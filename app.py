@@ -29,14 +29,38 @@ def allowed_file(filename):
 # ROUTES
 
 @app.route("/")
+@app.route("/")
 def index():
+    category = request.args.get("category", "")
+    subcategory = request.args.get("subcategory", "")
+    min_price = request.args.get("min_price", "")
+    max_price = request.args.get("max_price", "")
+
     conn = sqlite3.connect("petshop.db")
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM products WHERE in_stock = 1")
+
+    query = "SELECT * FROM products WHERE in_stock = 1"
+    params = []
+
+    if category:
+        query += " AND category = ?"
+        params.append(category)
+    if subcategory:
+        query += " AND subcategory = ?"
+        params.append(subcategory)
+    if min_price:
+        query += " AND price >= ?"
+        params.append(min_price)
+    if max_price:
+        query += " AND price <= ?"
+        params.append(max_price)
+
+    cursor.execute(query, params)
     products = cursor.fetchall()
     conn.close()
     return render_template("index.html", products=products)
+
 
 
 @app.route("/admin/edit/<int:product_id>", methods=["GET", "POST"])
