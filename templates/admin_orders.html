@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Sipariş Sorgulama - Admin</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+      font-family: 'Inter', sans-serif;
+      padding: 3rem 0;
+    }
+    .main-card {
+      background: white;
+      padding: 2rem;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      max-width: 900px;
+      margin: auto;
+    }
+    .btn-gradient {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      padding: 0.5rem 1.25rem;
+    }
+    .order-card {
+      background: #fff;
+      border: 1px solid #eee;
+      border-radius: 15px;
+      padding: 1.5rem;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+      margin-bottom: 1.5rem;
+    }
+    .order-card h5 {
+      color: #4a5568;
+    }
+    .order-card p {
+      margin-bottom: 0.4rem;
+      color: #2d3748;
+    }
+    ul {
+      padding-left: 1.2rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="main-card">
+    <h3 class="mb-4 text-center">📦 Sipariş Sorgulama</h3>
+
+    <!-- Sorgu Formu -->
+    <form method="POST" class="input-group mb-4">
+      <input type="text" name="code" class="form-control" placeholder="Sipariş Kodunu Gir" required>
+      <button type="submit" class="btn btn-gradient">Sorgula</button>
+    </form>
+
+    {% if result %}
+      <!-- Tek Sipariş Sonucu -->
+      <div class="order-card">
+        <h5>Sipariş Kodu: {{ result["order_code"] }}</h5>
+        <p><strong>💰 Toplam:</strong> {{ result["total_price"] }} TL</p>
+        <p><strong>📅 Tarih:</strong> {{ result["created_at"] }}</p>
+        <p><strong>👤 Ad Soyad:</strong> {{ result["customer_name"] }}</p>
+        <p><strong>🏠 Adres:</strong> {{ result["address"] }}</p>
+        <p><strong>📝 Not:</strong> {{ result["note"] or "Yok" }}</p>
+        <hr>
+        <h6>Ürünler:</h6>
+        <ul>
+          {% for item in items %}
+            <li>{{ item.name }} ({{ item.price }} TL × {{ item.quantity or 1 }})</li>
+          {% endfor %}
+        </ul>
+      </div>
+
+    {% elif not_found %}
+      <div class="alert alert-danger">❌ Sipariş bulunamadı.</div>
+
+    {% else %}
+      <!-- Tüm Siparişler -->
+      <h5 class="mb-3">Tüm Siparişler:</h5>
+      {% for order in all_orders %}
+      <div class="order-card">
+        <h5>Sipariş Kodu: {{ order.order_code }}</h5>
+        <p><strong>💰 Toplam:</strong> {{ order.total_price }} TL</p>
+        <p><strong>📅 Tarih:</strong> {{ order.created_at }}</p>
+        <p><strong>👤 Ad Soyad:</strong> {{ order.customer_name }}</p>
+        <p><strong>🏠 Adres:</strong> {{ order.address }}</p>
+        <p><strong>📝 Not:</strong> {{ order.note or "Yok" }}</p>
+        <hr>
+        <h6>Ürünler:</h6>
+        <ul>
+          {% for item in order.items %}
+            <li>{{ item.name }} ({{ item.price }} TL × {{ item.quantity or 1 }})</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+</body>
+</html>

@@ -1,0 +1,22 @@
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #f5faff;
+}
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+.nav-link {
+    font-weight: 500;
+}
+.product-card img {
+    height: 200px;
+    object-fit: cover;
+}
+.category-box {
+    transition: transform 0.3s ease;
+    cursor: pointer;
+}
+.category-box:hover {
+    transform: scale(1.05);
+}
