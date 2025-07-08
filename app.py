@@ -7,19 +7,31 @@ from urllib.parse import quote
 from functools import wraps
 
 app = Flask(__name__)
-db_path = os.path.join(app.root_path, "instance", "petshop.db")
 app.secret_key = "supersecretkey"
 UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'}
 
+# Veritabanı yolu - production ortamında farklı konumda olabilir
+if os.environ.get('RENDER'):
+    # Render.com'da
+    db_path = os.path.join(os.getcwd(), "petshop.db")
+else:
+    # Yerel geliştirme ortamında
+    db_path = os.path.join(app.root_path, "instance", "petshop.db")
+
 
 # Veritabanı başlatma fonksiyonu
 def init_database():
-    # instance klasörünü oluştur
-    instance_dir = os.path.join(app.root_path, "instance")
-    if not os.path.exists(instance_dir):
-        os.makedirs(instance_dir)
+    # Yerel geliştirme için instance klasörü
+    if not os.environ.get('RENDER'):
+        instance_dir = os.path.join(app.root_path, "instance")
+        if not os.path.exists(instance_dir):
+            os.makedirs(instance_dir)
+
+    # Upload klasörünü oluştur
+    if not os.path.exists(UPLOAD_FOLDER):
+        os.makedirs(UPLOAD_FOLDER)
 
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -28,8 +40,8 @@ def init_database():
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS products (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT,
-        price REAL,
+        name TEXT NOT NULL,
+        price REAL NOT NULL,
         image TEXT,
         category TEXT,
         subcategory TEXT,
@@ -42,21 +54,26 @@ def init_database():
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS orders (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        order_code TEXT,
-        items TEXT,
-        total_price REAL,
+        order_code TEXT NOT NULL,
+        items TEXT NOT NULL,
+        total_price REAL NOT NULL,
         customer_name TEXT,
         address TEXT,
-        note TEXT
+        note TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
     """)
 
     conn.commit()
     conn.close()
+    print("Database initialized successfully!")
 
 
 # Uygulama başlatıldığında veritabanını oluştur
-init_database()
+try:
+    init_database()
+except Exception as e:
+    print(f"Database initialization error: {e}")
 
 
 # Decorator for admin login
@@ -83,37 +100,55 @@ def index():
     min_price = request.args.get("min_price", "")
     max_price = request.args.get("max_price", "")
 
-    conn = sqlite3.connect(db_path)
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
+    try:
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
 
-    query = "SELECT * FROM products WHERE in_stock = 1"
-    params = []
+        query = "SELECT * FROM products WHERE in_stock = 1"
+        params = []
 
-    if category:
-        query += " AND category = ?"
-        params.append(category)
-    if subcategory:
-        query += " AND subcategory = ?"
-        params.append(subcategory)
-    if min_price:
-        query += " AND price >= ?"
-        params.append(min_price)
-    if max_price:
-        query += " AND price <= ?"
-        params.append(max_price)
+        if category:
+            query += " AND category = ?"
+            params.append(category)
+        if subcategory:
+            query += " AND subcategory = ?"
+            params.append(subcategory)
+        if min_price:
+            query += " AND price >= ?"
+            params.append(float(min_price))
+        if max_price:
+            query += " AND price <= ?"
+            params.append(float(max_price))
 
-    cursor.execute(query, params)
-    products = cursor.fetchall()
-    conn.close()
-    return render_template("index.html", products=products)
+        cursor.execute(query, params)
+        products = cursor.fetchall()
+        conn.close()
+
+        return render_template("index.html", products=products)
+    except Exception as e:
+        print(f"Database error in index: {e}")
+        return render_template("index.html", products=[])
+
+
+@app.route("/products")
+def products():
+    return redirect(url_for("index"))
+
+
+@app.route("/contact")
+def contact():
+    return render_template("contact.html")
+
+
+@app.route("/thank_you")
+def thank_you():
+    return render_template("thank_you.html")
 
 
 @app.route("/admin/edit/<int:product_id>", methods=["GET", "POST"])
+@login_required
 def edit_product(product_id):
-    if not session.get("admin_logged_in"):
-        return redirect(url_for("admin_login"))
-
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
@@ -123,16 +158,16 @@ def edit_product(product_id):
         category = request.form["category"]
         subcategory = request.form["subcategory"]
         description = request.form["description"]
-        image = request.form["current_image"]
 
-        # DEBUG: Gelen veriyi kontrol et
-        print(f"DEBUG - Description: '{description}'")
-        print(f"DEBUG - All form data: {dict(request.form)}")
+        # Mevcut resim bilgisini al
+        cursor.execute("SELECT image FROM products WHERE id = ?", (product_id,))
+        current_product = cursor.fetchone()
+        image = current_product[0] if current_product else "/static/default.jpg"
 
         # Yeni resim geldiyse güncelle
         if "image" in request.files:
             file = request.files["image"]
-            if file and file.filename:
+            if file and file.filename and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
                 file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
                 image = f"/static/uploads/{filename}"
@@ -144,8 +179,6 @@ def edit_product(product_id):
             WHERE id = ?
         """, (name, price, image, category, subcategory, description, product_id))
 
-        print(f"DEBUG - SQL executed with description: '{description}'")
-
         conn.commit()
         conn.close()
         return redirect(url_for("admin_panel"))
@@ -153,6 +186,9 @@ def edit_product(product_id):
     cursor.execute("SELECT * FROM products WHERE id = ?", (product_id,))
     product = cursor.fetchone()
     conn.close()
+
+    if not product:
+        return "Ürün bulunamadı", 404
 
     return render_template("edit_product.html", product=product)
 
@@ -173,6 +209,7 @@ def add_to_cart(product_id):
     if "cart" not in session:
         session["cart"] = []
 
+    # Sepette aynı ürün varsa miktarını artır
     for cart_item in session["cart"]:
         if cart_item["id"] == item["id"]:
             cart_item["quantity"] += 1
@@ -192,16 +229,13 @@ def cart():
 
 
 @app.route("/admin/delete/<int:product_id>")
+@login_required
 def delete_product(product_id):
-    if not session.get("admin_logged_in"):
-        return redirect(url_for("admin_login"))
-
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute("DELETE FROM products WHERE id = ?", (product_id,))
     conn.commit()
     conn.close()
-
     return redirect(url_for("admin_panel"))
 
 
@@ -292,10 +326,8 @@ def update_quantity(index):
 
 
 @app.route("/admin/orders", methods=["GET", "POST"])
+@login_required
 def admin_orders():
-    if not session.get("admin_logged_in"):
-        return redirect(url_for("admin_login"))
-
     result = None
     not_found = False
     items = []
@@ -330,8 +362,8 @@ def add_product():
         subcategory = request.form["subcategory"]
         description = request.form["description"]
 
-        file = request.files["image"]
-        if file and allowed_file(file.filename):
+        file = request.files.get("image")
+        if file and file.filename and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             image_path = f"/static/uploads/{filename}"
@@ -346,7 +378,7 @@ def add_product():
         """, (name, price, image_path, category, subcategory, description))
         conn.commit()
         conn.close()
-        return redirect(url_for("add_product"))
+        return redirect(url_for("admin_panel"))
 
     return render_template("add_product.html")
 
@@ -354,6 +386,7 @@ def add_product():
 @app.route("/product/<int:product_id>")
 def product_detail(product_id):
     conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM products WHERE id = ?", (product_id,))
     product = cursor.fetchone()
@@ -371,20 +404,38 @@ def admin_login():
         password = request.form.get("password")
         if password == "adminadmin1admin":
             session["admin_logged_in"] = True
-            return redirect("/admin")
+            return redirect(url_for("admin_panel"))
         return render_template("admin_login.html", error="Şifre yanlış!")
     return render_template("admin_login.html")
+
+
+@app.route("/admin/logout")
+def admin_logout():
+    session.pop("admin_logged_in", None)
+    return redirect(url_for("index"))
 
 
 @app.route("/admin")
 @login_required
 def admin_panel():
     conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM products")
+    cursor.execute("SELECT * FROM products ORDER BY id DESC")
     products = cursor.fetchall()
     conn.close()
     return render_template("admin_panel.html", products=products)
+
+
+# Error handlers
+@app.errorhandler(404)
+def not_found(error):
+    return render_template("index.html", products=[]), 404
+
+
+@app.errorhandler(500)
+def internal_error(error):
+    return render_template("index.html", products=[]), 500
 
 
 if __name__ == "__main__":

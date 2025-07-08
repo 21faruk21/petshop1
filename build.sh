@@ -3,11 +3,10 @@
 
 pip install -r requirements.txt
 
-# Create instance directory
-mkdir -p instance
-
-# Initialize database
-python init_db.py
-
 # Create static/uploads directory
 mkdir -p static/uploads
+
+# Set environment variable for Render
+export RENDER=true
+
+echo "Build completed successfully!"
