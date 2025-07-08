@@ -4,12 +4,123 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>{{ product[1] }} – Ürün Detayı | MaviPetShop</title>
-  <!-- Google Font, Bootstrap, FontAwesome -->
+
+  <!-- Google Font: Outfit -->
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <!-- Bootstrap & FontAwesome -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+
   <style>
-    /* (Orijinal stil bloğu aynen gelmeli) */
+    /* Temel renkler ve font */
+    body {
+      font-family: 'Outfit', sans-serif !important;
+      background: var(--bg, #fafafa);
+      color: var(--fg, #212121);
+      transition: background .3s, color .3s;
+    }
+    body.dark-mode {
+      --bg: #121212;
+      --fg: #f5f5f5;
+    }
+
+    /* Kampanya Çubuğu */
+    .campaign-bar {
+      background: linear-gradient(90deg, #ff6b6b, #ff9f43, #1dd1a1, #54a0ff);
+      background-size: 300% 300%;
+      color: #fff;
+      padding: .5rem 0;
+      text-align: center;
+      font-weight: 500;
+      animation: slide 8s linear infinite;
+    }
+    @keyframes slide {
+      0% { background-position: 0% }
+      100% { background-position: 100% }
+    }
+
+    /* Navbar */
+    .navbar {
+      background: #053ff3;
+    }
+    .navbar .nav-link {
+      color: #fff !important;
+      font-weight: 500;
+    }
+    .navbar .nav-link.active {
+      text-decoration: underline;
+    }
+
+    /* Kategori Çubuğu */
+    .category-scroll {
+      overflow-x: auto;
+      white-space: nowrap;
+      padding: .5rem 0;
+      background: #053ff3;
+    }
+    .category-scroll a {
+      display: inline-block;
+      color: #fff;
+      margin: 0 .5rem;
+      padding: .4rem .8rem;
+      border-radius: 50px;
+      background: rgba(255,255,255,0.15);
+      font-size: .9rem;
+      transition: background .3s;
+    }
+    .category-scroll a:hover {
+      background: rgba(255,255,255,0.3);
+      text-decoration: none;
+    }
+
+    /* Ürün Detay Kartı */
+    .detail-card {
+      background: var(--card-bg, #fff);
+      color: var(--fg, #212121);
+      border: none;
+      border-radius: 1.25rem;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      overflow: hidden;
+      max-width: 900px;
+      margin: 2rem auto;
+      transition: background .3s, color .3s;
+    }
+    body.dark-mode .detail-card {
+      --card-bg: #1f1f1f;
+    }
+    .detail-card img {
+      object-fit: cover;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Butonlar */
+    .btn-primary {
+      background-color: #053ff3;
+      border: none;
+      transition: background .2s, transform .2s;
+    }
+    .btn-primary:hover {
+      background-color: #0546d6;
+      transform: translateY(-2px);
+    }
+    .btn-secondary {
+      border: none;
+      transition: background .2s, transform .2s;
+    }
+    .btn-secondary:hover {
+      background-color: rgba(0,0,0,0.05);
+      transform: translateY(-2px);
+    }
+
+    /* Footer */
+    footer {
+      background: #053ff3;
+      color: #fff;
+      padding: 1rem 0;
+      text-align: center;
+      margin-top: 2rem;
+    }
   </style>
 </head>
 
@@ -30,7 +141,7 @@
       <div class="collapse navbar-collapse" id="mainNav">
         <ul class="navbar-nav me-auto">
           <li class="nav-item"><a class="nav-link" href="/">Anasayfa</a></li>
-          <li class="nav-item"><a class="nav-link" href="/cart"><i class="fa fa-shopping-cart"></i> Sepet – {{ total }} TL</a></li>
+          <li class="nav-item"><a class="nav-link" href="/cart"><i class="fa fa-shopping-cart"></i> Sepet</a></li>
           <li class="nav-item"><a class="nav-link" href="/add_product"><i class="fa fa-plus-circle"></i> Ürün Ekle</a></li>
           <li class="nav-item"><a class="nav-link" href="/admin"><i class="fa fa-cogs"></i> Admin</a></li>
           <li class="nav-item"><a class="nav-link" href="/contact"><i class="fa fa-envelope"></i> İletişim</a></li>
@@ -42,13 +153,12 @@
         </form>
         <a href="/cart" class="btn btn-outline-light btn-sm position-relative">
           <i class="fa fa-shopping-cart"></i>
-          Sepet – {{ total }} TL
+          Sepet{% if session.cart %} ({{ session.cart|length }}){% endif %}
         </a>
       </div>
     </div>
   </nav>
 
-  {% if not request.path.startswith('/admin') %}
   <!-- Kategori Menüsü -->
   <div class="category-scroll">
     <div class="container d-flex">
@@ -61,9 +171,8 @@
       <a href="/blog">Blog</a>
     </div>
   </div>
-  {% endif %}
 
-  <!-- Ürün Detay Kartı -->
+  <!-- Ürün Detay -->
   <div class="container">
     <div class="card detail-card">
       <div class="row g-0">

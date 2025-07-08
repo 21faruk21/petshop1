@@ -1,85 +1,47 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Sipariş Onayı – MaviPetShop</title>
-  <!-- Google Font, Bootstrap, FontAwesome -->
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+  <meta charset="UTF-8">
+  <title>Teşekkürler</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <style>
-    /* (Orijinal stil bloğu aynen gelmeli) */
+    body {
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .thank-card {
+      background: white;
+      padding: 3rem;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      text-align: center;
+      max-width: 600px;
+    }
+    .thank-card h1 {
+      color: #28a745;
+      font-weight: bold;
+    }
+    .btn-custom {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 12px;
+      font-weight: 600;
+      margin-top: 1rem;
+    }
   </style>
 </head>
-<body class="{% if theme=='dark' %}dark-mode{% endif %}">
-
-  <!-- Kampanya Çubuğu -->
-  <div class="campaign-bar">
-    🎉 300 TL ve üzeri siparişlerde ÜCRETSİZ KARGO! 🚚
-  </div>
-
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-dark">
-    <div class="container">
-      <a class="navbar-brand" href="/"><i class="fa-solid fa-paw"></i> MaviPetShop</a>
-      <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#mainNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="mainNav">
-        <ul class="navbar-nav me-auto">
-          <li class="nav-item"><a class="nav-link" href="/">Anasayfa</a></li>
-          <li class="nav-item"><a class="nav-link" href="/products">Ürünler</a></li>
-          <li class="nav-item">
-            <a class="nav-link" href="/cart">
-              <i class="fa fa-shopping-cart"></i>
-              Sepet – {{ total }} TL
-            </a>
-          </li>
-          <li class="nav-item"><a class="nav-link" href="/contact">İletişim</a></li>
-        </ul>
-        <form action="/toggle_theme" method="post" class="d-flex align-items-center me-3">
-          <button class="btn btn-sm btn-light">
-            {% if theme=='dark' %}Light{% else %}Dark{% endif %}
-          </button>
-        </form>
-        <a href="/cart" class="btn btn-outline-light btn-sm position-relative">
-          <i class="fa fa-shopping-cart"></i>
-          Sepet – {{ total }} TL
-        </a>
-      </div>
-    </div>
-  </nav>
-
-  {% if not request.path.startswith('/admin') %}
-  <!-- Kategori Menüsü -->
-  <div class="category-scroll">
-    <div class="container d-flex">
-      <a href="/kedi">Kedi</a>
-      <a href="/kopek">Köpek</a>
-      <a href="/kus">Kuş</a>
-      <a href="/balik">Balık</a>
-      <a href="/kemirgen">Kemirgen</a>
-      <a href="/surungen">Sürüngen</a>
-      <a href="/blog">Blog</a>
-    </div>
-  </div>
-  {% endif %}
-
-  <!-- Teşekkür Kartı -->
-  <div class="thank-card my-5">
-    <h1><i class="fa-solid fa-check-circle"></i> Siparişiniz Alındı!</h1>
+<body>
+  <div class="thank-card">
+    <h1><i class="fas fa-check-circle"></i> Siparişiniz Alındı!</h1>
     <p class="lead mt-3">WhatsApp üzerinden sipariş detaylarınız iletildi. En kısa sürede sizinle iletişime geçeceğiz.</p>
-    <div class="mt-4">
-      <a href="/" class="btn-custom"><i class="fa fa-arrow-left me-2"></i>Alışverişe Devam Et</a>
-    </div>
+    <a href="/" class="btn btn-custom">Alışverişe Devam Et</a>
   </div>
-
-  <!-- Footer -->
-  <footer>
-    © 2025 Mavi Petshop. Tüm hakları saklıdır.
-  </footer>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://kit.fontawesome.com/a2d9d6ea5c.js" crossorigin="anonymous"></script>
 </body>
 </html>

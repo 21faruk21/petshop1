@@ -4,12 +4,139 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Admin Panel - MaviPetShop</title>
-  <!-- Google Font, Bootstrap, FontAwesome -->
+
+  <!-- Google Font: Outfit -->
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <!-- Bootstrap & FontAwesome -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+
   <style>
-    /* (Orijinal stil bloğu aynen gelmeli) */
+    /* Temel renk değişkenleri */
+    body {
+      font-family: 'Outfit', sans-serif !important;
+      background: var(--bg, #fafafa);
+      color: var(--fg, #212121);
+      transition: background .3s, color .3s;
+      padding-top: 1rem;
+    }
+    body.dark-mode {
+      --bg: #121212;
+      --fg: #f5f5f5;
+    }
+
+    /* Kampanya Çubuğu */
+    .campaign-bar {
+      background: linear-gradient(90deg, #ff6b6b, #ff9f43, #1dd1a1, #54a0ff);
+      background-size: 300% 300%;
+      color: #fff;
+      padding: .5rem 0;
+      text-align: center;
+      font-weight: 500;
+      animation: slide 8s linear infinite;
+    }
+    @keyframes slide {
+      0% { background-position: 0% }
+      100% { background-position: 100% }
+    }
+
+    /* Navbar */
+    .navbar {
+      background: #053ff3;
+    }
+    .navbar .nav-link {
+      color: #fff !important;
+      font-weight: 500;
+    }
+    .navbar .nav-link.active {
+      text-decoration: underline;
+    }
+
+    /* Kategori Menüsü */
+    .category-scroll {
+      overflow-x: auto;
+      white-space: nowrap;
+      padding: .5rem 0;
+      background: #053ff3;
+    }
+    .category-scroll a {
+      display: inline-block;
+      color: #fff;
+      margin: 0 .5rem;
+      padding: .4rem .8rem;
+      border-radius: 50px;
+      background: rgba(255,255,255,0.15);
+      font-size: .9rem;
+      transition: background .3s;
+    }
+    .category-scroll a:hover {
+      background: rgba(255,255,255,0.3);
+      text-decoration: none;
+    }
+
+    /* Panel Kartı */
+    .panel-card {
+      background: var(--card-bg, #fff);
+      color: var(--fg, #212121);
+      padding: 2rem;
+      border-radius: 1.25rem;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      transition: background .3s, color .3s;
+    }
+    body.dark-mode .panel-card {
+      --card-bg: #1f1f1f;
+      --fg: #f5f5f5;
+    }
+
+    /* Tablo Stilleri */
+    .table thead {
+      background: #053ff3;
+    }
+    .table thead th {
+      color: #fff;
+    }
+    .table tbody tr:hover {
+      background: rgba(5,63,243,0.1);
+    }
+    .table td, .table th {
+      vertical-align: middle;
+    }
+
+    /* Buton Gradient */
+    .btn-gradient {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+      border: none;
+      border-radius: .75rem;
+      font-weight: 600;
+      padding: .5rem 1rem;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .btn-gradient:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    }
+
+    /* Çıkış Butonu */
+    .btn-logout {
+      border: 1px solid #f5365c;
+      color: #f5365c;
+      background: transparent;
+      transition: background .2s, color .2s;
+    }
+    .btn-logout:hover {
+      background: #f5365c;
+      color: #fff;
+    }
+
+    /* Footer */
+    footer {
+      background: #053ff3;
+      color: #fff;
+      padding: 1rem 0;
+      text-align: center;
+      margin-top: 2rem;
+    }
   </style>
 </head>
 <body class="{% if theme=='dark' %}dark-mode{% endif %}">
@@ -29,7 +156,7 @@
       <div class="collapse navbar-collapse" id="mainNav">
         <ul class="navbar-nav me-auto">
           <li class="nav-item"><a class="nav-link" href="/">Anasayfa</a></li>
-          <li class="nav-item"><a class="nav-link" href="/cart"><i class="fa fa-shopping-cart"></i> Sepet – {{ total }} TL</a></li>
+          <li class="nav-item"><a class="nav-link" href="/cart"><i class="fa fa-shopping-cart"></i> Sepet</a></li>
           <li class="nav-item"><a class="nav-link" href="/add_product"><i class="fa fa-plus-circle"></i> Ürün Ekle</a></li>
           <li class="nav-item"><a class="nav-link active" href="/admin"><i class="fa fa-cogs"></i> Admin Panel</a></li>
         </ul>
@@ -43,12 +170,69 @@
     </div>
   </nav>
 
-  {# Admin sayfası: kategori çubuğu tamamen kaldırıldı, koşula bile gerek kalmadı #}
+  <!-- Kategori Menüsü -->
+  <div class="category-scroll">
+    <div class="container d-flex">
+      <a href="/kedi">Kedi</a>
+      <a href="/kopek">Köpek</a>
+      <a href="/kus">Kuş</a>
+      <a href="/balik">Balık</a>
+      <a href="/kemirgen">Kemirgen</a>
+      <a href="/surungen">Sürüngen</a>
+      <a href="/blog">Blog</a>
+    </div>
+  </div>
 
   <!-- Admin Panel İçeriği -->
   <div class="container my-5">
     <div class="panel-card">
-      <!-- (Tablo, buton vs. aynen gelmeli) -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>Admin Panel</h3>
+        <!-- Çıkış Butonu yine burada da gösteriliyor -->
+        <a href="/admin/logout" class="btn-logout btn-sm">Çıkış Yap</a>
+      </div>
+
+      <a href="/admin/orders" class="btn-gradient btn-sm mb-4"><i class="fa-solid fa-box-open me-2"></i>Sipariş Sorgula</a>
+
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Ürün</th>
+              <th>Fiyat</th>
+              <th>Kategori</th>
+              <th>Alt Kategori</th>
+              <th>Durum</th>
+              <th>İşlemler</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in products %}
+            <tr>
+              <td>{{ p[0] }}</td>
+              <td>{{ p[1] }}</td>
+              <td>{{ p[2] }} TL</td>
+              <td>{{ p[4] }}</td>
+              <td>{{ p[5] }}</td>
+              <td>
+                {% if p[6] == 1 %}
+                  <a href="/admin/toggle_stock/{{ p[0] }}" class="btn btn-sm btn-success">Elde Var</a>
+                {% else %}
+                  <a href="/admin/toggle_stock/{{ p[0] }}" class="btn btn-sm btn-secondary">Elde Yok</a>
+                {% endif %}
+              </td>
+              <td>
+                <div class="d-flex gap-2">
+                  <a href="/admin/edit/{{ p[0] }}" class="btn btn-warning btn-sm w-50"><i class="fa fa-edit"></i> Düzenle</a>
+                  <a href="/admin/delete/{{ p[0] }}" class="btn btn-danger btn-sm w-50" onclick="return confirm('Bu ürünü silmek istediğine emin misin?')"><i class="fa fa-trash"></i> Sil</a>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
