@@ -7,6 +7,7 @@ from urllib.parse import quote
 from functools import wraps
 
 app = Flask(__name__)
+db_path = os.path.join(app.root_path, "instance", "petshop.db")
 app.secret_key = "supersecretkey"
 UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -36,7 +37,8 @@ def index():
     min_price = request.args.get("min_price", "")
     max_price = request.args.get("max_price", "")
 
-    conn = sqlite3.connect("petshop.db")
+    db_path = os.path.join(app.root_path, "instance", "petshop.db")
+    conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
 
@@ -68,7 +70,8 @@ def edit_product(product_id):
     if not session.get("admin_logged_in"):
         return redirect(url_for("admin_login"))
 
-    conn = sqlite3.connect("petshop.db")
+    db_path = os.path.join(app.root_path, "instance", "petshop.db")
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     if request.method == "POST":
@@ -112,7 +115,8 @@ def edit_product(product_id):
 
 @app.route("/add_to_cart/<int:product_id>")
 def add_to_cart(product_id):
-    conn = sqlite3.connect("petshop.db")
+    db_path = os.path.join(app.root_path, "instance", "petshop.db")
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute("SELECT id, name, price FROM products WHERE id = ?", (product_id,))
     product = cursor.fetchone()
@@ -147,7 +151,8 @@ def delete_product(product_id):
     if not session.get("admin_logged_in"):
         return redirect(url_for("admin_login"))
 
-    conn = sqlite3.connect("petshop.db")
+    db_path = os.path.join(app.root_path, "instance", "petshop.db")
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute("DELETE FROM products WHERE id = ?", (product_id,))
     conn.commit()
@@ -200,7 +205,8 @@ def order():
     note = request.form.get("note", "")
 
     # Veritabanına kaydet
-    conn = sqlite3.connect("petshop.db")
+    db_path = os.path.join(app.root_path, "instance", "petshop.db")
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute("""
         INSERT INTO orders (order_code, items, total_price, customer_name, address, note)
@@ -250,7 +256,8 @@ def admin_orders():
 
     if request.method == "POST":
         code = request.form["code"].strip().upper()
-        conn = sqlite3.connect("petshop.db")
+        db_path = os.path.join(app.root_path, "instance", "petshop.db")
+        conn = sqlite3.connect(db_path)
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM orders WHERE order_code = ?", (code,))
@@ -287,7 +294,8 @@ def add_product():
         else:
             image_path = "/static/default.jpg"
 
-        conn = sqlite3.connect("petshop.db")
+        db_path = os.path.join(app.root_path, "instance", "petshop.db")
+        conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
         cursor.execute("""
             INSERT INTO products (name, price, image, category, subcategory, description)
@@ -301,7 +309,8 @@ def add_product():
 
 @app.route("/product/<int:product_id>")
 def product_detail(product_id):
-    conn = sqlite3.connect("petshop.db")
+    db_path = os.path.join(app.root_path, "instance", "petshop.db")
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM products WHERE id = ?", (product_id,))
     product = cursor.fetchone()
@@ -340,7 +349,8 @@ def admin_login():
 @app.route("/admin")
 @login_required
 def admin_panel():
-    conn = sqlite3.connect("petshop.db")
+    db_path = os.path.join(app.root_path, "instance", "petshop.db")
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM products")
     products = cursor.fetchall()
