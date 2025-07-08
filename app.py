@@ -13,23 +13,69 @@ UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'}
 
-# Decorator for admin login
 
+# Veritabanı başlatma fonksiyonu
+def init_database():
+    # instance klasörünü oluştur
+    instance_dir = os.path.join(app.root_path, "instance")
+    if not os.path.exists(instance_dir):
+        os.makedirs(instance_dir)
+
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+
+    # Products tablosunu oluştur
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS products (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT,
+        price REAL,
+        image TEXT,
+        category TEXT,
+        subcategory TEXT,
+        description TEXT,
+        in_stock INTEGER DEFAULT 1
+    )
+    """)
+
+    # Orders tablosunu oluştur
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS orders (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        order_code TEXT,
+        items TEXT,
+        total_price REAL,
+        customer_name TEXT,
+        address TEXT,
+        note TEXT
+    )
+    """)
+
+    conn.commit()
+    conn.close()
+
+
+# Uygulama başlatıldığında veritabanını oluştur
+init_database()
+
+
+# Decorator for admin login
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not session.get("admin_logged_in"):
             return redirect(url_for("admin_login"))
         return f(*args, **kwargs)
+
     return decorated_function
 
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+
 # ROUTES
 
-@app.route("/")
 @app.route("/")
 def index():
     category = request.args.get("category", "")
@@ -37,7 +83,6 @@ def index():
     min_price = request.args.get("min_price", "")
     max_price = request.args.get("max_price", "")
 
-    db_path = os.path.join(app.root_path, "instance", "petshop.db")
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
@@ -64,13 +109,11 @@ def index():
     return render_template("index.html", products=products)
 
 
-
 @app.route("/admin/edit/<int:product_id>", methods=["GET", "POST"])
 def edit_product(product_id):
     if not session.get("admin_logged_in"):
         return redirect(url_for("admin_login"))
 
-    db_path = os.path.join(app.root_path, "instance", "petshop.db")
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
@@ -113,9 +156,9 @@ def edit_product(product_id):
 
     return render_template("edit_product.html", product=product)
 
+
 @app.route("/add_to_cart/<int:product_id>")
 def add_to_cart(product_id):
-    db_path = os.path.join(app.root_path, "instance", "petshop.db")
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute("SELECT id, name, price FROM products WHERE id = ?", (product_id,))
@@ -140,18 +183,19 @@ def add_to_cart(product_id):
     session.modified = True
     return redirect(url_for("index"))
 
+
 @app.route("/cart")
 def cart():
     cart_items = session.get("cart", [])
     total = sum(item["price"] * item.get("quantity", 1) for item in cart_items)
     return render_template("cart.html", cart_items=cart_items, total=total)
 
+
 @app.route("/admin/delete/<int:product_id>")
 def delete_product(product_id):
     if not session.get("admin_logged_in"):
         return redirect(url_for("admin_login"))
 
-    db_path = os.path.join(app.root_path, "instance", "petshop.db")
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute("DELETE FROM products WHERE id = ?", (product_id,))
@@ -166,15 +210,18 @@ def clear_cart():
     session["cart"] = []
     return redirect(url_for("cart"))
 
+
 @app.route("/toggle_theme", methods=["POST"])
 def toggle_theme():
     current = session.get("theme", "light")
     session["theme"] = "dark" if current == "light" else "light"
     return redirect(request.referrer or url_for("index"))
 
+
 @app.context_processor
 def inject_theme():
     return dict(theme=session.get("theme", "light"))
+
 
 @app.route("/remove_from_cart/<int:index>")
 def remove_from_cart(index):
@@ -186,6 +233,7 @@ def remove_from_cart(index):
             pass
     return redirect(url_for("cart"))
 
+
 @app.route("/order", methods=["POST"])
 def order():
     cart_items = session.get("cart", [])
@@ -194,7 +242,6 @@ def order():
     if not cart_items:
         return redirect(url_for("cart"))
 
-    import random, string, json
     order_code = "-".join(
         ''.join(random.choices(string.ascii_uppercase + string.digits, k=4)) for _ in range(4)
     )
@@ -205,7 +252,6 @@ def order():
     note = request.form.get("note", "")
 
     # Veritabanına kaydet
-    db_path = os.path.join(app.root_path, "instance", "petshop.db")
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute("""
@@ -225,7 +271,6 @@ Toplam Tutar: {total} TL
 
 IBAN bilgilerinizi paylaşabilir misiniz?
 """
-    from urllib.parse import quote
     whatsapp_link = f"https://wa.me/{whatsapp_number}?text={quote(message)}"
 
     session.pop("cart", None)
@@ -245,6 +290,7 @@ def update_quantity(index):
             pass
     return redirect(url_for("cart"))
 
+
 @app.route("/admin/orders", methods=["GET", "POST"])
 def admin_orders():
     if not session.get("admin_logged_in"):
@@ -256,7 +302,6 @@ def admin_orders():
 
     if request.method == "POST":
         code = request.form["code"].strip().upper()
-        db_path = os.path.join(app.root_path, "instance", "petshop.db")
         conn = sqlite3.connect(db_path)
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
@@ -266,7 +311,6 @@ def admin_orders():
 
         if result:
             try:
-                import json
                 items = json.loads(result["items"])
             except:
                 items = []
@@ -294,7 +338,6 @@ def add_product():
         else:
             image_path = "/static/default.jpg"
 
-        db_path = os.path.join(app.root_path, "instance", "petshop.db")
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
         cursor.execute("""
@@ -307,9 +350,9 @@ def add_product():
 
     return render_template("add_product.html")
 
+
 @app.route("/product/<int:product_id>")
 def product_detail(product_id):
-    db_path = os.path.join(app.root_path, "instance", "petshop.db")
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM products WHERE id = ?", (product_id,))
@@ -322,20 +365,6 @@ def product_detail(product_id):
     return render_template("product_detail.html", product=product)
 
 
-    if not row:
-        return "Ürün bulunamadı", 404
-
-    product = {
-        "id": row[0],
-        "name": row[1],
-        "price": row[2],
-        "image": row[3],
-        "category": row[4],
-        "subcategory": row[5],
-        "description": row[6]
-    }
-    return render_template("product_detail.html", product=product)
-
 @app.route("/admin/login", methods=["GET", "POST"])
 def admin_login():
     if request.method == "POST":
@@ -346,16 +375,17 @@ def admin_login():
         return render_template("admin_login.html", error="Şifre yanlış!")
     return render_template("admin_login.html")
 
+
 @app.route("/admin")
 @login_required
 def admin_panel():
-    db_path = os.path.join(app.root_path, "instance", "petshop.db")
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM products")
     products = cursor.fetchall()
     conn.close()
     return render_template("admin_panel.html", products=products)
+
 
 if __name__ == "__main__":
     app.run(debug=True)
