@@ -22,7 +22,6 @@
       --bg: #121212;
       --fg: #f5f5f5;
     }
-    /* Kampanya Çubuğu */
     .campaign-bar {
       background: linear-gradient(90deg, #ff6b6b, #ff9f43, #1dd1a1, #54a0ff);
       background-size: 300% 300%;
@@ -36,7 +35,6 @@
       0% { background-position: 0% }
       100% { background-position: 100% }
     }
-    /* Navbar */
     .navbar {
       padding: .5rem 1rem;
     }
@@ -44,15 +42,14 @@
       color: white !important;
       font-weight: 500;
     }
-    .navbar .nav-link:hover {
+    .navbar .nav-link.active {
       text-decoration: underline;
     }
-    /* Kategori Çubuğu */
     .category-scroll {
       overflow-x: auto;
       white-space: nowrap;
       padding: .5rem 0;
-      background: var(--bgdef, #053ff3);
+      background: #053ff3;
     }
     .category-scroll a {
       display: inline-block;
@@ -68,7 +65,6 @@
       background: rgba(255,255,255,0.3);
       text-decoration: none;
     }
-    /* Tablo ve Kart Stilleri */
     .table thead {
       background: #053ff3;
     }
@@ -80,6 +76,7 @@
       transition: transform .2s, box-shadow .2s;
       border-radius: 1rem;
       border: none;
+      margin-bottom: 1.5rem;
     }
     body.dark-mode .card-order {
       --card-bg: #1f1f1f;
@@ -152,75 +149,83 @@
     <h2 class="mb-4">Sepetim</h2>
 
     {% if cart_items %}
-    <div class="table-responsive mb-4">
-      <table class="table">
-        <thead class="text-white">
-          <tr>
-            <th>Ürün</th>
-            <th>Fiyat</th>
-            <th>Adet</th>
-            <th>İşlem</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for item in cart_items %}
-          <tr>
-            <td>{{ item.name }}</td>
-            <td>{{ item.price }} TL</td>
-            <td>
-              <form action="/update_quantity/{{ loop.index0 }}" method="POST" class="d-flex">
-                <input type="number" name="quantity" value="{{ item.quantity }}" min="1" class="form-control form-control-sm me-2" style="width: 70px;">
-                <button type="submit" class="btn btn-sm btn-primary">Güncelle</button>
-              </form>
-            </td>
-            <td>
-              <a href="/remove_from_cart/{{ loop.index0 }}" class="btn btn-sm btn-outline-secondary">Sil</a>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-
-    <div class="card card-order p-4 mb-4">
-      <div class="d-flex justify-content-between align-items-center">
-        <h4>Toplam Tutar:</h4>
-        <h4 class="text-success">{{ total }} TL</h4>
+      <!-- Ürün Listesi -->
+      <div class="table-responsive mb-4">
+        <table class="table">
+          <thead class="text-white">
+            <tr>
+              <th>Ürün</th>
+              <th>Fiyat</th>
+              <th>Adet</th>
+              <th>İşlem</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in cart_items %}
+            <tr>
+              <td>{{ item.name }}</td>
+              <td>{{ item.price }} TL</td>
+              <td>
+                <form action="/update_quantity/{{ loop.index0 }}" method="POST" class="d-flex">
+                  <input type="number" name="quantity" value="{{ item.quantity }}" min="1"
+                         class="form-control form-control-sm me-2" style="width:75px;">
+                  <button type="submit" class="btn btn-sm btn-primary">Güncelle</button>
+                </form>
+              </td>
+              <td>
+                <a href="/remove_from_cart/{{ loop.index0 }}" class="btn btn-sm btn-outline-secondary">Sil</a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
-    </div>
 
-    <div class="card card-order p-4 mb-4">
-      <form method="POST" action="/order" class="row g-3">
-        <div class="col-md-6">
-          <label class="form-label">Ad Soyad</label>
-          <input type="text" name="customer_name" class="form-control" required>
+      <!-- Toplam Tutar Kartı -->
+      <div class="card card-order p-4">
+        <div class="d-flex justify-content-between align-items-center">
+          <h4>Toplam Tutar:</h4>
+          <h4 class="text-success">{{ total }} TL</h4>
         </div>
-        <div class="col-md-6">
-          <label class="form-label">Telefon</label>
-          <input type="tel" name="phone" class="form-control" placeholder="05XX XXX XX XX" required>
-        </div>
-        <div class="col-12">
-          <label class="form-label">Adres</label>
-          <textarea name="address" class="form-control" rows="3" required></textarea>
-        </div>
-        <div class="col-12">
-          <label class="form-label">Not (isteğe bağlı)</label>
-          <textarea name="note" class="form-control" rows="2"></textarea>
-        </div>
-        <div class="col-12">
-          <button type="submit" class="btn btn-primary w-100">Siparişi WhatsApp’tan Tamamla</button>
-        </div>
-      </form>
-    </div>
+      </div>
 
-    <div class="text-center">
-      <a href="/clear_cart" class="btn btn-outline-secondary">Sepeti Temizle</a>
-    </div>
+      <!-- Sipariş Formu Kartı -->
+      <div class="card card-order p-4">
+        <form method="POST" action="/order" class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Ad Soyad</label>
+            <input type="text" name="customer_name" class="form-control" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Telefon</label>
+            <input type="tel" name="phone" class="form-control" placeholder="05XX XXX XX XX" required>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Adres</label>
+            <textarea name="address" class="form-control" rows="3" required></textarea>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Not (isteğe bağlı)</label>
+            <textarea name="note" class="form-control" rows="2"></textarea>
+          </div>
+          <div class="col-12">
+            <button type="submit" class="btn btn-primary w-100">
+              Siparişi WhatsApp’tan Tamamla
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Sepeti Temizle -->
+      <div class="text-center">
+        <a href="/clear_cart" class="btn btn-outline-secondary">Sepeti Temizle</a>
+      </div>
 
     {% else %}
-    <div class="alert alert-info text-center py-4">
-      Sepetiniz boş. <a href="/" class="btn btn-sm btn-primary ms-2">Alışverişe Devam Et</a>
-    </div>
+      <div class="alert alert-info text-center py-4">
+        Sepetiniz boş.
+        <a href="/" class="btn btn-sm btn-primary ms-2">Alışverişe Devam Et</a>
+      </div>
     {% endif %}
   </div>
 
@@ -229,7 +234,7 @@
     © 2025 Mavi Petshop. Tüm hakları saklıdır.
   </footer>
 
-  <!-- JS -->
+  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

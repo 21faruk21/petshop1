@@ -1,48 +1,206 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <title>Ürünler - MaviPetShop</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Tüm Ürünler – MaviPetShop</title>
+
+  <!-- Google Font: Outfit -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <!-- Bootstrap & FontAwesome -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+
   <style>
+    /* Temel değişkenler */
     body {
-      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-      font-family: 'Inter', sans-serif;
+      font-family: 'Outfit', sans-serif !important;
+      background: var(--bg, #fafafa);
+      color: var(--fg, #212121);
+      transition: background .3s, color .3s;
     }
+    body.dark-mode {
+      --bg: #121212;
+      --fg: #f5f5f5;
+    }
+
+    /* Kampanya Çubuğu */
+    .campaign-bar {
+      background: linear-gradient(90deg, #ff6b6b, #ff9f43, #1dd1a1, #54a0ff);
+      background-size: 300% 300%;
+      color: #fff;
+      padding: .5rem 0;
+      text-align: center;
+      font-weight: 500;
+      animation: slide 8s linear infinite;
+    }
+    @keyframes slide {
+      0%   { background-position: 0% }
+      100% { background-position: 100% }
+    }
+
+    /* Navbar */
+    .navbar {
+      background: #053ff3;
+    }
+    .navbar .nav-link {
+      color: #fff !important;
+      font-weight: 500;
+    }
+    .navbar .nav-link.active {
+      text-decoration: underline;
+    }
+
+    /* Kategori Menüsü */
+    .category-scroll {
+      overflow-x: auto;
+      white-space: nowrap;
+      padding: .5rem 0;
+      background: #053ff3;
+    }
+    .category-scroll a {
+      display: inline-block;
+      color: #fff;
+      margin: 0 .5rem;
+      padding: .4rem .8rem;
+      border-radius: 50px;
+      background: rgba(255,255,255,0.15);
+      font-size: .9rem;
+      transition: background .3s;
+    }
+    .category-scroll a:hover {
+      background: rgba(255,255,255,0.3);
+      text-decoration: none;
+    }
+
+    /* Ürün Kartı */
     .product-card {
-      background: white;
-      border-radius: 20px;
+      background: var(--card-bg, #fff);
+      color: var(--fg, #212121);
+      border: none;
+      border-radius: 1rem;
       overflow: hidden;
       box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-      transition: all 0.3s ease;
+      transition: transform .2s, box-shadow .2s, background .3s, color .3s;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
     .product-card:hover {
       transform: translateY(-5px);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.15);
     }
-    .price {
-      color: #667eea;
-      font-weight: bold;
+    body.dark-mode .product-card {
+      --card-bg: #1f1f1f;
+      --fg: #f5f5f5;
+    }
+    .product-card img {
+      object-fit: cover;
+      height: 200px;
+      width: 100%;
+    }
+    .product-card .card-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Buton Stilleri */
+    .btn-outline-primary {
+      border-radius: .75rem;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .btn-outline-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    }
+
+    /* Footer */
+    footer {
+      background: #053ff3;
+      color: #fff;
+      padding: 1rem 0;
+      text-align: center;
+      margin-top: 3rem;
     }
   </style>
 </head>
-<body>
-<div class="container py-5">
-  <h2 class="text-center mb-4">Tüm Ürünler</h2>
-  <div class="row g-4">
-    {% for product in products %}
-      <div class="col-md-4">
-        <div class="product-card p-3">
-          <img src="{{ product.image }}" alt="{{ product.name }}" class="img-fluid rounded mb-3" style="height: 200px; object-fit: cover;">
-          <h5>{{ product.name }}</h5>
-          <p class="price">{{ product.price }} TL</p>
-          <a href="/product/{{ product.id }}" class="btn btn-sm btn-primary w-100">Detaya Git</a>
+<body class="{% if theme=='dark' %}dark-mode{% endif %}">
+
+  <!-- Kampanya Çubuğu -->
+  <div class="campaign-bar">
+    🎉 300 TL ve üzeri siparişlerde ÜCRETSİZ KARGO! 🚚
+  </div>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+      <a class="navbar-brand" href="/"><i class="fa-solid fa-paw"></i> MaviPetShop</a>
+      <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#mainNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="mainNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item"><a class="nav-link" href="/">Anasayfa</a></li>
+          <li class="nav-item"><a class="nav-link active" href="/products">Ürünler</a></li>
+        </ul>
+        <form action="/toggle_theme" method="post" class="d-flex align-items-center me-3">
+          <button class="btn btn-sm btn-light">
+            {% if theme=='dark' %}Light{% else %}Dark{% endif %}
+          </button>
+        </form>
+        <a href="/cart" class="btn btn-outline-light btn-sm position-relative">
+          <i class="fa fa-shopping-cart"></i>
+          Sepet{% if session.cart %} ({{ session.cart|length }}){% endif %}
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Kategori Menüsü -->
+  <div class="category-scroll">
+    <div class="container d-flex">
+      <a href="/kedi">Kedi</a>
+      <a href="/kopek">Köpek</a>
+      <a href="/kus">Kuş</a>
+      <a href="/balik">Balık</a>
+      <a href="/kemirgen">Kemirgen</a>
+      <a href="/surungen">Sürüngen</a>
+      <a href="/blog">Blog</a>
+    </div>
+  </div>
+
+  <!-- Tüm Ürünler -->
+  <div class="container py-5">
+    <h2 class="text-center mb-4">Tüm Ürünler</h2>
+    <div class="row g-4">
+      {% for product in products %}
+      <div class="col-md-4 d-flex">
+        <div class="product-card">
+          <a href="/product/{{ product.id }}">
+            <img src="{{ product.image }}" alt="{{ product.name }}">
+          </a>
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title">{{ product.name }}</h5>
+            <p class="text-success fw-bold mb-3">{{ product.price }} TL</p>
+            <a href="/product/{{ product.id }}" class="btn btn-primary mb-2"><i class="fa fa-info-circle me-2"></i>Detaya Git</a>
+            <a href="/add_to_cart/{{ product.id }}" class="btn btn-outline-primary mt-auto"><i class="fa fa-cart-plus me-2"></i>Sepete Ekle</a>
+          </div>
         </div>
       </div>
-    {% endfor %}
+      {% endfor %}
+    </div>
+
+    <div class="text-center mt-4">
+      <a href="/" class="btn btn-outline-primary"><i class="fa fa-arrow-left me-2"></i>Anasayfa</a>
+    </div>
   </div>
-  <div class="text-center mt-4">
-    <a href="/" class="btn btn-outline-primary">← Anasayfa</a>
-  </div>
-</div>
+
+  <!-- Footer -->
+  <footer>
+    © 2025 Mavi Petshop. Tüm hakları saklıdır.
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

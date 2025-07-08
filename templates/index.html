@@ -12,6 +12,7 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
 
   <style>
+    /* Temel renk değişkenleri */
     body {
       font-family: 'Outfit', sans-serif !important;
       background: var(--bg, #fafafa);
@@ -22,11 +23,12 @@
       --bg: #121212;
       --fg: #f5f5f5;
     }
+
     /* Kampanya Çubuğu */
     .campaign-bar {
       background: linear-gradient(90deg, #ff6b6b, #ff9f43, #1dd1a1, #54a0ff);
       background-size: 300% 300%;
-      color: white;
+      color: #fff;
       padding: .5rem 0;
       text-align: center;
       font-weight: 500;
@@ -36,22 +38,22 @@
       0% { background-position: 0% }
       100% { background-position: 100% }
     }
+
     /* Navbar */
     .navbar {
-      padding: .5rem 1rem;
+      background: #053ff3;
     }
     .navbar .nav-link {
-      color: white !important;
+      color: #fff !important;
       font-weight: 500;
     }
-    .navbar .nav-link:hover {
-      text-decoration: underline;
-    }
+
+    /* Kategori Çubuğu */
     .category-scroll {
       overflow-x: auto;
       white-space: nowrap;
       padding: .5rem 0;
-      background: var(--bgdef, #053ff3);
+      background: #053ff3;
     }
     .category-scroll a {
       display: inline-block;
@@ -67,34 +69,55 @@
       background: rgba(255,255,255,0.3);
       text-decoration: none;
     }
+
+    /* Filtre Kartı */
+    .filter-card {
+      background: var(--card-bg, #fff);
+      color: var(--fg, #212121);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+      margin-bottom: 2rem;
+      transition: background .3s, color .3s;
+    }
+    body.dark-mode .filter-card {
+      --card-bg: #1f1f1f;
+      --fg: #f5f5f5;
+    }
+
     /* Ürün Kartı */
-    .card {
+    .product-card {
       border: none;
       border-radius: 1rem;
-      transition: transform .2s;
+      overflow: hidden;
+      transition: transform .2s, box-shadow .2s;
     }
-    .card:hover {
+    .product-card:hover {
       transform: translateY(-5px);
       box-shadow: 0 8px 20px rgba(0,0,0,0.1);
     }
-    .card-img-top {
-      border-top-left-radius: 1rem;
-      border-top-right-radius: 1rem;
+    .product-card img {
       object-fit: cover;
       height: 200px;
     }
+
+    /* Butonlar */
+    .btn-outline-primary {
+      border-radius: .75rem;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .btn-outline-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    }
+
     /* Footer */
     footer {
       background: #053ff3;
-      color: white;
-    }
-    /* Dark mode overrides */
-    .dark-mode .category-scroll {
-      --bgdef: #212121;
-    }
-    .dark-mode .card {
-      background: #1f1f1f;
-      color: #f5f5f5;
+      color: #fff;
+      padding: 1rem 0;
+      text-align: center;
+      margin-top: 3rem;
     }
   </style>
 </head>
@@ -106,7 +129,7 @@
   </div>
 
   <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-dark" style="background:#053ff3">
+  <nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container">
       <a class="navbar-brand" href="/"><i class="fa-solid fa-paw"></i> MaviPetShop</a>
       <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#mainNav">
@@ -122,14 +145,11 @@
           </button>
         </form>
         <form class="d-flex me-3">
-          <input id="searchInput" class="form-control form-control-sm" type="text" placeholder="Ürün ara..."/>
+          <input id="searchInput" class="form-control form-control-sm" type="text" placeholder="Ürün ara…"/>
         </form>
         <a href="/cart" class="btn btn-outline-light btn-sm position-relative">
           <i class="fa fa-shopping-cart"></i>
-          Sepet
-          {% if session.cart %}
-            ({{ session.cart|length }})
-          {% endif %}
+          Sepet{% if session.cart %} ({{ session.cart|length }}){% endif %}
         </a>
       </div>
     </div>
@@ -150,38 +170,40 @@
 
   <!-- Filtreleme -->
   <div class="container my-4">
-    <form action="/" method="get" class="row g-3 align-items-end">
-      <div class="col-md-3">
-        <label class="form-label">Kategori</label>
-        <select name="category" class="form-select">
-          <option value="">Hepsi</option>
-          <option value="Kedi">Kedi</option>
-          <option value="Köpek">Köpek</option>
-          <option value="Kuş">Kuş</option>
-          <option value="Balık">Balık</option>
-        </select>
-      </div>
-      <div class="col-md-3">
-        <label class="form-label">Alt Kategori</label>
-        <select name="subcategory" class="form-select">
-          <option value="">Hepsi</option>
-          <option value="Mama">Mama</option>
-          <option value="Aksesuar">Aksesuar</option>
-          <option value="Oyuncak">Oyuncak</option>
-        </select>
-      </div>
-      <div class="col-md-2">
-        <label class="form-label">Min Fiyat</label>
-        <input name="min_price" type="number" class="form-control" placeholder="0"/>
-      </div>
-      <div class="col-md-2">
-        <label class="form-label">Max Fiyat</label>
-        <input name="max_price" type="number" class="form-control" placeholder="99999"/>
-      </div>
-      <div class="col-md-2">
-        <button type="submit" class="btn btn-primary w-100">Filtrele</button>
-      </div>
-    </form>
+    <div class="filter-card">
+      <form action="/" method="get" class="row g-3 align-items-end">
+        <div class="col-md-3">
+          <label class="form-label">Kategori</label>
+          <select name="category" class="form-select">
+            <option value="">Hepsi</option>
+            <option value="Kedi">Kedi</option>
+            <option value="Köpek">Köpek</option>
+            <option value="Kuş">Kuş</option>
+            <option value="Balık">Balık</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Alt Kategori</label>
+          <select name="subcategory" class="form-select">
+            <option value="">Hepsi</option>
+            <option value="Mama">Mama</option>
+            <option value="Aksesuar">Aksesuar</option>
+            <option value="Oyuncak">Oyuncak</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Min Fiyat</label>
+          <input name="min_price" type="number" class="form-control" placeholder="0"/>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Max Fiyat</label>
+          <input name="max_price" type="number" class="form-control" placeholder="99999"/>
+        </div>
+        <div class="col-md-2">
+          <button type="submit" class="btn btn-primary w-100">Filtrele</button>
+        </div>
+      </form>
+    </div>
   </div>
 
   <!-- Ürünler -->
@@ -189,7 +211,7 @@
     <div class="row" id="productList">
       {% for product in products %}
       <div class="col-md-4 mb-4 product-item">
-        <div class="card h-100">
+        <div class="card product-card h-100">
           <a href="/product/{{ product.id }}">
             <img src="{{ product.image }}" class="card-img-top" alt="{{ product.name }}"/>
           </a>
@@ -206,13 +228,13 @@
   </div>
 
   <!-- Footer -->
-  <footer class="text-center py-3 mt-5">
+  <footer class="text-center">
     © 2025 Mavi Petshop. Tüm hakları saklıdır.
   </footer>
 
   <!-- JS -->
   <script>
-    // Canlı search
+    // Canlı arama
     document.getElementById('searchInput').addEventListener('input', function(){
       const q = this.value.toLowerCase();
       document.querySelectorAll('.product-item').forEach(el => {

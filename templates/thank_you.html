@@ -1,47 +1,188 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <title>Teşekkürler</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Sipariş Onayı – MaviPetShop</title>
+
+  <!-- Google Font: Outfit -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <!-- Bootstrap & FontAwesome -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+
   <style>
+    /* Temel renk ve font ayarları */
     body {
-      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-      font-family: 'Inter', sans-serif;
+      font-family: 'Outfit', sans-serif !important;
+      background: var(--bg, #fafafa);
+      color: var(--fg, #212121);
+      transition: background .3s, color .3s;
       min-height: 100vh;
       display: flex;
-      align-items: center;
-      justify-content: center;
+      flex-direction: column;
     }
-    .thank-card {
-      background: white;
-      padding: 3rem;
-      border-radius: 20px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    body.dark-mode {
+      --bg: #121212;
+      --fg: #f5f5f5;
+    }
+
+    /* Kampanya çubuğu */
+    .campaign-bar {
+      background: linear-gradient(90deg, #ff6b6b, #ff9f43, #1dd1a1, #54a0ff);
+      background-size: 300% 300%;
+      color: #fff;
+      padding: .5rem 0;
       text-align: center;
+      font-weight: 500;
+      animation: slide 8s linear infinite;
+    }
+    @keyframes slide {
+      0%   { background-position: 0% }
+      100% { background-position: 100% }
+    }
+
+    /* Navbar */
+    .navbar {
+      background: #053ff3;
+    }
+    .navbar .nav-link {
+      color: #fff !important;
+      font-weight: 500;
+    }
+    .navbar .nav-link.active {
+      text-decoration: underline;
+    }
+
+    /* Kategori çubuğu */
+    .category-scroll {
+      overflow-x: auto;
+      white-space: nowrap;
+      padding: .5rem 0;
+      background: #053ff3;
+    }
+    .category-scroll a {
+      display: inline-block;
+      color: #fff;
+      margin: 0 .5rem;
+      padding: .4rem .8rem;
+      border-radius: 50px;
+      background: rgba(255,255,255,0.15);
+      font-size: .9rem;
+      transition: background .3s;
+    }
+    .category-scroll a:hover {
+      background: rgba(255,255,255,0.3);
+      text-decoration: none;
+    }
+
+    /* Onay kartı */
+    .thank-card {
+      background: var(--card-bg, #fff);
+      color: var(--fg, #212121);
+      padding: 3rem;
+      border-radius: 1.25rem;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
       max-width: 600px;
+      margin: auto;
+      text-align: center;
+      flex: 1;
+      transition: background .3s, color .3s;
+    }
+    body.dark-mode .thank-card {
+      --card-bg: #1f1f1f;
     }
     .thank-card h1 {
       color: #28a745;
-      font-weight: bold;
+      font-weight: 700;
     }
+
+    /* Buton */
     .btn-custom {
       background: linear-gradient(135deg, #667eea, #764ba2);
-      color: white;
+      color: #fff;
       border: none;
-      padding: 0.75rem 1.5rem;
-      border-radius: 12px;
+      border-radius: .75rem;
       font-weight: 600;
-      margin-top: 1rem;
+      padding: .75rem 1.5rem;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .btn-custom:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    }
+
+    /* Footer */
+    footer {
+      background: #053ff3;
+      color: #fff;
+      padding: 1rem 0;
+      text-align: center;
+      font-size: .9rem;
     }
   </style>
 </head>
-<body>
-  <div class="thank-card">
-    <h1><i class="fas fa-check-circle"></i> Siparişiniz Alındı!</h1>
-    <p class="lead mt-3">WhatsApp üzerinden sipariş detaylarınız iletildi. En kısa sürede sizinle iletişime geçeceğiz.</p>
-    <a href="/" class="btn btn-custom">Alışverişe Devam Et</a>
+<body class="{% if theme=='dark' %}dark-mode{% endif %}">
+
+  <!-- Kampanya Çubuğu -->
+  <div class="campaign-bar">
+    🎉 300 TL ve üzeri siparişlerde ÜCRETSİZ KARGO! 🚚
   </div>
-<script src="https://kit.fontawesome.com/a2d9d6ea5c.js" crossorigin="anonymous"></script>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+      <a class="navbar-brand" href="/"><i class="fa-solid fa-paw"></i> MaviPetShop</a>
+      <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#mainNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="mainNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item"><a class="nav-link" href="/">Anasayfa</a></li>
+          <li class="nav-item"><a class="nav-link" href="/products">Ürünler</a></li>
+          <li class="nav-item"><a class="nav-link" href="/cart"><i class="fa fa-shopping-cart"></i> Sepet</a></li>
+          <li class="nav-item"><a class="nav-link" href="/contact">İletişim</a></li>
+        </ul>
+        <form action="/toggle_theme" method="post" class="d-flex align-items-center me-3">
+          <button class="btn btn-sm btn-light">
+            {% if theme=='dark' %}Light{% else %}Dark{% endif %}
+          </button>
+        </form>
+        <a href="/cart" class="btn btn-outline-light btn-sm position-relative">
+          <i class="fa fa-shopping-cart"></i>
+          Sepet{% if session.cart %} ({{ session.cart|length }}){% endif %}
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Kategori Menüsü -->
+  <div class="category-scroll">
+    <div class="container d-flex">
+      <a href="/kedi">Kedi</a>
+      <a href="/kopek">Köpek</a>
+      <a href="/kus">Kuş</a>
+      <a href="/balik">Balık</a>
+      <a href="/kemirgen">Kemirgen</a>
+      <a href="/surungen">Sürüngen</a>
+      <a href="/blog">Blog</a>
+    </div>
+  </div>
+
+  <!-- Teşekkür Kartı -->
+  <div class="thank-card my-5">
+    <h1><i class="fa-solid fa-check-circle"></i> Siparişiniz Alındı!</h1>
+    <p class="lead mt-3">WhatsApp üzerinden sipariş detaylarınız iletildi. En kısa sürede sizinle iletişime geçeceğiz.</p>
+    <div class="mt-4">
+      <a href="/" class="btn-custom"><i class="fa fa-arrow-left me-2"></i>Alışverişe Devam Et</a>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    © 2025 Mavi Petshop. Tüm hakları saklıdır.
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
