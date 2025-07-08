@@ -2,8 +2,33 @@
 <html lang="tr">
 <head>
   <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Mavi Petshop</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no"/>
+
+  <title>{{ title or shop_name }}</title>
+  <meta name="description" content="{{ description or 'Kedi Maması, Köpek Maması, Kuş, Balık ve Diğer ... Online Petshop Mağazası Petzzshop.com’da!' }}"/>
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website"/>
+  <meta property="og:site_name" content="{{ shop_name }}"/>
+  <meta property="og:title" content="{{ title or shop_name }}"/>
+  <meta property="og:description" content="{{ description or 'Kedi Maması, Köpek Maması, Kuş, Balık ve Diğer ... Online Petshop Mağazası Petzzshop.com’da!' }}"/>
+  <meta property="og:url" content="{{ request.url }}"/>
+  <meta property="og:image" content="{{ og_image or url_for('static', filename='images/og-image.jpg', _external=True) }}"/>
+
+  <link rel="canonical" href="{{ canonical or request.url }}"/>
+
+  <!-- Schema.org Markup -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Store",
+    "name": "{{ shop_name }}",
+    "image": "{{ og_image or url_for('static', filename='images/og-image.jpg', _external=True) }}",
+    "url": "{{ request.url_root }}",
+    "telephone": "{{ contact_phone }}",
+    "address": { "@type": "PostalAddress" }
+  }
+  </script>
 
   <!-- Google Font: Outfit -->
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
@@ -12,19 +37,18 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
 
   <style>
-    /* Temel renk değişkenleri */
     body {
       font-family: 'Outfit', sans-serif !important;
       background: var(--bg, #fafafa);
       color: var(--fg, #212121);
       transition: background .3s, color .3s;
+      min-width: 360px;
+      overflow-x: hidden;
     }
     body.dark-mode {
       --bg: #121212;
       --fg: #f5f5f5;
     }
-
-    /* Kampanya Çubuğu */
     .campaign-bar {
       background: linear-gradient(90deg, #ff6b6b, #ff9f43, #1dd1a1, #54a0ff);
       background-size: 300% 300%;
@@ -34,21 +58,11 @@
       font-weight: 500;
       animation: slide 8s linear infinite;
     }
-    @keyframes slide {
-      0% { background-position: 0% }
-      100% { background-position: 100% }
-    }
+    @keyframes slide { 0% { background-position: 0% } 100% { background-position: 100% } }
 
-    /* Navbar */
-    .navbar {
-      background: #053ff3;
-    }
-    .navbar .nav-link {
-      color: #fff !important;
-      font-weight: 500;
-    }
+    .navbar { background: #053ff3; }
+    .navbar .nav-link, .navbar .navbar-brand { color: #fff !important; font-weight: 500; }
 
-    /* Kategori Çubuğu */
     .category-scroll {
       overflow-x: auto;
       white-space: nowrap;
@@ -65,12 +79,8 @@
       font-size: .9rem;
       transition: background .3s;
     }
-    .category-scroll a:hover {
-      background: rgba(255,255,255,0.3);
-      text-decoration: none;
-    }
+    .category-scroll a:hover { background: rgba(255,255,255,0.3); text-decoration: none; }
 
-    /* Filtre Kartı */
     .filter-card {
       background: var(--card-bg, #fff);
       color: var(--fg, #212121);
@@ -80,12 +90,8 @@
       margin-bottom: 2rem;
       transition: background .3s, color .3s;
     }
-    body.dark-mode .filter-card {
-      --card-bg: #1f1f1f;
-      --fg: #f5f5f5;
-    }
+    body.dark-mode .filter-card { --card-bg: #1f1f1f; --fg: #f5f5f5; }
 
-    /* Ürün Kartı */
     .product-card {
       border: none;
       border-radius: 1rem;
@@ -96,12 +102,8 @@
       transform: translateY(-5px);
       box-shadow: 0 8px 20px rgba(0,0,0,0.1);
     }
-    .product-card img {
-      object-fit: cover;
-      height: 200px;
-    }
+    .product-card img { object-fit: cover; height: 200px; }
 
-    /* Butonlar */
     .btn-outline-primary {
       border-radius: .75rem;
       transition: transform .2s, box-shadow .2s;
@@ -111,7 +113,6 @@
       box-shadow: 0 6px 20px rgba(0,0,0,0.1);
     }
 
-    /* Footer */
     footer {
       background: #053ff3;
       color: #fff;
@@ -129,15 +130,15 @@
   </div>
 
   <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-dark">
+  <nav class="navbar navbar-expand-lg">
     <div class="container">
-      <a class="navbar-brand" href="/"><i class="fa-solid fa-paw"></i> MaviPetShop</a>
-      <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#mainNav">
+      <a class="navbar-brand" href="/{{ base_path }}"><i class="fa-solid fa-paw"></i> {{ shop_name }}</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="mainNav">
         <ul class="navbar-nav me-auto">
-          <li class="nav-item"><a class="nav-link active" href="/">Anasayfa</a></li>
+          <li class="nav-item"><a class="nav-link active" href="/{{ base_path }}">Anasayfa</a></li>
         </ul>
         <form action="/toggle_theme" method="post" class="d-flex align-items-center me-3">
           <button class="btn btn-sm btn-light">
@@ -155,37 +156,42 @@
     </div>
   </nav>
 
+  <!-- Kategori Çubuğu -->
+  <div class="category-scroll">
+    {% for cat in categories %}
+      <a href="?category={{ cat }}">{{ cat }}</a>
+    {% endfor %}
+  </div>
 
-  <!-- Filtreleme -->
+  <!-- Filtre Kartı -->
   <div class="container my-4">
     <div class="filter-card">
-      <form action="/" method="get" class="row g-3 align-items-end">
+      <form action="/{{ base_path }}" method="get" class="row g-3 align-items-end">
         <div class="col-md-3">
           <label class="form-label">Kategori</label>
           <select name="category" class="form-select">
             <option value="">Hepsi</option>
-            <option value="Kedi">Kedi</option>
-            <option value="Köpek">Köpek</option>
-            <option value="Kuş">Kuş</option>
-            <option value="Balık">Balık</option>
+            {% for cat in categories %}
+            <option value="{{ cat }}" {% if request.args.get('category')==cat %}selected{% endif %}>{{ cat }}</option>
+            {% endfor %}
           </select>
         </div>
         <div class="col-md-3">
           <label class="form-label">Alt Kategori</label>
           <select name="subcategory" class="form-select">
             <option value="">Hepsi</option>
-            <option value="Mama">Mama</option>
-            <option value="Aksesuar">Aksesuar</option>
-            <option value="Oyuncak">Oyuncak</option>
+            {% for sub in subcategories %}
+            <option value="{{ sub }}" {% if request.args.get('subcategory')==sub %}selected{% endif %}>{{ sub }}</option>
+            {% endfor %}
           </select>
         </div>
         <div class="col-md-2">
           <label class="form-label">Min Fiyat</label>
-          <input name="min_price" type="number" class="form-control" placeholder="0"/>
+          <input name="min_price" type="number" class="form-control" value="{{ request.args.get('min_price','') }}"/>
         </div>
         <div class="col-md-2">
           <label class="form-label">Max Fiyat</label>
-          <input name="max_price" type="number" class="form-control" placeholder="99999"/>
+          <input name="max_price" type="number" class="form-control" value="{{ request.args.get('max_price','') }}"/>
         </div>
         <div class="col-md-2">
           <button type="submit" class="btn btn-primary w-100">Filtrele</button>
@@ -216,13 +222,12 @@
   </div>
 
   <!-- Footer -->
-  <footer class="text-center">
-    © 2025 Mavi Petshop. Tüm hakları saklıdır.
+  <footer>
+    © {{ current_year }} {{ shop_name }}. Tüm hakları saklıdır.
   </footer>
 
-  <!-- JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // Canlı arama
     document.getElementById('searchInput').addEventListener('input', function(){
       const q = this.value.toLowerCase();
       document.querySelectorAll('.product-item').forEach(el => {
@@ -230,6 +235,5 @@
       });
     });
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
