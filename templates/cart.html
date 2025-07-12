@@ -101,6 +101,38 @@
       background-color: #053ff3;
       color: #fff;
     }
+    .quantity-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .quantity-btn {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: #053ff3;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .quantity-btn:hover {
+      background: #0546d6;
+    }
+    .quantity-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .quantity-input {
+      width: 50px;
+      text-align: center;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 0.25rem;
+    }
   </style>
 </head>
 <body class="{% if theme=='dark' %}dark-mode{% endif %}">
@@ -154,11 +186,21 @@
               <td>{{ item.name }}</td>
               <td>{{ item.price }} TL</td>
               <td>
-                <form action="/update_quantity/{{ loop.index0 }}" method="POST" class="d-flex">
-                  <input type="number" name="quantity" value="{{ item.quantity }}" min="1"
-                         class="form-control form-control-sm me-2" style="width:75px;">
-                  <button type="submit" class="btn btn-sm btn-primary">Güncelle</button>
-                </form>
+                <div class="quantity-controls">
+                  <form action="/update_quantity/{{ loop.index0 }}" method="POST" style="display: inline;">
+                    <input type="hidden" name="quantity" value="{{ item.quantity - 1 }}">
+                    <button type="submit" class="quantity-btn" {{ 'disabled' if item.quantity <= 1 else '' }}>
+                      <i class="fas fa-minus"></i>
+                    </button>
+                  </form>
+                  <span class="quantity-input">{{ item.quantity }}</span>
+                  <form action="/update_quantity/{{ loop.index0 }}" method="POST" style="display: inline;">
+                    <input type="hidden" name="quantity" value="{{ item.quantity + 1 }}">
+                    <button type="submit" class="quantity-btn">
+                      <i class="fas fa-plus"></i>
+                    </button>
+                  </form>
+                </div>
               </td>
               <td>
                 <a href="/remove_from_cart/{{ loop.index0 }}" class="btn btn-sm btn-outline-secondary">Sil</a>
@@ -198,7 +240,7 @@
           </div>
           <div class="col-12">
             <button type="submit" class="btn btn-primary w-100">
-              Siparişi WhatsApp’tan Tamamla
+              Siparişi WhatsApp'tan Tamamla
             </button>
           </div>
         </form>
