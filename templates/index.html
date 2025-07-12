@@ -152,9 +152,9 @@
     <div class="container">
       <a class="navbar-brand" href="/"><i class="fa-solid fa-paw"></i> MaviPetShop</a>
 
-      <!-- Mobil sepet butonu - her zaman görünür -->
+      <!-- Mobil sepet butonu - sadece mobilde görünür -->
       <div class="d-flex align-items-center">
-        <a href="/cart" class="mobile-cart me-3">
+        <a href="/cart" class="mobile-cart me-3 d-lg-none">
           <i class="fa fa-shopping-cart"></i>
           <span>{% if session.cart %}{{ session.cart|length }}{% else %}0{% endif %} Ürün</span>
         </a>
