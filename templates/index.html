@@ -48,6 +48,25 @@
       font-weight: 500;
     }
 
+    /* Mobil sepet butonu */
+    .mobile-cart {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #fff;
+      text-decoration: none;
+      font-size: 0.8rem;
+      line-height: 1.1;
+    }
+    .mobile-cart:hover {
+      color: #fff;
+      text-decoration: none;
+    }
+    .mobile-cart i {
+      font-size: 1.2rem;
+      margin-bottom: 2px;
+    }
+
     /* Kategori Çubuğu */
     .category-scroll {
       overflow-x: auto;
@@ -132,9 +151,20 @@
   <nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container">
       <a class="navbar-brand" href="/"><i class="fa-solid fa-paw"></i> MaviPetShop</a>
-      <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#mainNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
+
+      <!-- Mobil sepet butonu - her zaman görünür -->
+      <div class="d-flex align-items-center">
+        <a href="/cart" class="mobile-cart me-3">
+          <i class="fa fa-shopping-cart"></i>
+          <span>{% if session.cart %}{{ session.cart|length }}{% else %}0{% endif %} Ürün</span>
+          <span>{% if session.cart %}{{ session.cart_total }}{% else %}0{% endif %} TL</span>
+        </a>
+
+        <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#mainNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+      </div>
+
       <div class="collapse navbar-collapse" id="mainNav">
         <ul class="navbar-nav me-auto">
           <li class="nav-item"><a class="nav-link active" href="/">Anasayfa</a></li>
@@ -147,7 +177,8 @@
         <form class="d-flex me-3">
           <input id="searchInput" class="form-control form-control-sm" type="text" placeholder="Ürün ara…"/>
         </form>
-        <a href="/cart" class="btn btn-outline-light btn-sm position-relative">
+        <!-- Desktop sepet butonu -->
+        <a href="/cart" class="btn btn-outline-light btn-sm position-relative d-none d-lg-block">
           <i class="fa fa-shopping-cart"></i>
           Sepet{% if session.cart %} ({{ session.cart|length }}){% endif %}
         </a>
