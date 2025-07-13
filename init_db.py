@@ -28,5 +28,15 @@ CREATE TABLE IF NOT EXISTS orders (
 )
 """)
 
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS campaigns (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    image TEXT NOT NULL,
+    link TEXT NOT NULL,
+    title TEXT,
+    active INTEGER DEFAULT 1
+)
+""")
+
 conn.commit()
 conn.close()

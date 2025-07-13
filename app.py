@@ -124,9 +124,13 @@ def index():
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
 
+        # Kampanyaları çek
+        cursor.execute("SELECT * FROM campaigns WHERE active = 1")
+        campaigns = cursor.fetchall()
+
         query = "SELECT * FROM products WHERE in_stock = 1 AND LOWER(category) = LOWER(?)"
         params = [category]
-        if subcategory:
+        if subcategory and subcategory != "" and subcategory != "Hepsi":
             query += " AND LOWER(subcategory) = LOWER(?)"
             params.append(subcategory)
         if min_price:
@@ -140,10 +144,10 @@ def index():
         products = cursor.fetchall()
         conn.close()
 
-        return render_template("index.html", products=products, selected_category=category)
+        return render_template("index.html", products=products, selected_category=category, campaigns=campaigns)
     except Exception as e:
         print(f"Database error in index: {e}")
-        return render_template("index.html", products=[], selected_category=category)
+        return render_template("index.html", products=[], selected_category=category, campaigns=[])
 
 
 @app.route("/products")
@@ -440,6 +444,50 @@ def admin_panel():
     products = cursor.fetchall()
     conn.close()
     return render_template("admin_panel.html", products=products)
+
+
+@app.route("/admin/campaigns", methods=["GET", "POST"])
+@login_required
+def admin_campaigns():
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    message = None
+    # Kampanya ekleme
+    if request.method == "POST":
+        title = request.form.get("title", "")
+        link = request.form.get("link", "")
+        active = 1 if request.form.get("active") == "on" else 0
+        file = request.files.get("image")
+        if file and file.filename and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            image_path = f"/static/uploads/{filename}"
+            cursor.execute("INSERT INTO campaigns (image, link, title, active) VALUES (?, ?, ?, ?)", (image_path, link, title, active))
+            conn.commit()
+            message = "Kampanya eklendi."
+        else:
+            message = "Geçerli bir görsel seçmelisiniz."
+    # Kampanya silme
+    if request.args.get("delete"):
+        cid = request.args.get("delete")
+        cursor.execute("DELETE FROM campaigns WHERE id = ?", (cid,))
+        conn.commit()
+        message = "Kampanya silindi."
+    # Aktif/pasif yapma
+    if request.args.get("toggle"):
+        cid = request.args.get("toggle")
+        cursor.execute("SELECT active FROM campaigns WHERE id = ?", (cid,))
+        row = cursor.fetchone()
+        if row:
+            new_status = 0 if row[0] else 1
+            cursor.execute("UPDATE campaigns SET active = ? WHERE id = ?", (new_status, cid))
+            conn.commit()
+            message = "Kampanya durumu değiştirildi."
+    cursor.execute("SELECT * FROM campaigns ORDER BY id DESC")
+    campaigns = cursor.fetchall()
+    conn.close()
+    return render_template("admin_campaigns.html", campaigns=campaigns, message=message)
 
 
 # Error handlers

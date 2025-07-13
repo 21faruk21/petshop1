@@ -150,22 +150,24 @@
   <nav class="navbar navbar-expand-lg">
     <div class="container">
       <a class="navbar-brand text-white" href="/"><i class="fa-solid fa-paw"></i> MaviPetShop</a>
-      <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#mainNav">
+      <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#nav">
         <span class="navbar-toggler-icon"></span>
       </button>
-      <div class="collapse navbar-collapse" id="mainNav">
+      <div class="collapse navbar-collapse" id="nav">
         <ul class="navbar-nav me-auto">
           <li class="nav-item"><a class="nav-link" href="/">Anasayfa</a></li>
-          <li class="nav-item"><a class="nav-link" href="/cart"><i class="fa fa-shopping-cart"></i> Sepet</a></li>
+          <!-- Sepet butonunu admin panelinde gizle -->
+          <!-- <li class="nav-item"><a class="nav-link" href="/cart"><i class="fa fa-shopping-cart"></i> Sepet</a></li> -->
           <li class="nav-item"><a class="nav-link" href="/add_product"><i class="fa fa-plus-circle"></i> Ürün Ekle</a></li>
-          <li class="nav-item"><a class="nav-link active" href="/admin"><i class="fa fa-cogs"></i> Admin Panel</a></li>
+          <li class="nav-item"><a class="nav-link active" href="/admin"><i class="fa fa-cog"></i> Admin Panel</a></li>
+          <li class="nav-item"><a class="nav-link" href="/admin/campaigns"><i class="fa fa-bullhorn"></i> Kampanya Yönetimi</a></li>
         </ul>
-        <form action="/toggle_theme" method="post" class="d-flex align-items-center me-3">
+        <form action="/toggle_theme" method="post" class="d-flex">
           <button class="btn btn-sm btn-light">
             {% if theme=='dark' %}Light{% else %}Dark{% endif %}
           </button>
         </form>
-        <a href="/admin/logout" class="btn-logout btn-sm">Çıkış Yap</a>
+        <a href="/admin/logout" class="btn btn-link">Çıkış Yap</a>
       </div>
     </div>
   </nav>

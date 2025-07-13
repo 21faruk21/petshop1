@@ -4,283 +4,148 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Mavi Petshop</title>
-
-  <!-- Google Font: Outfit -->
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-  <!-- Bootstrap & FontAwesome -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
-
   <style>
-    /* Temel renk değişkenleri */
     body {
-      font-family: 'Outfit', sans-serif !important;
-      background: var(--bg, #fafafa);
-      color: var(--fg, #212121);
-      transition: background .3s, color .3s;
-    }
-    body.dark-mode {
-      --bg: #121212;
-      --fg: #f5f5f5;
-    }
-
-    /* Kampanya Çubuğu */
-    .campaign-bar {
-      background: linear-gradient(90deg, #ff6b6b, #ff9f43, #1dd1a1, #54a0ff);
-      background-size: 300% 300%;
-      color: #fff;
-      padding: .5rem 0;
-      text-align: center;
-      font-weight: 500;
-      animation: slide 8s linear infinite;
-    }
-    @keyframes slide {
-      0% { background-position: 0% }
-      100% { background-position: 100% }
-    }
-
-    /* Navbar */
-    .navbar {
-      background: #053ff3;
-    }
-    .navbar .nav-link {
-      color: #fff !important;
-      font-weight: 500;
-    }
-
-    /* Mobil sepet butonu */
-    .mobile-cart {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      color: #fff;
-      text-decoration: none;
-      font-size: 0.8rem;
-      line-height: 1.1;
-    }
-    .mobile-cart:hover {
-      color: #fff;
-      text-decoration: none;
-    }
-    .mobile-cart i {
-      font-size: 1.2rem;
-      margin-bottom: 2px;
-    }
-
-    /* Kategori Çubuğu */
-    .category-scroll {
-      overflow-x: auto;
-      white-space: nowrap;
-      padding: .5rem 0;
-      background: #053ff3;
-    }
-    .category-scroll a {
-      display: inline-block;
-      color: #fff;
-      margin: 0 .5rem;
-      padding: .4rem .8rem;
-      border-radius: 50px;
-      background: rgba(255,255,255,0.15);
-      font-size: .9rem;
-      transition: background .3s;
-    }
-    .category-scroll a:hover {
-      background: rgba(255,255,255,0.3);
-      text-decoration: none;
-    }
-
-    /* Kategori Grid Kartları */
-    .category-grid {
-      margin: 2rem 0;
-    }
-    .category-card {
-      background: var(--card-bg, #fff);
-      color: var(--fg, #212121);
-      border: none;
-      border-radius: 1rem;
-      padding: 2rem 1rem;
-      text-align: center;
-      transition: all .3s ease;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-      cursor: pointer;
-      text-decoration: none;
-      display: block;
-      height: 100%;
-    }
-    .category-card:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 15px 30px rgba(0,0,0,0.15);
-      text-decoration: none;
-      color: var(--fg, #212121);
-    }
-    body.dark-mode .category-card {
-      --card-bg: #1f1f1f;
-      --fg: #f5f5f5;
-    }
-    body.dark-mode .category-card:hover {
-      color: #f5f5f5;
-    }
-    .category-card i {
-      font-size: 3rem;
-      margin-bottom: 1rem;
-      color: #053ff3;
-    }
-    .category-card h5 {
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-    }
-    .category-card p {
-      font-size: 0.9rem;
-      opacity: 0.7;
+      background-color: #f0f0f2;
       margin: 0;
+      padding: 0;
+      font-family: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
     }
-
-    /* Filtre Kartı */
+    .main-box {
+      width: 100%;
+      max-width: 900px;
+      margin: 4em auto 2em auto;
+      padding: 2.5em 2em 2em 2em;
+      background-color: #fdfdff;
+      border-radius: 0.7em;
+      box-shadow: 2px 3px 14px 2px rgba(0,0,0,0.06);
+    }
+    .site-title {
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: #053ff3;
+      margin-bottom: 0.5em;
+      text-align: center;
+      letter-spacing: 1px;
+    }
+    .site-desc {
+      color: #444;
+      font-size: 1.1rem;
+      text-align: center;
+      margin-bottom: 2em;
+    }
     .filter-card {
-      background: var(--card-bg, #fff);
-      color: var(--fg, #212121);
-      border-radius: 1rem;
-      padding: 1.5rem;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-      margin-bottom: 2rem;
-      transition: background .3s, color .3s;
+      background: #fff;
+      border-radius: 0.7em;
+      box-shadow: 0 4px 16px rgba(5,63,243,0.06);
+      padding: 1.5em 1em 1em 1em;
+      margin-bottom: 2em;
     }
-    body.dark-mode .filter-card {
-      --card-bg: #1f1f1f;
-      --fg: #f5f5f5;
+    .product-list {
+      margin-top: 2em;
     }
-
-    /* Ürün Kartı */
+    .product-item {
+      margin-bottom: 2em;
+    }
     .product-card {
       border: none;
-      border-radius: 1rem;
-      overflow: hidden;
-      transition: transform .2s, box-shadow .2s;
+      border-radius: 1em;
+      box-shadow: 0 4px 16px rgba(5,63,243,0.08);
+      background: #fff;
+      padding-bottom: 1em;
+      transition: box-shadow .2s, transform .2s;
     }
     .product-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      box-shadow: 0 8px 32px rgba(5,63,243,0.13);
+      transform: translateY(-4px) scale(1.01);
     }
     .product-card img {
       object-fit: cover;
-      height: 200px;
+      height: 220px;
+      border-top-left-radius: 1em;
+      border-top-right-radius: 1em;
+      width: 100%;
     }
-
-    /* Butonlar */
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #222;
+    }
+    .text-muted {
+      color: #888 !important;
+      font-size: 0.95rem;
+    }
+    .text-success {
+      color: #009688 !important;
+      font-weight: 700;
+    }
     .btn-outline-primary {
       border-radius: .75rem;
-      transition: transform .2s, box-shadow .2s;
+      font-weight: 600;
+      color: #053ff3;
+      border-color: #053ff3;
+      transition: background .2s, color .2s;
     }
     .btn-outline-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-    }
-
-    /* Footer */
-    footer {
       background: #053ff3;
       color: #fff;
-      padding: 1rem 0;
-      text-align: center;
-      margin-top: 3rem;
+    }
+    @media (max-width: 700px) {
+      .main-box { margin: 0.5em auto; padding: 1em 0.5em; }
+      .site-title { font-size: 1.5rem; }
+      .product-card img { height: 140px; }
     }
   </style>
 </head>
-<body class="{% if theme=='dark' %}dark-mode{% endif %}">
+<body>
+  <div class="main-box">
+    <div class="site-title">Mavi Petshop</div>
+    <div class="site-desc">
+      Türkiye'nin en güvenilir online petshop'u. Kedi, köpek, kuş ve balık ürünlerinde uygun fiyat ve hızlı teslimat!<br>
+      <span style="color:#053ff3;font-weight:600;">Hoş geldiniz!</span>
+    </div>
 
-  <!-- Kampanya Çubuğu -->
-  <div class="campaign-bar">
-    🎉 300 TL ve üzeri siparişlerde ÜCRETSİZ KARGO! 🚚
-  </div>
-
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-dark">
-    <div class="container">
-      <a class="navbar-brand" href="/"><i class="fa-solid fa-paw"></i> MaviPetShop</a>
-
-      <!-- Mobil sepet butonu - sadece mobilde görünür -->
-      <div class="d-flex align-items-center">
-        <a href="/cart" class="mobile-cart me-3 d-lg-none">
-          <i class="fa fa-shopping-cart"></i>
-          <span>{% if session.cart %}{{ session.cart|length }}{% else %}0{% endif %} Ürün</span>
-        </a>
-
-        <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#mainNav">
-          <span class="navbar-toggler-icon"></span>
+    {% if campaigns and campaigns|length > 0 %}
+    <div class="mb-4">
+      <div id="campaignCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3500" data-bs-wrap="true">
+        <div class="carousel-inner" style="border-radius: 1em; box-shadow: 0 4px 16px rgba(5,63,243,0.10); overflow: hidden;">
+          {% for c in campaigns %}
+          <div class="carousel-item {% if loop.index0 == 0 %}active{% endif %}">
+            <a href="{{ c.link }}" target="_blank">
+              <img src="{{ c.image }}" class="d-block w-100" alt="Kampanya" style="object-fit:cover; width:100%; max-height:270px; background:#e3f0ff;">
+              {% if c.title %}
+              <div class="carousel-caption d-none d-md-block">
+                <h5 style="background:rgba(5,63,243,0.85);color:#fff;padding:.5em 1em;border-radius:.7em;display:inline-block;">{{ c.title }}</h5>
+              </div>
+              {% endif %}
+            </a>
+          </div>
+          {% endfor %}
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#campaignCarousel" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Önceki</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#campaignCarousel" data-bs-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Sonraki</span>
         </button>
       </div>
-
-      <div class="collapse navbar-collapse" id="mainNav">
-        <ul class="navbar-nav me-auto">
-          <li class="nav-item"><a class="nav-link active" href="/">Anasayfa</a></li>
-        </ul>
-        <form action="/toggle_theme" method="post" class="d-flex align-items-center me-3">
-          <button class="btn btn-sm btn-light">
-            {% if theme=='dark' %}<i class="fa-solid fa-sun"></i>{% else %}<i class="fa-solid fa-moon"></i>{% endif %}
-          </button>
-        </form>
-        <form class="d-flex me-3">
-          <input id="searchInput" class="form-control form-control-sm" type="text" placeholder="Ürün ara…"/>
-        </form>
-        <!-- Desktop sepet butonu -->
-        <a href="/cart" class="btn btn-outline-light btn-sm position-relative d-none d-lg-block">
-          <i class="fa fa-shopping-cart"></i>
-          Sepet{% if session.cart %} ({{ session.cart|length }}){% endif %}
-        </a>
-      </div>
     </div>
-  </nav>
+    {% endif %}
 
-  <!-- Kategori Grid Menüsü -->
-  {% if not selected_category %}
-  <div class="container category-grid">
-    <div class="row g-4">
-      <div class="col-6">
-        <a href="/?category=Kedi" class="category-card">
-          <i class="fa-solid fa-cat" style="color:#053ff3;"></i>
-          <h5>Kedi</h5>
-          <p>Kedi mama, aksesuar ve oyuncakları</p>
-        </a>
-      </div>
-      <div class="col-6">
-        <a href="/?category=Köpek" class="category-card">
-          <i class="fa-solid fa-dog" style="color:#053ff3;"></i>
-          <h5>Köpek</h5>
-          <p>Köpek mama, aksesuar ve oyuncakları</p>
-        </a>
-      </div>
-      <div class="col-6">
-        <a href="/?category=Kuş" class="category-card">
-          <i class="fa-solid fa-dove" style="color:#053ff3;"></i>
-          <h5>Kuş</h5>
-          <p>Kuş yemi, kafes ve aksesuarları</p>
-        </a>
-      </div>
-      <div class="col-6">
-        <a href="/?category=Balık" class="category-card">
-          <i class="fa-solid fa-fish" style="color:#053ff3;"></i>
-          <h5>Balık</h5>
-          <p>Balık yemi, akvaryum malzemeleri</p>
-        </a>
-      </div>
-    </div>
-  </div>
-  {% endif %}
-
-  {% if selected_category %}
-  <div class="container my-3">
+    {% if selected_category %}
     <div class="alert alert-info d-flex justify-content-between align-items-center">
       <div><b>Kategori:</b> {{ selected_category }}</div>
       <a href="/change_category" class="btn btn-sm btn-outline-primary">Kategoriyi Değiştir</a>
     </div>
-  </div>
-  {% endif %}
+    {% endif %}
 
-  <!-- Filtreleme -->
-  <div class="container my-4">
+    <!-- Filtreleme -->
     <div class="filter-card">
       <form action="/" method="get" class="row g-3 align-items-end">
-        <!-- Kategori dropdown'u kaldırıldı -->
         <div class="col-md-4">
           <label class="form-label">Alt Kategori</label>
           <select name="subcategory" class="form-select">
@@ -303,44 +168,28 @@
         </div>
       </form>
     </div>
-  </div>
 
-  <!-- Ürünler -->
-  <div class="container">
-    <div class="row" id="productList">
-      {% for product in products %}
-      <div class="col-md-4 mb-4 product-item">
-        <div class="card product-card h-100">
-          <a href="/product/{{ product.id }}">
-            <img src="{{ product.image }}" class="card-img-top" alt="{{ product.name }}"/>
-          </a>
-          <div class="card-body d-flex flex-column">
-            <h5 class="card-title">{{ product.name }}</h5>
-            <p class="text-muted">{{ product.category }} / {{ product.subcategory }}</p>
-            <h6 class="text-success">{{ product.price }} TL</h6>
-            <a href="/add_to_cart/{{ product.id }}" class="btn btn-outline-primary mt-auto">Sepete Ekle</a>
+    <!-- Ürünler -->
+    <div class="container-fluid product-list">
+      <div class="row" id="productList">
+        {% for product in products %}
+        <div class="col-md-4 product-item">
+          <div class="card product-card h-100">
+            <a href="/product/{{ product.id }}">
+              <img src="{{ product.image }}" class="card-img-top" alt="{{ product.name }}"/>
+            </a>
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title">{{ product.name }}</h5>
+              <p class="text-muted">{{ product.category }} / {{ product.subcategory }}</p>
+              <h6 class="text-success">{{ product.price }} TL</h6>
+              <a href="/add_to_cart/{{ product.id }}" class="btn btn-outline-primary mt-auto">Sepete Ekle</a>
+            </div>
           </div>
         </div>
+        {% endfor %}
       </div>
-      {% endfor %}
     </div>
   </div>
-
-  <!-- Footer -->
-  <footer class="text-center">
-    © 2025 Mavi Petshop. Tüm hakları saklıdır.
-  </footer>
-
-  <!-- JS -->
-  <script>
-    // Canlı arama
-    document.getElementById('searchInput').addEventListener('input', function(){
-      const q = this.value.toLowerCase();
-      document.querySelectorAll('.product-item').forEach(el => {
-        el.style.display = el.querySelector('.card-title').textContent.toLowerCase().includes(q) ? '' : 'none';
-      });
-    });
-  </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
