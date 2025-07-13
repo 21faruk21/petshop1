@@ -435,6 +435,7 @@ def admin_logout():
 
 
 @app.route("/admin")
+@app.route("/admin/")
 @login_required
 def admin_panel():
     conn = sqlite3.connect(db_path)
