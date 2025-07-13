@@ -133,9 +133,24 @@
       border-radius: 4px;
       padding: 0.25rem;
     }
+    .btn-light.dark { background: #23262f; color: #f3f6fa; border-color: #444; }
+    .navbar.dark { background: #181a20 !important; }
+    .campaign-bar.dark { background: linear-gradient(90deg, #222, #333, #181a20, #23262f); color: #bfc9d8; }
+    .table thead.dark { background: #23262f !important; color: #bfc9d8 !important; }
+    .table tbody tr.dark { background: #23262f !important; color: #bfc9d8 !important; }
+    .card-order.dark { background: #23262f !important; color: #f3f6fa !important; }
+    .btn-primary.dark { background: #6ea8fe !important; border-color: #6ea8fe !important; color: #fff !important; }
+    .btn-outline-secondary.dark { background: #23262f !important; color: #6ea8fe !important; border-color: #6ea8fe !important; }
+    .btn-outline-secondary.dark:hover { background: #6ea8fe !important; color: #fff !important; }
+    .form-control.dark, .form-label.dark { background: #23262f !important; color: #f3f6fa !important; border-color: #444 !important; }
+    body.dark-mode { --bg: #181a20; --fg: #f3f6fa; }
+    .main-box { width: 100%; max-width: 900px; margin: 4em auto 2em auto; padding: 2.5em 2em 2em 2em; background-color: #fdfdff; border-radius: 0.7em; box-shadow: 2px 3px 14px 2px rgba(0,0,0,0.06); }
+    body { background-color: #f0f0f2; }
+    body.dark-mode { background-color: #181a20 !important; }
+    .main-box.dark { background-color: #23262f !important; color: #f3f6fa !important; box-shadow: 2px 3px 14px 2px rgba(0,0,0,0.18); }
   </style>
 </head>
-<body class="{% if theme=='dark' %}dark-mode{% endif %}">
+<body class="{% if theme=='dark' %}dark-mode{% endif %}" style="background:#f0f0f2;">
 
   <!-- Kampanya Çubuğu -->
   <div class="campaign-bar">
@@ -154,18 +169,23 @@
           <li class="nav-item"><a class="nav-link" href="/">Anasayfa</a></li>
           <li class="nav-item"><a class="nav-link active" href="/cart"><i class="fa fa-shopping-cart"></i> Sepetim</a></li>
         </ul>
-        <form action="/toggle_theme" method="post" class="d-flex align-items-center me-3">
-          <button class="btn btn-sm btn-light">
-            {% if theme=='dark' %}Light{% else %}Dark{% endif %}
+        <div class="d-flex align-items-center gap-2">
+          <form action="/toggle_theme" method="post" class="d-none">
+            <button class="btn btn-sm btn-light">
+              {% if theme=='dark' %}Light{% else %}Dark{% endif %}
+            </button>
+          </form>
+          <button id="themeToggle" class="btn btn-light d-flex align-items-center" style="border-radius:50%;width:42px;height:42px;justify-content:center;box-shadow:0 2px 8px rgba(5,63,243,0.08);font-size:1.3rem;" title="Tema Değiştir">
+            <i id="themeIcon" class="fa fa-moon"></i>
           </button>
-        </form>
+        </div>
       </div>
     </div>
   </nav>
 
 
   <!-- Sepet İçeriği -->
-  <div class="container my-5">
+  <div class="main-box position-relative" style="margin:4em auto 2em auto;max-width:900px;padding:2.5em 2em 2em 2em;background-color:#fdfdff;border-radius:0.7em;box-shadow:2px 3px 14px 2px rgba(0,0,0,0.06);">
     <h2 class="mb-4">Sepetim</h2>
 
     {% if cart_items %}
@@ -266,5 +286,32 @@
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Tema toggle scripti
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    function setDarkMode(on) {
+      document.body.classList.toggle('dark-mode', on);
+      document.querySelectorAll('.main-box').forEach(e=>e.classList.toggle('dark', on));
+      document.querySelectorAll('.navbar').forEach(e=>e.classList.toggle('dark', on));
+      document.querySelectorAll('.campaign-bar').forEach(e=>e.classList.toggle('dark', on));
+      document.querySelectorAll('.table thead').forEach(e=>e.classList.toggle('dark', on));
+      document.querySelectorAll('.table tbody tr').forEach(e=>e.classList.toggle('dark', on));
+      document.querySelectorAll('.card-order').forEach(e=>e.classList.toggle('dark', on));
+      document.querySelectorAll('.btn-primary').forEach(e=>e.classList.toggle('dark', on));
+      document.querySelectorAll('.btn-outline-secondary').forEach(e=>e.classList.toggle('dark', on));
+      document.querySelectorAll('.btn-light').forEach(e=>e.classList.toggle('dark', on));
+      document.querySelectorAll('.form-control').forEach(e=>e.classList.toggle('dark', on));
+      document.querySelectorAll('.form-label').forEach(e=>e.classList.toggle('dark', on));
+      themeIcon.className = on ? 'fa fa-sun' : 'fa fa-moon';
+    }
+    // Local storage ile tema kalıcı olsun
+    if(localStorage.getItem('darkMode')==='true') setDarkMode(true);
+    themeToggle.addEventListener('click',()=>{
+      const isDark = document.body.classList.toggle('dark-mode');
+      setDarkMode(isDark);
+      localStorage.setItem('darkMode', isDark);
+    });
+  </script>
 </body>
 </html>
