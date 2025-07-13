@@ -1,6 +1,6 @@
 import os
 from werkzeug.utils import secure_filename
-from flask import Flask, render_template, session, redirect, url_for, request
+from flask import Flask, render_template, session, redirect, url_for, request, jsonify
 import sqlite3
 import random, string, json
 from urllib.parse import quote
@@ -93,9 +93,28 @@ def allowed_file(filename):
 
 # ROUTES
 
+@app.route("/select_category", methods=["POST"])
+def select_category():
+    category = request.form.get("category")
+    if category:
+        session["selected_category"] = category
+        return redirect(url_for("index"))
+    return redirect(url_for("index"))
+
+@app.route("/change_category")
+def change_category():
+    session.pop("selected_category", None)
+    return redirect(url_for("index"))
+
 @app.route("/")
 def index():
-    category = request.args.get("category", "")
+    # Eğer kullanıcı kategori seçmemişse, kategori seçme ekranı göster
+    selected_category = session.get("selected_category")
+    if not selected_category:
+        return render_template("select_category.html")
+
+    # Kategori seçilmişse, sadece o kategorinin ürünlerini göster
+    category = selected_category
     subcategory = request.args.get("subcategory", "")
     min_price = request.args.get("min_price", "")
     max_price = request.args.get("max_price", "")
@@ -105,14 +124,10 @@ def index():
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
 
-        query = "SELECT * FROM products WHERE in_stock = 1"
-        params = []
-
-        if category:
-            query += " AND category = ?"
-            params.append(category)
+        query = "SELECT * FROM products WHERE in_stock = 1 AND LOWER(category) = LOWER(?)"
+        params = [category]
         if subcategory:
-            query += " AND subcategory = ?"
+            query += " AND LOWER(subcategory) = LOWER(?)"
             params.append(subcategory)
         if min_price:
             query += " AND price >= ?"
@@ -125,10 +140,10 @@ def index():
         products = cursor.fetchall()
         conn.close()
 
-        return render_template("index.html", products=products)
+        return render_template("index.html", products=products, selected_category=category)
     except Exception as e:
         print(f"Database error in index: {e}")
-        return render_template("index.html", products=[])
+        return render_template("index.html", products=[], selected_category=category)
 
 
 @app.route("/products")
