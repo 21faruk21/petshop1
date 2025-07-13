@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Sipariş Takip | Mavi Petshop</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+  <style>
+    body { background: #f0f0f2; }
+    .track-card { max-width: 500px; margin: 3rem auto; background: #fff; border-radius: 1.5rem; box-shadow: 0 8px 32px rgba(5,63,243,0.08); padding: 2.5rem 2rem 2rem 2rem; }
+    h2 { color: #053ff3; font-weight: 900; text-align: center; margin-bottom: 2rem; }
+    .form-label { font-weight: 600; color: #053ff3; }
+    .btn-primary { background: #053ff3; border: none; border-radius: .75rem; font-weight: 600; }
+    .btn-primary:hover { background: #032b9c; }
+    .form-select, .form-control { border-radius: .75rem; }
+  </style>
+</head>
+<body>
+  <div class="track-card">
+    <h2><i class="fa fa-truck"></i> Sipariş Takip</h2>
+    <form method="POST" class="mb-4">
+      <label class="form-label">Sipariş Kodunuz</label>
+      <div class="input-group mb-3">
+        <input type="text" name="code" class="form-control" placeholder="Örn: ABCD-1234-XYZ9" required>
+        <button type="submit" class="btn btn-primary">Sorgula</button>
+      </div>
+    </form>
+    {% if result %}
+      <div class="mb-3 d-flex flex-column gap-2">
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+          <div class="px-3 py-2 rounded" style="background:#e3f7e7;min-width:160px;font-weight:600;font-size:1.1rem;color:#1a7f37;">
+            <i class="fa fa-truck"></i> Kargo Şirketi: <span>{{ result["shipping_company"] or '-' }}</span>
+          </div>
+          <div class="px-3 py-2 rounded" style="background:#e3eaf7;min-width:160px;font-weight:600;font-size:1.1rem;color:#1a3a7f;">
+            <i class="fa fa-barcode"></i> Takip No: <span>{{ result["tracking_number"] or '-' }}</span>
+            {% if result["shipping_company"] and result["tracking_number"] %}
+              {% set takip_url = None %}
+              {% if 'Yurtiçi' in result["shipping_company"] %}
+                {% set takip_url = 'https://selfservis.yurticikargo.com/reports/sswDocumentDetails.aspx?DocId=' ~ result["tracking_number"] %}
+              {% elif 'Aras' in result["shipping_company"] %}
+                {% set takip_url = 'https://kargotakip.araskargo.com.tr/mainpage.aspx?code=' ~ result["tracking_number"] %}
+              {% elif 'MNG' in result["shipping_company"] %}
+                {% set takip_url = 'https://www.mngkargo.com.tr/tr/kargo-takip?code=' ~ result["tracking_number"] %}
+              {% elif 'Sürat' in result["shipping_company"] %}
+                {% set takip_url = 'https://www.suratkargo.com.tr/kargo-takip?code=' ~ result["tracking_number"] %}
+              {% elif 'PTT' in result["shipping_company"] %}
+                {% set takip_url = 'https://gonderitakip.ptt.gov.tr/Track/Verify?q=' ~ result["tracking_number"] %}
+              {% endif %}
+              {% if takip_url %}
+                <a href="{{ takip_url }}" target="_blank" class="btn btn-sm btn-outline-primary ms-2">Kargo Takip</a>
+              {% endif %}
+            {% endif %}
+          </div>
+          <div class="px-3 py-2 rounded" style="background:#e3f0ff;min-width:160px;font-weight:700;font-size:1.1rem;color:#053ff3;">
+            <i class="fa fa-info-circle"></i> Durum: <span>{{ result["status"] or "Hazırlanıyor" }}</span>
+          </div>
+        </div>
+      </div>
+      <ul class="mb-2 ps-3">
+        <li><b>Sipariş Kodu:</b> {{ result["order_code"] }}</li>
+        <li><b>Toplam:</b> {{ result["total_price"] }} TL</li>
+        <li><b>Tarih:</b> {{ result["created_at"] }}</li>
+        <li><b>Ad Soyad:</b> {{ result["customer_name"] }}</li>
+        <li><b>Adres:</b> {{ result["address"] }}</li>
+        <li><b>Not:</b> {{ result["note"] or "-" }}</li>
+      </ul>
+      <b>Ürünler:</b>
+      <ul class="mb-0 ps-3">
+        {% for item in items %}
+          <li>{{ item.name }} ({{ item.price }} TL × {{ item.quantity or 1 }})</li>
+        {% endfor %}
+      </ul>
+    {% elif not_found %}
+      <div class="alert alert-danger">❌ Sipariş bulunamadı. Kodunuzu kontrol edin.</div>
+    {% endif %}
+  </div>
+</body>
+</html> 

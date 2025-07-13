@@ -60,7 +60,8 @@ def init_database():
         customer_name TEXT,
         address TEXT,
         note TEXT,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        status TEXT DEFAULT 'Hazırlanıyor'
     )
     """)
 
@@ -323,9 +324,9 @@ def order():
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute("""
-        INSERT INTO orders (order_code, items, total_price, customer_name, address, note)
-        VALUES (?, ?, ?, ?, ?, ?)
-    """, (order_code, json.dumps(cart_items), total, customer_name, address, note))
+        INSERT INTO orders (order_code, items, total_price, customer_name, address, note, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    """, (order_code, json.dumps(cart_items), total, customer_name, address, note, 'Hazırlanıyor'))
     conn.commit()
     conn.close()
 
@@ -458,8 +459,19 @@ def admin_panel():
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM products ORDER BY id DESC")
     products = cursor.fetchall()
+    cursor.execute("SELECT * FROM orders ORDER BY id DESC")
+    orders = cursor.fetchall()
+    # Her siparişi dict'e çevirip ürünlerini ekle
+    orders_with_items = []
+    for order in orders:
+        order_dict = dict(order)
+        try:
+            order_dict["items"] = json.loads(order["items"])
+        except:
+            order_dict["items"] = []
+        orders_with_items.append(order_dict)
     conn.close()
-    return render_template("admin_panel.html", products=products)
+    return render_template("admin_panel.html", products=products, orders=orders_with_items)
 
 
 @app.route("/admin/campaigns", methods=["GET", "POST"])
@@ -516,6 +528,43 @@ def admin_messages():
     messages = cursor.fetchall()
     conn.close()
     return render_template("admin_messages.html", messages=messages)
+
+
+@app.route("/admin/update_order_status/<int:order_id>", methods=["POST"])
+@login_required
+def update_order_status(order_id):
+    new_status = request.form.get("status", "Hazırlanıyor")
+    shipping_company = request.form.get("shipping_company", "")
+    tracking_number = request.form.get("tracking_number", "")
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("UPDATE orders SET status = ?, shipping_company = ?, tracking_number = ? WHERE id = ?", (new_status, shipping_company, tracking_number, order_id))
+    conn.commit()
+    conn.close()
+    return redirect(url_for("admin_panel"))
+
+
+@app.route("/order-track", methods=["GET", "POST"])
+def order_track():
+    result = None
+    not_found = False
+    items = []
+    if request.method == "POST":
+        code = request.form["code"].strip().upper()
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM orders WHERE order_code = ?", (code,))
+        result = cursor.fetchone()
+        conn.close()
+        if result:
+            try:
+                items = json.loads(result["items"])
+            except:
+                items = []
+        else:
+            not_found = True
+    return render_template("order_track.html", result=result, items=items, not_found=not_found)
 
 
 # Error handlers

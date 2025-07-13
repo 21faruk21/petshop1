@@ -121,6 +121,7 @@
             <!-- <li class="nav-item"><a class="nav-link" href="/cart"><i class="fa fa-shopping-cart"></i> Sepet</a></li> -->
             <li class="nav-item"><a class="nav-link" href="/add_product"><i class="fa fa-plus-circle"></i> Ürün Ekle</a></li>
             <li class="nav-item"><a class="nav-link active" href="/admin"><i class="fa fa-cog"></i> Admin Panel</a></li>
+            <li class="nav-item"><a class="nav-link" href="/admin/orders"><i class="fa-solid fa-box-open"></i> Siparişler</a></li>
             <li class="nav-item"><a class="nav-link" href="/admin/campaigns"><i class="fa fa-bullhorn"></i> Kampanya Yönetimi</a></li>
             <li class="nav-item"><a class="nav-link" href="/admin/messages"><i class="fa fa-envelope"></i> Gelen Mesajlar</a></li>
           </ul>
@@ -168,6 +169,63 @@
                         </td>
                         <td><a href="/admin/edit/{{ product.id }}" class="btn btn-outline-warning btn-sm"><i class="fa fa-edit"></i> Düzenle</a></td>
                         <td><a href="/admin/delete/{{ product.id }}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Silmek istediğine emin misin?')"><i class="fa fa-trash"></i> Sil</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="admin-panel-card mt-5">
+        <h2>Siparişler</h2>
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Kod</th>
+                        <th>Müşteri</th>
+                        <th>Toplam</th>
+                        <th>Tarih</th>
+                        <th>Durum</th>
+                        <th>Kargo Şirketi</th>
+                        <th>Takip No</th>
+                        <th>Ürünler</th>
+                        <th>Güncelle</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td>{{ order.id }}</td>
+                        <td>{{ order.order_code }}</td>
+                        <td>{{ order.customer_name }}</td>
+                        <td>{{ order.total_price }} TL</td>
+                        <td>{{ order.created_at }}</td>
+                        <form method="POST" id="form_{{ order.id }}" action="/admin/update_order_status/{{ order.id }}">
+                        <td>
+                            <select name="status" class="form-select form-select-sm w-auto">
+                                <option value="Hazırlanıyor" {% if order.status=='Hazırlanıyor' %}selected{% endif %}>Hazırlanıyor</option>
+                                <option value="Kargoda" {% if order.status=='Kargoda' %}selected{% endif %}>Kargoda</option>
+                                <option value="Teslim Edildi" {% if order.status=='Teslim Edildi' %}selected{% endif %}>Teslim Edildi</option>
+                            </select>
+                        </td>
+                        <td>
+                            <input type="text" name="shipping_company" class="form-control form-control-sm" placeholder="Kargo Şirketi" value="{{ order.shipping_company or '' }}" style="min-width:110px;">
+                        </td>
+                        <td>
+                            <input type="text" name="tracking_number" class="form-control form-control-sm" placeholder="Takip No" value="{{ order.tracking_number or '' }}" style="min-width:110px;">
+                        </td>
+                        <td>
+                            <ul class="mb-0 ps-3">
+                                {% for item in order["items"] %}
+                                    <li>{{ item.name }} ({{ item.price }} TL × {{ item.quantity or 1 }})</li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                        <td>
+                            <button type="submit" class="btn btn-sm btn-primary">Güncelle</button>
+                        </td>
+                        </form>
                     </tr>
                     {% endfor %}
                 </tbody>
