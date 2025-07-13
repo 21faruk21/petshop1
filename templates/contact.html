@@ -1,187 +1,82 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>İletişim - MaviPetShop</title>
-
-  <!-- Google Font: Outfit -->
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-  <!-- Bootstrap & FontAwesome -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
-
-  <style>
-    /* Temel değişkenler */
-    body {
-      font-family: 'Outfit', sans-serif !important;
-      background: var(--bg, #fafafa);
-      color: var(--fg, #212121);
-      transition: background .3s, color .3s;
-      padding: 3rem 0;
-    }
-    body.dark-mode {
-      --bg: #121212;
-      --fg: #f5f5f5;
-    }
-
-    /* Kampanya Çubuğu */
-    .campaign-bar {
-      background: linear-gradient(90deg, #ff6b6b, #ff9f43, #1dd1a1, #54a0ff);
-      background-size: 300% 300%;
-      color: #fff;
-      padding: .5rem 0;
-      text-align: center;
-      font-weight: 500;
-      animation: slide 8s linear infinite;
-    }
-    @keyframes slide {
-      0% { background-position: 0% }
-      100% { background-position: 100% }
-    }
-
-    /* Navbar */
-    .navbar {
-      background: #053ff3;
-    }
-    .navbar .nav-link {
-      color: #fff !important;
-      font-weight: 500;
-    }
-    .navbar .nav-link.active {
-      text-decoration: underline;
-    }
-
-    /* Kategori Çubuğu */
-    .category-scroll {
-      overflow-x: auto;
-      white-space: nowrap;
-      padding: .5rem 0;
-      background: #053ff3;
-    }
-    .category-scroll a {
-      display: inline-block;
-      color: #fff;
-      margin: 0 .5rem;
-      padding: .4rem .8rem;
-      border-radius: 50px;
-      background: rgba(255,255,255,0.15);
-      font-size: .9rem;
-      transition: background .3s;
-    }
-    .category-scroll a:hover {
-      background: rgba(255,255,255,0.3);
-      text-decoration: none;
-    }
-
-    /* İletişim Kartı */
-    .contact-card {
-      background: var(--card-bg, #fff);
-      color: var(--fg, #212121);
-      padding: 2.5rem;
-      border-radius: 1.25rem;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-      max-width: 600px;
-      margin: auto;
-      transition: background .3s, color .3s;
-    }
-    body.dark-mode .contact-card {
-      --card-bg: #1f1f1f;
-      --fg: #f5f5f5;
-    }
-
-    /* Buton */
-    .btn-custom {
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: #fff;
-      border: none;
-      border-radius: .75rem;
-      font-weight: 600;
-      padding: .75rem 1.5rem;
-      transition: transform .2s, box-shadow .2s;
-    }
-    .btn-custom:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-    }
-
-    /* Ana Sayfa Butonu */
-    .btn-outline-secondary {
-      border-color: #053ff3;
-      color: #053ff3;
-      transition: background .3s, color .3s;
-    }
-    .btn-outline-secondary:hover {
-      background: #053ff3;
-      color: #fff;
-    }
-
-    /* Footer */
-    footer {
-      background: #053ff3;
-      color: #fff;
-      padding: 1rem 0;
-      text-align: center;
-      margin-top: 3rem;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bize Ulaşın | Mavi Petshop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <style>
+        body { background: #f5f7fa; }
+        .contact-card { max-width: 500px; margin: 3rem auto; background: #fff; border-radius: 1.5rem; box-shadow: 0 8px 32px rgba(5,63,243,0.08); padding: 2.5rem 2rem 2rem 2rem; }
+        h2 { color: #053ff3; font-weight: 900; text-align: center; margin-bottom: 2rem; }
+        .form-label { font-weight: 600; color: #053ff3; }
+        .btn-primary { background: #053ff3; border: none; border-radius: .75rem; font-weight: 600; }
+        .btn-primary:hover { background: #032b9c; }
+        .form-select, .form-control { border-radius: .75rem; }
+    </style>
 </head>
-<body class="{% if theme=='dark' %}dark-mode{% endif %}">
-
-  <!-- Kampanya Çubuğu -->
-  <div class="campaign-bar">
-    🎉 300 TL ve üzeri siparişlerde ÜCRETSİZ KARGO! 🚚
-  </div>
-
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg">
-    <div class="container">
-      <a class="navbar-brand text-white" href="/"><i class="fa-solid fa-paw"></i> MaviPetShop</a>
-      <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#mainNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="mainNav">
-        <ul class="navbar-nav me-auto">
-          <li class="nav-item"><a class="nav-link" href="/">Anasayfa</a></li>
-          <li class="nav-item"><a class="nav-link" href="/cart"><i class="fa fa-shopping-cart"></i> Sepet</a></li>
-          <li class="nav-item"><a class="nav-link" href="/add_product"><i class="fa fa-plus-circle"></i> Ürün Ekle</a></li>
-          <li class="nav-item"><a class="nav-link" href="/admin"><i class="fa fa-cogs"></i> Admin Panel</a></li>
-          <li class="nav-item"><a class="nav-link active" href="/contact"><i class="fa fa-envelope"></i> İletişim</a></li>
-        </ul>
-        <form action="/toggle_theme" method="post" class="d-flex align-items-center me-3">
-          <button class="btn btn-sm btn-light">
-            {% if theme=='dark' %}Light{% else %}Dark{% endif %}
-          </button>
+<body>
+    <div class="contact-card position-relative" style="position:relative;">
+        <button id="themeToggle" class="btn btn-light d-flex align-items-center position-absolute" style="top:1.2rem;right:1.2rem;border-radius:50%;width:40px;height:40px;justify-content:center;box-shadow:0 2px 8px rgba(5,63,243,0.08);font-size:1.2rem;z-index:10;" title="Tema Değiştir">
+            <i id="themeIcon" class="fa fa-moon"></i>
+        </button>
+        <h2><i class="fa-solid fa-envelope"></i> Bize Ulaşın</h2>
+        {% if message %}
+        <div class="alert alert-info">{{ message }}</div>
+        {% endif %}
+        <form action="/contact" method="post">
+            <div class="mb-3">
+                <label class="form-label">Ad Soyad</label>
+                <input type="text" name="name" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">E-posta</label>
+                <input type="email" name="email" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Telefon <span class="text-muted" style="font-size:0.9em;">(isteğe bağlı)</span></label>
+                <input type="text" name="phone" class="form-control" placeholder="05xx xxx xx xx">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Mesajınız</label>
+                <textarea name="message" class="form-control" rows="3" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Gönder</button>
         </form>
-      </div>
     </div>
-  </nav>
-
-
-  <!-- İletişim Formu -->
-  <div class="contact-card my-5">
-    <h2 class="mb-4 text-center">İletişim</h2>
-    <form method="POST">
-      <div class="mb-3">
-        <label class="form-label">Adınız</label>
-        <input type="text" name="name" class="form-control" required>
-      </div>
-      <div class="mb-3">
-        <label class="form-label">Mesajınız</label>
-        <textarea name="message" rows="5" class="form-control" required></textarea>
-      </div>
-      <button type="submit" class="btn-custom w-100">Gönder</button>
-    </form>
-    <div class="text-center mt-3">
-      <a href="/" class="btn btn-outline-secondary">← Anasayfa</a>
-    </div>
-  </div>
-
-  <!-- Footer -->
-  <footer>
-    © 2025 Mavi Petshop. Tüm hakları saklıdır.
-  </footer>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Tema toggle scripti
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    function setDarkMode(on) {
+      document.body.style.background = on ? '#181a20' : '#f5f7fa';
+      const card = document.querySelector('.contact-card');
+      if(card) {
+        card.style.background = on ? '#23262f' : '#fff';
+        card.style.color = on ? '#f3f6fa' : '#053ff3';
+        card.style.boxShadow = on ? '0 8px 32px rgba(5,63,243,0.18)' : '0 8px 32px rgba(5,63,243,0.08)';
+      }
+      document.querySelectorAll('h2').forEach(e=>e.style.color = on ? '#6ea8fe' : '#053ff3');
+      document.querySelectorAll('.form-label').forEach(e=>e.style.color = on ? '#6ea8fe' : '#053ff3');
+      document.querySelectorAll('.form-control').forEach(e=>{
+        e.style.background = on ? '#23262f' : '#fff';
+        e.style.color = on ? '#f3f6fa' : '#212529';
+        e.style.borderColor = on ? '#444' : '#ced4da';
+      });
+      document.querySelectorAll('.btn-primary').forEach(e=>{
+        e.style.background = on ? '#6ea8fe' : '#053ff3';
+        e.style.borderColor = on ? '#6ea8fe' : 'none';
+        e.style.color = '#fff';
+      });
+      themeIcon.className = on ? 'fa fa-sun' : 'fa fa-moon';
+    }
+    // Local storage ile tema kalıcı olsun
+    if(localStorage.getItem('darkMode')==='true') setDarkMode(true);
+    themeToggle.addEventListener('click',()=>{
+      const isDark = themeIcon.classList.contains('fa-moon');
+      setDarkMode(isDark);
+      localStorage.setItem('darkMode', isDark);
+    });
+  </script>
 </body>
 </html>

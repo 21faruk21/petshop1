@@ -13,6 +13,9 @@
       padding: 0;
       font-family: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
     }
+    body.dark {
+      background-color: #181a20;
+    }
     .main-box {
       width: 100%;
       max-width: 900px;
@@ -22,6 +25,11 @@
       border-radius: 0.7em;
       box-shadow: 2px 3px 14px 2px rgba(0,0,0,0.06);
     }
+    .main-box.dark {
+      background-color: #23262f;
+      color: #f3f6fa;
+      box-shadow: 2px 3px 14px 2px rgba(0,0,0,0.18);
+    }
     .site-title {
       font-size: 2.5rem;
       font-weight: 900;
@@ -30,12 +38,14 @@
       text-align: center;
       letter-spacing: 1px;
     }
+    .site-title.dark { color: #6ea8fe; }
     .site-desc {
       color: #444;
       font-size: 1.1rem;
       text-align: center;
       margin-bottom: 2em;
     }
+    .site-desc.dark { color: #bfc9d8; }
     .filter-card {
       background: #fff;
       border-radius: 0.7em;
@@ -43,6 +53,7 @@
       padding: 1.5em 1em 1em 1em;
       margin-bottom: 2em;
     }
+    .filter-card.dark { background: #23262f; box-shadow: 0 4px 16px rgba(5,63,243,0.18); }
     .product-list {
       margin-top: 2em;
     }
@@ -57,6 +68,7 @@
       padding-bottom: 1em;
       transition: box-shadow .2s, transform .2s;
     }
+    .product-card.dark { background: #23262f; color: #f3f6fa; box-shadow: 0 4px 16px rgba(5,63,243,0.18); }
     .product-card:hover {
       box-shadow: 0 8px 32px rgba(5,63,243,0.13);
       transform: translateY(-4px) scale(1.01);
@@ -88,20 +100,53 @@
       border-color: #053ff3;
       transition: background .2s, color .2s;
     }
+    .btn-outline-primary.dark { color: #6ea8fe; border-color: #6ea8fe; }
     .btn-outline-primary:hover {
       background: #053ff3;
       color: #fff;
     }
+    .btn-outline-primary.dark:hover { background: #6ea8fe; color: #fff; }
+    .cart-btn {
+      margin-left: 1em;
+      border-radius: 1.5em;
+      padding: 0.4em 1.1em;
+      font-size: 1rem;
+      box-shadow: 0 2px 8px rgba(5,63,243,0.08);
+      background: #fff;
+      transition: background .2s, color .2s;
+    }
+    .cart-btn.dark { background: #181a20; color: #6ea8fe; border-color: #6ea8fe; }
+    .cart-btn:hover {
+      background: #053ff3;
+      color: #fff;
+      border-color: #053ff3;
+    }
+    .cart-btn.dark:hover { background: #6ea8fe; color: #fff; }
     @media (max-width: 700px) {
       .main-box { margin: 0.5em auto; padding: 1em 0.5em; }
-      .site-title { font-size: 1.5rem; }
+      .site-title { font-size: 1.5rem; flex-direction: column; gap: 0.7em; align-items: stretch !important; }
       .product-card img { height: 140px; }
+      .cart-btn, .site-title .btn-primary, #themeToggle { width: 100%; justify-content: center; margin-left: 0; margin-top: 0.5em; }
+      .site-title .d-flex.align-items-center.gap-2 { flex-direction: column; gap: 0.5em; width: 100%; }
+      .carousel-caption h5 { font-size: 0.95rem; padding: .4em .7em; }
     }
   </style>
 </head>
 <body>
-  <div class="main-box">
-    <div class="site-title">Mavi Petshop</div>
+  <div class="main-box position-relative">
+    <div class="site-title d-flex justify-content-between align-items-center">
+      <span>Mavi Petshop</span>
+      <div class="d-flex align-items-center gap-2">
+        <a href="/cart" class="cart-btn btn btn-outline-primary position-static d-flex align-items-center" style="font-weight:600;font-size:1.1rem;gap:0.5em;">
+          <i class="fa fa-shopping-cart"></i>
+          <span>Sepet{% if session.cart %} ({{ session.cart|length }}){% endif %}</span>
+        </a>
+        <a href="/contact" class="btn btn-primary d-flex align-items-center" style="font-weight:600; border-radius:1.5em; padding:.5em 1.5em;">Bize Ulaşın</a>
+        <button id="themeToggle" class="btn btn-light d-flex align-items-center" style="border-radius:50%;width:42px;height:42px;justify-content:center;box-shadow:0 2px 8px rgba(5,63,243,0.08);font-size:1.3rem;" title="Tema Değiştir">
+          <i id="themeIcon" class="fa fa-moon"></i>
+        </button>
+      </div>
+    </div>
     <div class="site-desc">
       Türkiye'nin en güvenilir online petshop'u. Kedi, köpek, kuş ve balık ürünlerinde uygun fiyat ve hızlı teslimat!<br>
       <span style="color:#053ff3;font-weight:600;">Hoş geldiniz!</span>
@@ -116,8 +161,8 @@
             <a href="{{ c.link }}" target="_blank">
               <img src="{{ c.image }}" class="d-block w-100" alt="Kampanya" style="object-fit:cover; width:100%; max-height:270px; background:#e3f0ff;">
               {% if c.title %}
-              <div class="carousel-caption d-none d-md-block">
-                <h5 style="background:rgba(5,63,243,0.85);color:#fff;padding:.5em 1em;border-radius:.7em;display:inline-block;">{{ c.title }}</h5>
+              <div class="carousel-caption d-block" style="bottom:1.5rem;">
+                <h5 style="background:rgba(5,63,243,0.85);color:#fff;padding:.5em 1em;border-radius:.7em;display:inline-block;font-size:1.1rem;">{{ c.title }}</h5>
               </div>
               {% endif %}
             </a>
@@ -191,5 +236,34 @@
     </div>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Tema toggle scripti
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    function setDarkMode(on) {
+      document.body.classList.toggle('dark', on);
+      document.querySelector('.main-box').classList.toggle('dark', on);
+      document.querySelector('.site-title').classList.toggle('dark', on);
+      document.querySelector('.site-desc').classList.toggle('dark', on);
+      document.querySelector('.filter-card').classList.toggle('dark', on);
+      document.querySelectorAll('.product-card').forEach(e=>e.classList.toggle('dark', on));
+      document.querySelectorAll('.btn-outline-primary').forEach(e=>e.classList.toggle('dark', on));
+      document.querySelectorAll('.btn-primary').forEach(e=>e.classList.toggle('dark', on));
+      document.querySelectorAll('.alert-info').forEach(e=>e.classList.toggle('dark', on));
+      document.querySelectorAll('.form-control').forEach(e=>e.classList.toggle('dark', on));
+      document.querySelectorAll('.form-select').forEach(e=>e.classList.toggle('dark', on));
+      document.querySelectorAll('.form-label').forEach(e=>e.classList.toggle('dark', on));
+      document.querySelectorAll('.cart-btn').forEach(e=>e.classList.toggle('dark', on));
+      document.querySelectorAll('.btn-light').forEach(e=>e.classList.toggle('dark', on));
+      themeIcon.className = on ? 'fa fa-sun' : 'fa fa-moon';
+    }
+    // Local storage ile tema kalıcı olsun
+    if(localStorage.getItem('darkMode')==='true') setDarkMode(true);
+    themeToggle.addEventListener('click',()=>{
+      const isDark = document.body.classList.toggle('dark');
+      setDarkMode(isDark);
+      localStorage.setItem('darkMode', isDark);
+    });
+  </script>
 </body>
 </html>

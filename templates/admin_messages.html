@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gelen Mesajlar | Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <style>
+        body { background: #f5f7fa; }
+        .admin-messages-card { max-width: 900px; margin: 2rem auto; background: #fff; border-radius: 1.5rem; box-shadow: 0 8px 32px rgba(5,63,243,0.08); padding: 2.5rem 2rem 2rem 2rem; }
+        h2 { color: #053ff3; font-weight: 900; text-align: center; margin-bottom: 2rem; }
+        .table { background: #fff; }
+        .table th, .table td { vertical-align: middle; }
+        .table td { font-size: 1rem; }
+        .table th { color: #053ff3; font-weight: 700; }
+    </style>
+</head>
+<body>
+    <div class="admin-messages-card">
+        <h2>Gelen Mesajlar</h2>
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Ad Soyad</th>
+                        <th>E-posta</th>
+                        <th>Telefon</th>
+                        <th>Mesaj</th>
+                        <th>Tarih</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for m in messages %}
+                    <tr>
+                        <td>{{ m.id }}</td>
+                        <td>{{ m.name }}</td>
+                        <td>{{ m.email }}</td>
+                        <td>{{ m.phone or '-' }}</td>
+                        <td>{{ m.message }}</td>
+                        <td>{{ m.created_at }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html> 

@@ -155,9 +155,24 @@ def products():
     return redirect(url_for("index"))
 
 
-@app.route("/contact")
+@app.route("/contact", methods=["GET", "POST"])
 def contact():
-    return render_template("contact.html")
+    message = None
+    if request.method == "POST":
+        name = request.form.get("name", "")
+        email = request.form.get("email", "")
+        phone = request.form.get("phone", "")
+        msg = request.form.get("message", "")
+        if name and email and msg:
+            conn = sqlite3.connect(db_path)
+            cursor = conn.cursor()
+            cursor.execute("INSERT INTO messages (name, email, phone, message) VALUES (?, ?, ?, ?)", (name, email, phone, msg))
+            conn.commit()
+            conn.close()
+            message = "Mesajınız başarıyla gönderildi!"
+        else:
+            message = "Lütfen zorunlu alanları doldurun."
+    return render_template("contact.html", message=message)
 
 
 @app.route("/thank_you")
@@ -489,6 +504,18 @@ def admin_campaigns():
     campaigns = cursor.fetchall()
     conn.close()
     return render_template("admin_campaigns.html", campaigns=campaigns, message=message)
+
+
+@app.route("/admin/messages")
+@login_required
+def admin_messages():
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM messages ORDER BY created_at DESC")
+    messages = cursor.fetchall()
+    conn.close()
+    return render_template("admin_messages.html", messages=messages)
 
 
 # Error handlers

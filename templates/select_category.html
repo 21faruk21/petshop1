@@ -80,6 +80,9 @@
     </style>
 </head>
 <body>
+    <button id="themeToggle" class="btn btn-light d-flex align-items-center position-absolute" style="top:2.2rem;right:2.2rem;border-radius:50%;width:44px;height:44px;justify-content:center;box-shadow:0 2px 8px rgba(5,63,243,0.08);font-size:1.4rem;z-index:10;" title="Tema Değiştir">
+      <i id="themeIcon" class="fa fa-moon"></i>
+    </button>
     <div class="logo-text">MaviPetShop</div>
     <form action="/select_category" method="post" style="width:100%;max-width:520px;">
         <div class="category-grid">
@@ -89,5 +92,29 @@
             <button type="submit" name="category" value="Balık" class="category-tile"><i class="fa-solid fa-fish" style="color:#053ff3;"></i><span>Balık</span></button>
         </div>
     </form>
+  <script>
+    // Tema toggle scripti
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    function setDarkMode(on) {
+      document.body.style.background = on ? 'linear-gradient(135deg, #181a20 0%, #23262f 100%)' : 'linear-gradient(135deg, #e3f0ff 0%, #f5f7fa 100%)';
+      document.querySelector('.logo-text').style.color = on ? '#6ea8fe' : '#053ff3';
+      document.querySelectorAll('.category-tile').forEach(e=>{
+        e.style.background = on ? '#23262f' : '#fff';
+        e.style.color = on ? '#6ea8fe' : '#053ff3';
+        e.style.boxShadow = on ? '0 8px 32px rgba(5,63,243,0.18)' : '0 8px 32px rgba(5,63,243,0.10)';
+        e.querySelector('i').style.color = on ? '#6ea8fe' : '#053ff3';
+        e.querySelector('span').style.color = on ? '#6ea8fe' : '#053ff3';
+      });
+      themeIcon.className = on ? 'fa fa-sun' : 'fa fa-moon';
+    }
+    // Local storage ile tema kalıcı olsun
+    if(localStorage.getItem('darkMode')==='true') setDarkMode(true);
+    themeToggle.addEventListener('click',()=>{
+      const isDark = themeIcon.classList.contains('fa-moon');
+      setDarkMode(isDark);
+      localStorage.setItem('darkMode', isDark);
+    });
+  </script>
 </body>
 </html> 
