@@ -5,20 +5,64 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bize Ulaşın | Mavi Petshop</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
     <style>
         body { background: #f5f7fa; }
         .contact-card { max-width: 500px; margin: 3rem auto; background: #fff; border-radius: 1.5rem; box-shadow: 0 8px 32px rgba(5,63,243,0.08); padding: 2.5rem 2rem 2rem 2rem; }
         h2 { color: #053ff3; font-weight: 900; text-align: center; margin-bottom: 2rem; }
         .form-label { font-weight: 600; color: #053ff3; }
-        .btn-primary { background: #053ff3; border: none; border-radius: .75rem; font-weight: 600; }
-        .btn-primary:hover { background: #032b9c; }
+        .btn-primary {
+          background: #ff6b00 !important;
+          border: none !important;
+          border-radius: .75rem !important;
+          font-weight: 700 !important;
+          box-shadow: 0 4px 16px rgba(255,107,0,0.18) !important;
+          outline: 2px solid #ffb366 !important;
+          color: #fff !important;
+          transition: background .2s, box-shadow .2s, outline .2s;
+        }
+        .btn-primary:hover, .btn-primary:focus {
+          background: #ff8800 !important;
+          box-shadow: 0 6px 24px rgba(255,107,0,0.28) !important;
+          outline: 2.5px solid #ffb366 !important;
+          color: #fff !important;
+        }
+        .btn-back {
+          background: #fff !important;
+          color: #1976ff !important;
+          border-radius: 50%;
+          width: 44px;
+          height: 44px;
+          box-shadow: 0 2px 8px rgba(25,118,255,0.18);
+          font-size: 1.4rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: none;
+          position: relative;
+          z-index: 30;
+          transition: background .2s, color .2s, box-shadow .2s;
+        }
+        .btn-back i { color: #1976ff !important; transition: color .2s; }
+        .btn-back:hover { background: #e3f0ff !important; box-shadow: 0 4px 16px rgba(25,118,255,0.28); }
+        .btn-back:hover i { color: #053ff3 !important; }
+        body.dark .btn-back, body.dark-mode .btn-back {
+          background: #fff !important;
+          color: #1976ff !important;
+          box-shadow: 0 2px 8px rgba(25,118,255,0.28);
+        }
         .form-select, .form-control { border-radius: .75rem; }
     </style>
 </head>
 <body>
+    <a href="/" style="position:absolute;top:24px;left:24px;z-index:20;text-decoration:none;">
+      <button class="btn btn-back" type="button">
+        <i class="fa fa-arrow-left" style="font-size:1.5rem;"></i>
+      </button>
+    </a>
     <div class="contact-card position-relative" style="position:relative;">
         <button id="themeToggle" class="btn btn-light d-flex align-items-center position-absolute" style="top:1.2rem;right:1.2rem;border-radius:50%;width:40px;height:40px;justify-content:center;box-shadow:0 2px 8px rgba(5,63,243,0.08);font-size:1.2rem;z-index:10;" title="Tema Değiştir">
-            <i id="themeIcon" class="fa fa-moon"></i>
+            <i id="themeIcon" class="fa fa-moon" style="font-size:1.2rem;"></i>
         </button>
         <h2><i class="fa-solid fa-envelope"></i> Bize Ulaşın</h2>
         {% if message %}

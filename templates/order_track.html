@@ -24,9 +24,38 @@
     body.dark-mode .btn-outline-primary:hover { background: #6ea8fe; color: #23272f; }
     body.dark-mode .form-control, body.dark-mode .form-select { background: #23272f; color: #f5f5f5; border-color: #6ea8fe; }
     body.dark-mode .alert-danger { background: #2d2d2d; color: #ff6b6b; border-color: #ff6b6b; }
+    .btn-back {
+      background: #fff !important;
+      color: #1976ff !important;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      box-shadow: 0 2px 8px rgba(25,118,255,0.18);
+      font-size: 1.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      position: relative;
+      z-index: 30;
+      transition: background .2s, color .2s, box-shadow .2s;
+    }
+    .btn-back i { color: #1976ff !important; font-size:1.5rem; transition: color .2s; }
+    .btn-back:hover { background: #e3f0ff !important; box-shadow: 0 4px 16px rgba(25,118,255,0.28); }
+    .btn-back:hover i { color: #053ff3 !important; }
+    body.dark-mode .btn-back {
+      background: #fff !important;
+      color: #1976ff !important;
+      box-shadow: 0 2px 8px rgba(25,118,255,0.28);
+    }
   </style>
 </head>
 <body>
+  <a href="/" style="position:absolute;top:24px;left:24px;z-index:20;text-decoration:none;">
+    <button class="btn btn-back" type="button">
+      <i class="fa fa-arrow-left"></i>
+    </button>
+  </a>
   <div style="position:fixed;top:18px;right:18px;z-index:100;">
     <button id="themeToggle" class="btn btn-light d-flex align-items-center" style="border-radius:50%;width:40px;height:40px;justify-content:center;box-shadow:0 2px 8px rgba(5,63,243,0.08);font-size:1.2rem;z-index:10;" title="Tema Değiştir">
       <i id="themeIcon" class="fa fa-moon"></i>

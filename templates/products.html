@@ -123,9 +123,31 @@
       text-align: center;
       margin-top: 3rem;
     }
+    .btn-back {
+      background: #fff !important;
+      color: #053ff3 !important;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      box-shadow: 0 2px 8px rgba(5,63,243,0.08);
+      font-size: 1.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      transition: background .2s, color .2s;
+    }
+    .btn-back i { color: #053ff3; transition: color .2s; }
+    .btn-back:hover { background: #e3f0ff !important; }
+    .btn-back:hover i { color: #032b9c; }
   </style>
 </head>
 <body class="{% if theme=='dark' %}dark-mode{% endif %}">
+  <a href="/" style="position:absolute;top:24px;left:24px;z-index:20;text-decoration:none;">
+    <button class="btn btn-back" type="button">
+      <i class="fas fa-arrow-left"></i>
+    </button>
+  </a>
 
   <!-- Kampanya Çubuğu -->
   <div class="campaign-bar">
@@ -144,6 +166,7 @@
           <li class="nav-item"><a class="nav-link" href="/">Anasayfa</a></li>
           <li class="nav-item"><a class="nav-link active" href="/products">Ürünler</a></li>
         </ul>
+        <a href="/contact" class="btn btn-primary ms-2 d-flex align-items-center" style="font-weight:600; border-radius:1.5em; padding:.5em 1.5em;">Bize Ulaşın</a>
         <form action="/toggle_theme" method="post" class="d-flex align-items-center me-3">
           <button class="btn btn-sm btn-light">
             {% if theme=='dark' %}Light{% else %}Dark{% endif %}
