@@ -77,6 +77,34 @@ except Exception as e:
     print(f"Database initialization error: {e}")
 
 
+# --- Migration: Eksik kolonları ekle ---
+def migrate_orders_table():
+    import sqlite3
+    try:
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        try:
+            cursor.execute("ALTER TABLE orders ADD COLUMN status TEXT DEFAULT 'Hazırlanıyor'")
+        except Exception as e:
+            print("status kolonu zaten var veya eklenemedi:", e)
+        try:
+            cursor.execute("ALTER TABLE orders ADD COLUMN shipping_company TEXT")
+        except Exception as e:
+            print("shipping_company kolonu zaten var veya eklenemedi:", e)
+        try:
+            cursor.execute("ALTER TABLE orders ADD COLUMN tracking_number TEXT")
+        except Exception as e:
+            print("tracking_number kolonu zaten var veya eklenemedi:", e)
+        conn.commit()
+        conn.close()
+        print("orders tablosu migration tamamlandı.")
+    except Exception as e:
+        print("Migration genel hata:", e)
+
+# Sunucu başlarken bir kere çalıştır
+migrate_orders_table()
+
+
 # Decorator for admin login
 def login_required(f):
     @wraps(f)
