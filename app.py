@@ -305,45 +305,42 @@ def remove_from_cart(index):
 
 @app.route("/order", methods=["POST"])
 def order():
-    cart_items = session.get("cart", [])
-    total = sum(item["price"] * item.get("quantity", 1) for item in cart_items)
+    try:
+        cart_items = session.get("cart", [])
+        total = sum(item["price"] * item.get("quantity", 1) for item in cart_items)
 
-    if not cart_items:
-        return redirect(url_for("cart"))
+        if not cart_items:
+            return redirect(url_for("cart"))
 
-    order_code = "-".join(
-        ''.join(random.choices(string.ascii_uppercase + string.digits, k=4)) for _ in range(4)
-    )
+        order_code = "-".join(
+            ''.join(random.choices(string.ascii_uppercase + string.digits, k=4)) for _ in range(4)
+        )
 
-    # Kullanıcıdan alınan veriler
-    customer_name = request.form.get("customer_name", "")
-    address = request.form.get("address", "")
-    note = request.form.get("note", "")
+        # Kullanıcıdan alınan veriler
+        customer_name = request.form.get("customer_name", "")
+        address = request.form.get("address", "")
+        note = request.form.get("note", "")
 
-    # Veritabanına kaydet
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-    cursor.execute("""
-        INSERT INTO orders (order_code, items, total_price, customer_name, address, note, status)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    """, (order_code, json.dumps(cart_items), total, customer_name, address, note, 'Hazırlanıyor'))
-    conn.commit()
-    conn.close()
+        # Veritabanına kaydet
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO orders (order_code, items, total_price, customer_name, address, note, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (order_code, json.dumps(cart_items), total, customer_name, address, note, 'Hazırlanıyor'))
+        conn.commit()
+        conn.close()
 
-    # WhatsApp yönlendirmesi
-    whatsapp_number = "905422192125"
-    message = f"""🐾 Merhaba! Siparişimi tamamlamak istiyorum.
+        # WhatsApp yönlendirmesi
+        whatsapp_number = "905422192125"
+        message = f"""🐾 Merhaba! Siparişimi tamamlamak istiyorum.\n\nSipariş Kodu: {order_code}\nAd Soyad: {customer_name}\nToplam Tutar: {total} TL\n\nIBAN bilgilerinizi paylaşabilir misiniz?\n"""
+        whatsapp_link = f"https://wa.me/{whatsapp_number}?text={quote(message)}"
 
-Sipariş Kodu: {order_code}
-Ad Soyad: {customer_name}
-Toplam Tutar: {total} TL
-
-IBAN bilgilerinizi paylaşabilir misiniz?
-"""
-    whatsapp_link = f"https://wa.me/{whatsapp_number}?text={quote(message)}"
-
-    session.pop("cart", None)
-    return redirect(whatsapp_link)
+        session.pop("cart", None)
+        return redirect(whatsapp_link)
+    except Exception as e:
+        print(f"ORDER ERROR: {e}")
+        return f"Bir hata oluştu: {e}", 500
 
 
 @app.route("/update_quantity/<int:index>", methods=["POST"])
