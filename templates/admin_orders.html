@@ -3,235 +3,424 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Sipariş Sorgulama - Admin | MaviPetShop</title>
-
-  <!-- Google Font: Outfit -->
+  <title>Sipariş Yönetimi - Admin | MaviPetShop</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-  <!-- Bootstrap & FontAwesome -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
-
+  <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet"/>
   <style>
-    /* Temel değişkenler */
     body {
       font-family: 'Outfit', sans-serif !important;
-      background: var(--bg, #fafafa);
-      color: var(--fg, #212121);
-      transition: background .3s, color .3s;
+      background: #f0f0f2;
+      transition: background 0.3s ease;
     }
-    body.dark-mode {
-      --bg: #121212;
-      --fg: #f5f5f5;
+    
+    .orders-container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
     }
-
-    /* Kampanya Çubuğu */
-    .campaign-bar {
-      background: linear-gradient(90deg, #ff6b6b, #ff9f43, #1dd1a1, #54a0ff);
-      background-size: 300% 300%;
-      color: #fff;
-      padding: .5rem 0;
-      text-align: center;
-      font-weight: 500;
-      animation: slide 8s linear infinite;
-    }
-    @keyframes slide {
-      0% { background-position: 0% }
-      100% { background-position: 100% }
-    }
-
-    /* Navbar */
-    .navbar {
-      background: #053ff3;
-    }
-    .navbar .nav-link {
-      color: #fff !important;
-      font-weight: 500;
-    }
-    .navbar .nav-link.active {
-      text-decoration: underline;
-    }
-
-    /* Kategori Çubuğu */
-    .category-scroll {
-      overflow-x: auto;
-      white-space: nowrap;
-      padding: .5rem 0;
-      background: #053ff3;
-    }
-    .category-scroll a {
-      display: inline-block;
-      color: #fff;
-      margin: 0 .5rem;
-      padding: .4rem .8rem;
-      border-radius: 50px;
-      background: rgba(255,255,255,0.15);
-      font-size: .9rem;
-      transition: background .3s;
-    }
-    .category-scroll a:hover {
-      background: rgba(255,255,255,0.3);
-      text-decoration: none;
-    }
-
-    /* Kart Stili */
-    .card-order {
-      background: var(--card-bg, #fff);
-      color: var(--fg, #212121);
-      border: none;
+    
+    .page-header {
+      background: #fff;
       border-radius: 1rem;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-      margin-bottom: 1.5rem;
-      transition: background .3s, color .3s, transform .2s;
-    }
-    .card-order:hover {
-      transform: translateY(-3px);
-    }
-    body.dark-mode .card-order {
-      --card-bg: #1f1f1f;
-      --fg: #f5f5f5;
-    }
-
-    /* Buton */
-    .btn-gradient {
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: #fff;
-      border: none;
-      border-radius: .75rem;
-      font-weight: 600;
-      padding: .5rem 1.25rem;
-      transition: transform .2s, box-shadow .2s;
-    }
-    .btn-gradient:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-    }
-
-    /* Footer */
-    footer {
-      background: #053ff3;
-      color: #fff;
-      padding: 1rem 0;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
       text-align: center;
-      margin-top: 3rem;
+    }
+    
+    .page-header h1 {
+      color: #053ff3;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    
+    .page-header p {
+      color: #6b7280;
+      margin: 0;
+    }
+    
+    .order-card {
+      background: #fff;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+    }
+    
+    .order-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .order-id {
+      font-weight: 700;
+      color: #053ff3;
+      font-size: 1.1rem;
+    }
+    
+    .order-date {
+      color: #6b7280;
+      font-size: 0.9rem;
+    }
+    
+    .order-body {
+      margin-bottom: 1rem;
+    }
+    
+    .customer-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    
+    .info-item {
+      display: flex;
+      align-items: center;
+      color: #374151;
+    }
+    
+    .info-item i {
+      margin-right: 0.5rem;
+      color: #667eea;
+    }
+    
+    .order-items {
+      background: #f8fafc;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    
+    .order-items h6 {
+      color: #374151;
+      margin-bottom: 0.5rem;
+    }
+    
+    .item-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .item-list li {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #e5e7eb;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .item-list li:last-child {
+      border-bottom: none;
+    }
+    
+    .item-name {
+      font-weight: 500;
+      color: #374151;
+    }
+    
+    .item-details {
+      color: #6b7280;
+      font-size: 0.9rem;
+    }
+    
+    .order-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    
+    .status-section {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    .status-badge {
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    
+    .status-pending {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    
+    .status-processing {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+    
+    .status-shipped {
+      background: #e0f2fe;
+      color: #0277bd;
+    }
+    
+    .status-delivered {
+      background: #dcfce7;
+      color: #166534;
+    }
+    
+    .status-cancelled {
+      background: #fecaca;
+      color: #991b1b;
+    }
+    
+    .form-control, .form-select {
+      border-radius: 0.5rem;
+      border: 1px solid #d1d5db;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.9rem;
+    }
+    
+    .form-control:focus, .form-select:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .btn-update {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 0.5rem 1rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-update:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .total-amount {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #10b981;
+    }
+    
+    .tracking-info {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    
+    .no-orders {
+      text-align: center;
+      padding: 3rem;
+      color: #6b7280;
+    }
+    
+    .no-orders i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      color: #d1d5db;
+    }
+    
+    @media (max-width: 768px) {
+      .order-header {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+      }
+      
+      .customer-info {
+        grid-template-columns: 1fr;
+      }
+      
+      .order-footer {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .tracking-info {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body class="{% if theme=='dark' %}dark-mode{% endif %}">
-
-  <!-- Kampanya Çubuğu -->
-  <div class="campaign-bar">
-    🎉 300 TL ve üzeri siparişlerde ÜCRETSİZ KARGO! 🚚
-  </div>
-
   <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg">
+  <nav class="navbar navbar-expand-lg navbar-dark" style="background: #053ff3;">
     <div class="container">
-      <a class="navbar-brand text-white" href="/"><i class="fa-solid fa-paw"></i> MaviPetShop</a>
-      <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#mainNav">
+      <a class="navbar-brand" href="{{ url_for('index') }}">
+        <i class="fas fa-paw"></i> Mavi Petshop
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
       </button>
-      <div class="collapse navbar-collapse" id="mainNav">
+      <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav me-auto">
-          <li class="nav-item"><a class="nav-link" href="/">Anasayfa</a></li>
-          <li class="nav-item"><a class="nav-link" href="/cart"><i class="fa fa-shopping-cart"></i> Sepet</a></li>
-          <li class="nav-item"><a class="nav-link" href="/add_product"><i class="fa fa-plus-circle"></i> Ürün Ekle</a></li>
-          <li class="nav-item"><a class="nav-link active" href="/admin/orders"><i class="fa-solid fa-box-open"></i> Sipariş Sorgulama</a></li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('index') }}">Ana Sayfa</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('admin_panel') }}">Admin Panel</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{{ url_for('admin_orders') }}">Siparişler</a>
+          </li>
         </ul>
-        <form action="/toggle_theme" method="post" class="d-flex">
-          <button id="themeToggle" class="btn btn-light d-flex align-items-center ms-2" style="border-radius:50%;width:40px;height:40px;justify-content:center;box-shadow:0 2px 8px rgba(5,63,243,0.08);font-size:1.2rem;z-index:10;" title="Tema Değiştir">
-            <i id="themeIcon" class="fa fa-moon"></i>
-          </button>
-        </form>
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <button class="btn btn-link nav-link" onclick="toggleTheme()">
+              <i class="fas fa-moon" id="themeIcon"></i>
+              <span id="themeText">{% if theme=='dark' %}Light{% else %}Dark{% endif %}</span>
+            </button>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('admin_logout') }}">
+              <i class="fas fa-sign-out-alt"></i> Çıkış
+            </a>
+          </li>
+        </ul>
       </div>
     </div>
   </nav>
 
+  <div class="orders-container">
+    <div class="page-header">
+      <h1><i class="fas fa-shopping-cart"></i> Sipariş Yönetimi</h1>
+      <p>Tüm siparişleri görüntüle ve yönet</p>
+    </div>
 
-
-  <!-- Ana İçerik -->
-  <div class="container my-5">
-    <h3 class="mb-4 text-center">📦 Sipariş Sorgulama</h3>
-
-    <!-- Sorgu Formu -->
-    <form method="POST" class="input-group mb-4">
-      <input type="text" name="code" class="form-control" placeholder="Sipariş Kodunu Gir" required>
-      <button type="submit" class="btn-gradient">Sorgula</button>
-    </form>
-
-    {% if result %}
-      <!-- Tek Sipariş Sonucu -->
-      <div class="card-order p-4">
-        <h5 class="mb-3">Sipariş Kodu: {{ result["order_code"] }}</h5>
-        <p><strong>💰 Toplam:</strong> {{ result["total_price"] }} TL</p>
-        <p><strong>📅 Tarih:</strong> {{ result["created_at"] }}</p>
-        <p><strong>👤 Ad Soyad:</strong> {{ result["customer_name"] }}</p>
-        <p><strong>🏠 Adres:</strong> {{ result["address"] }}</p>
-        <p><strong>📝 Not:</strong> {{ result["note"] or "Yok" }}</p>
-        <p><strong>🚚 Durum:</strong> {{ result["status"] or "Hazırlanıyor" }}</p>
-        <hr>
-        <h6>Ürünler:</h6>
-        <ul class="mb-0 ps-3">
-          {% for item in items %}
-            <li>{{ item.name }} ({{ item.price }} TL × {{ item.quantity or 1 }})</li>
-          {% endfor %}
-        </ul>
-      </div>
-
-    {% elif not_found %}
-      <div class="alert alert-danger text-center">❌ Sipariş bulunamadı.</div>
-
-    {% else %}
-      <!-- Tüm Siparişler -->
-      <h5 class="mb-3">Tüm Siparişler</h5>
-      {% for order in all_orders %}
-      <div class="card-order p-4">
-        <h5 class="mb-3">Sipariş Kodu: {{ order.order_code }}</h5>
-        <p><strong>💰 Toplam:</strong> {{ order.total_price }} TL</p>
-        <p><strong>📅 Tarih:</strong> {{ order.created_at }}</p>
-        <p><strong>👤 Ad Soyad:</strong> {{ order.customer_name }}</p>
-        <p><strong>🏠 Adres:</strong> {{ order.address }}</p>
-        <p><strong>📝 Not:</strong> {{ order.note or "Yok" }}</p>
-        <form method="POST" action="/admin/update_order_status/{{ order.id }}" class="d-flex align-items-center mb-2" style="gap:0.5em;">
-          <label class="form-label mb-0" style="font-weight:600;">Durum:</label>
-          <select name="status" class="form-select form-select-sm w-auto">
-            <option value="Hazırlanıyor" {% if order.status=='Hazırlanıyor' %}selected{% endif %}>Hazırlanıyor</option>
-            <option value="Kargoda" {% if order.status=='Kargoda' %}selected{% endif %}>Kargoda</option>
-            <option value="Teslim Edildi" {% if order.status=='Teslim Edildi' %}selected{% endif %}>Teslim Edildi</option>
-          </select>
-          <button type="submit" class="btn btn-sm btn-primary">Güncelle</button>
+    {% if orders %}
+      {% for order in orders %}
+      <div class="order-card">
+        <div class="order-header">
+          <div>
+            <div class="order-id">Sipariş #{{ order.id }}</div>
+            <div class="order-date">{{ order.created_at.strftime('%d.%m.%Y %H:%M') }}</div>
+          </div>
+          <div class="total-amount">{{ order.total_price }}₺</div>
+        </div>
+        
+        <div class="order-body">
+          <div class="customer-info">
+            <div class="info-item">
+              <i class="fas fa-user"></i>
+              <span>{{ order.customer_name }}</span>
+            </div>
+            <div class="info-item">
+              <i class="fas fa-phone"></i>
+              <span>{{ order.customer_phone }}</span>
+            </div>
+            <div class="info-item">
+              <i class="fas fa-envelope"></i>
+              <span>{{ order.customer_email }}</span>
+            </div>
+            <div class="info-item">
+              <i class="fas fa-map-marker-alt"></i>
+              <span>{{ order.customer_address }}</span>
+            </div>
+          </div>
+          
+          <div class="order-items">
+            <h6><i class="fas fa-box"></i> Sipariş Detayları</h6>
+            <ul class="item-list">
+              {% for item in order.items %}
+              <li>
+                <div>
+                  <div class="item-name">{{ item.name }}</div>
+                  <div class="item-details">{{ item.quantity }} adet × {{ item.price }}₺</div>
+                </div>
+                <div class="item-total">{{ item.quantity * item.price }}₺</div>
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+        
+        <form method="POST" action="{{ url_for('admin_update_order', order_id=order.id) }}">
+          <div class="tracking-info">
+            <div>
+              <label class="form-label">Kargo Şirketi</label>
+              <input type="text" class="form-control" name="shipping_company" 
+                     value="{{ order.shipping_company or '' }}" placeholder="Kargo şirketi adı">
+            </div>
+            <div>
+              <label class="form-label">Takip Numarası</label>
+              <input type="text" class="form-control" name="tracking_number" 
+                     value="{{ order.tracking_number or '' }}" placeholder="Takip numarası">
+            </div>
+          </div>
+          
+          <div class="order-footer">
+            <div class="status-section">
+              <span class="status-badge status-{{ order.status|lower }}">
+                {{ order.status }}
+              </span>
+              <select class="form-select" name="status" style="width: auto;">
+                <option value="Hazırlanıyor" {% if order.status=='Hazırlanıyor' %}selected{% endif %}>Hazırlanıyor</option>
+                <option value="Kargoda" {% if order.status=='Kargoda' %}selected{% endif %}>Kargoda</option>
+                <option value="Teslim Edildi" {% if order.status=='Teslim Edildi' %}selected{% endif %}>Teslim Edildi</option>
+                <option value="İptal Edildi" {% if order.status=='İptal Edildi' %}selected{% endif %}>İptal Edildi</option>
+              </select>
+            </div>
+            <button type="submit" class="btn-update">
+              <i class="fas fa-save"></i> Güncelle
+            </button>
+          </div>
         </form>
-        <hr>
-        <h6>Ürünler:</h6>
-        <ul class="mb-0 ps-3">
-          {% for item in order.items %}
-            <li>{{ item.name }} ({{ item.price }} TL × {{ item.quantity or 1 }})</li>
-          {% endfor %}
-        </ul>
       </div>
       {% endfor %}
+    {% else %}
+      <div class="order-card">
+        <div class="no-orders">
+          <i class="fas fa-inbox"></i>
+          <h4>Henüz sipariş yok</h4>
+          <p>Yeni siparişler burada görünecek</p>
+        </div>
+      </div>
     {% endif %}
   </div>
 
-  <!-- Footer -->
-  <footer>
-    © 2025 Mavi Petshop. Tüm hakları saklıdır.
-  </footer>
-
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // Tema toggle scripti
-    const themeToggle = document.getElementById('themeToggle');
-    const themeIcon = document.getElementById('themeIcon');
-    function setDarkMode(on) {
-      document.body.classList.toggle('dark-mode', on);
-      themeIcon.className = on ? 'fa fa-sun' : 'fa fa-moon';
+    function toggleTheme() {
+      const body = document.body;
+      const themeIcon = document.getElementById('themeIcon');
+      const themeText = document.getElementById('themeText');
+      
+      const isDark = body.classList.toggle('dark-mode');
+      
+      if (isDark) {
+        themeIcon.className = 'fas fa-sun';
+        themeText.textContent = 'Light';
+      } else {
+        themeIcon.className = 'fas fa-moon';
+        themeText.textContent = 'Dark';
+      }
+      
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
     }
-    // Local storage ile tema kalıcı olsun
-    if(localStorage.getItem('darkMode')==='true') setDarkMode(true);
-    themeToggle.addEventListener('click',()=>{
-      const isDark = themeIcon.classList.contains('fa-moon');
-      setDarkMode(isDark);
-      localStorage.setItem('darkMode', isDark);
+    
+    // Sayfa yüklendiğinde tema durumunu kontrol et
+    document.addEventListener('DOMContentLoaded', function() {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        document.getElementById('themeIcon').className = 'fas fa-sun';
+        document.getElementById('themeText').textContent = 'Light';
+      }
     });
   </script>
 </body>

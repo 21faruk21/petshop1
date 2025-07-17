@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ürün Ekle | Mavi Petshop</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
-    <style>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+  <style>
         body { background: #f5f7fa; }
         .add-product-card {
             max-width: 500px;
-            margin: 3rem auto;
+      margin: 3rem auto;
             background: #fff;
             border-radius: 1.5rem;
             box-shadow: 0 8px 32px rgba(5,63,243,0.08);
@@ -21,49 +21,173 @@
         .btn-primary:hover { background: #032b9c; }
         .form-select, .form-control { border-radius: .75rem; }
         h2 { color: #053ff3; font-weight: 900; text-align: center; margin-bottom: 2rem; }
-    </style>
+  </style>
 </head>
 <body>
+    <a href="/admin" style="position:absolute;top:24px;left:24px;z-index:20;text-decoration:none;">
+      <button class="btn btn-light d-flex align-items-center justify-content-center" style="border-radius:50%;width:44px;height:44px;box-shadow:0 2px 8px rgba(5,63,243,0.08);font-size:1.4rem;">
+        <i class="fa fa-arrow-left"></i>
+      </button>
+    </a>
     <div class="add-product-card">
         <h2><i class="fa-solid fa-plus"></i> Ürün Ekle</h2>
         <form action="/add_product" method="post" enctype="multipart/form-data">
+      <div class="mb-3">
+        <label class="form-label">Ürün Adı</label>
+        <input type="text" name="name" class="form-control" required>
+      </div>
             <div class="mb-3">
-                <label class="form-label">Ürün Adı</label>
-                <input type="text" name="name" class="form-control" required>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Fiyat (TL)</label>
+          <label class="form-label">Fiyat (TL)</label>
                 <input type="number" name="price" class="form-control" step="0.01" required>
-            </div>
+        </div>
             <div class="mb-3">
-                <label class="form-label">Kategori</label>
-                <select name="category" class="form-select" required>
+          <label class="form-label">Hayvan Türü</label>
+          <select name="category" class="form-select" required>
                     <option value="">Seçiniz</option>
-                    <option value="Kedi">Kedi</option>
-                    <option value="Köpek">Köpek</option>
-                    <option value="Kuş">Kuş</option>
-                    <option value="Balık">Balık</option>
+            <option value="Kedi">Kedi</option>
+            <option value="Köpek">Köpek</option>
+            <option value="Kuş">Kuş</option>
+            <option value="Balık">Balık</option>
+          </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Ana Kategori</label>
+        <select name="main_category" class="form-select" id="mainCategorySelect" required>
+          <option value="">Önce hayvan türünü seçin</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Alt Kategori</label>
+                <select name="subcategory" class="form-select" id="subcategorySelect" multiple required>
+                    <option value="">Önce ana kategoriyi seçin</option>
                 </select>
-            </div>
+      </div>
             <div class="mb-3">
-                <label class="form-label">Alt Kategori</label>
-                <select name="subcategory" class="form-select">
-                    <option value="">Seçiniz</option>
-                    <option value="Mama">Mama</option>
-                    <option value="Aksesuar">Aksesuar</option>
-                    <option value="Oyuncak">Oyuncak</option>
-                </select>
-            </div>
-            <div class="mb-3">
+        <label class="form-label">Marka</label>
+        <select name="brand" class="form-select" required>
+          <option value="">Seçiniz</option>
+          <option value="Acana">Acana</option>
+          <option value="Advance">Advance</option>
+          <option value="Brit Care">Brit Care</option>
+          <option value="Pro Plan">Pro Plan</option>
+          <option value="Royal Canin">Royal Canin</option>
+          <option value="Hill's">Hill's</option>
+          <option value="Orijen">Orijen</option>
+        </select>
+      </div>
+            <script>
+const subcategories = {
+    'Kedi': {
+        'Mama': [
+            'Yavru Kedi Maması', 'Yetişkin Kedi Maması', 'Kısırlaştırılmış Kedi Maması', 'Konserve Kedi Maması'
+        ],
+        'Ödül & Eğitim': [
+            'Kedi Ödülleri', 'Kedi Eğitim Ürünleri'
+        ],
+        'Bakım & Sağlık': [
+            'Kedi Bakım Ürünleri', 'Kedi Sağlık Ürünleri'
+        ],
+        'Aksesuar': [
+            'Kedi Kumları', 'Kedi Tuvaleti ve Ürünleri', 'Kedi Aksesuarları', 'Kedi Oyuncakları', 'Kedi Tasmaları', 'Kedi Mama ve Su Kapları', 'Kedi Kafesleri', 'Kedi Taşıma Çantaları', 'Kedi Tırmalamaları', 'Kedi Yatakları'
+        ],
+        'Marka': [
+            'Popüler Markalar'
+        ]
+    },
+    'Köpek': {
+        'Mama': [
+            'Yavru Köpek Maması', 'Yetişkin Köpek Maması', 'Kısırlaştırılmış Köpek Maması', 'Konserve Köpek Maması'
+        ],
+        'Ödül & Eğitim': [
+            'Köpek Ödülleri', 'Köpek Eğitim Ürünleri'
+        ],
+        'Bakım & Sağlık': [
+            'Köpek Bakım Ürünleri', 'Köpek Sağlık Ürünleri'
+        ],
+        'Aksesuar': [
+            'Köpek Tasmaları', 'Köpek Mama ve Su Kapları', 'Köpek Kafesleri', 'Köpek Taşıma Çantaları', 'Köpek Yatakları', 'Köpek Oyuncakları'
+        ],
+        'Marka': [
+            'Popüler Markalar'
+        ]
+    },
+    'Kuş': {
+        'Yem': [
+            'Kuş Yemleri'
+        ],
+        'Bakım & Sağlık': [
+            'Kuş Vitaminleri', 'Kuş Sağlık Ürünleri'
+        ],
+        'Aksesuar': [
+            'Kuş Kafesleri', 'Kuş Oyuncakları', 'Kuş Aksesuarları', 'Kuş Banyosu'
+        ],
+        'Marka': [
+            'Popüler Markalar'
+        ]
+    },
+    'Balık': {
+        'Yem': [
+            'Balık Yemleri'
+        ],
+        'Bakım & Sağlık': [
+            'Balık Sağlık Ürünleri'
+        ],
+        'Aksesuar': [
+            'Akvaryumlar', 'Akvaryum Ekipmanları', 'Balık Dekorasyon'
+        ],
+        'Marka': [
+            'Popüler Markalar'
+        ]
+    }
+};
+const categorySelect = document.querySelector('select[name="category"]');
+const mainCategorySelect = document.getElementById('mainCategorySelect');
+const subcategorySelect = document.getElementById('subcategorySelect');
+
+function updateMainCategories() {
+    const animalType = categorySelect.value;
+    mainCategorySelect.innerHTML = '<option value="">Seçiniz</option>';
+    subcategorySelect.innerHTML = '<option value="">Önce ana kategoriyi seçin</option>';
+    
+    if(subcategories[animalType]) {
+        Object.keys(subcategories[animalType]).forEach(mainCat => {
+            const opt = document.createElement('option');
+            opt.value = mainCat;
+            opt.textContent = mainCat;
+            mainCategorySelect.appendChild(opt);
+        });
+    }
+}
+
+function updateSubcategories() {
+    const animalType = categorySelect.value;
+    const mainCat = mainCategorySelect.value;
+    subcategorySelect.innerHTML = '';
+    
+    if(subcategories[animalType] && subcategories[animalType][mainCat]) {
+        subcategories[animalType][mainCat].forEach(sub => {
+            const opt = document.createElement('option');
+            opt.value = sub;
+            opt.textContent = sub;
+            subcategorySelect.appendChild(opt);
+        });
+    }
+}
+
+categorySelect.addEventListener('change', updateMainCategories);
+mainCategorySelect.addEventListener('change', updateSubcategories);
+window.addEventListener('DOMContentLoaded', updateMainCategories);
+</script>
+      <div class="mb-3">
                 <label class="form-label">Açıklama</label>
                 <textarea name="description" class="form-control" rows="2"></textarea>
-            </div>
-            <div class="mb-3">
+      </div>
+      <div class="mb-3">
                 <label class="form-label">Ürün Görseli</label>
                 <input type="file" name="image" class="form-control">
-            </div>
+      </div>
             <button type="submit" class="btn btn-primary w-100">Ürünü Ekle</button>
-        </form>
-    </div>
+    </form>
+  </div>
 </body>
 </html>

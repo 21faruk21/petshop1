@@ -1,85 +1,192 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kampanya Yönetimi | Admin</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
-    <style>
-        body { background: #f5f7fa; }
-        .admin-campaigns-card { max-width: 700px; margin: 2rem auto; background: #fff; border-radius: 1.5rem; box-shadow: 0 8px 32px rgba(5,63,243,0.08); padding: 2.5rem 2rem 2rem 2rem; }
-        h2 { color: #053ff3; font-weight: 900; text-align: center; margin-bottom: 2rem; }
-        .form-label { font-weight: 600; color: #053ff3; }
-        .btn-primary { background: #053ff3; border: none; border-radius: .75rem; font-weight: 600; }
-        .btn-primary:hover { background: #032b9c; }
-        .btn-outline-danger, .btn-outline-success { border-radius: .75rem; }
-        .table img { max-height: 60px; border-radius: 0.5rem; }
-    </style>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Kampanya Yönetimi - Admin | MaviPetShop</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+  <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet"/>
+  <style>
+    body {
+      font-family: 'Outfit', sans-serif !important;
+      background: #f0f0f2;
+      transition: background 0.3s ease;
+    }
+    
+    .campaigns-container {
+      max-width: 1000px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    
+    .page-header {
+      background: #fff;
+      border-radius: 1rem;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      text-align: center;
+    }
+    
+    .page-header h1 {
+      color: #053ff3;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    
+    .page-header p {
+      color: #6b7280;
+      margin: 0;
+    }
+    
+    .campaign-card {
+      background: #fff;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+    }
+    
+    .campaign-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .campaign-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .campaign-title {
+      font-weight: 600;
+      color: #374151;
+    }
+    
+    .campaign-date {
+      color: #6b7280;
+      font-size: 0.9rem;
+    }
+    
+    .campaign-content {
+      color: #4b5563;
+      line-height: 1.6;
+    }
+    
+    .no-campaigns {
+      text-align: center;
+      padding: 3rem;
+      color: #6b7280;
+    }
+    
+    .no-campaigns i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      color: #d1d5db;
+    }
+  </style>
 </head>
-<body>
-    <div class="admin-campaigns-card">
-        <h2>Kampanya Yönetimi</h2>
-        {% if message %}
-        <div class="alert alert-info">{{ message }}</div>
-        {% endif %}
-        <form action="/admin/campaigns" method="post" enctype="multipart/form-data" class="mb-4">
-            <div class="row g-3 align-items-end">
-                <div class="col-md-4">
-                    <label class="form-label">Başlık</label>
-                    <input type="text" name="title" class="form-control" placeholder="Kampanya başlığı (isteğe bağlı)">
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Yönlendirme Linki</label>
-                    <input type="text" name="link" class="form-control" placeholder="https://..." required>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">Görsel</label>
-                    <input type="file" name="image" class="form-control" required>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">Aktif</label>
-                    <input type="checkbox" name="active" checked class="form-check-input">
-                </div>
-            </div>
-            <button type="submit" class="btn btn-primary mt-3 w-100">Kampanya Ekle</button>
-        </form>
-        <hr>
-        <h5 class="mb-3">Mevcut Kampanyalar</h5>
-        <div class="table-responsive">
-            <table class="table table-bordered align-middle">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Görsel</th>
-                        <th>Başlık</th>
-                        <th>Link</th>
-                        <th>Durum</th>
-                        <th>İşlem</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for c in campaigns %}
-                    <tr>
-                        <td>{{ c.id }}</td>
-                        <td><img src="{{ c.image }}" alt="kampanya"/></td>
-                        <td>{{ c.title }}</td>
-                        <td><a href="{{ c.link }}" target="_blank">Link</a></td>
-                        <td>
-                            {% if c.active %}
-                                <span class="badge bg-success">Aktif</span>
-                            {% else %}
-                                <span class="badge bg-secondary">Pasif</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <a href="/admin/campaigns?toggle={{ c.id }}" class="btn btn-outline-success btn-sm">Aktif/Pasif</a>
-                            <a href="/admin/campaigns?delete={{ c.id }}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Silmek istediğine emin misin?')">Sil</a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+<body class="{% if theme=='dark' %}dark-mode{% endif %}">
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark" style="background: #053ff3;">
+    <div class="container">
+      <a class="navbar-brand" href="{{ url_for('index') }}">
+        <i class="fas fa-paw"></i> Mavi Petshop
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('index') }}">Ana Sayfa</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('admin_panel') }}">Admin Panel</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{{ url_for('admin_campaigns') }}">Kampanyalar</a>
+          </li>
+        </ul>
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <button class="btn btn-link nav-link" onclick="toggleTheme()">
+              <i class="fas fa-moon" id="themeIcon"></i>
+              <span id="themeText">{% if theme=='dark' %}Light{% else %}Dark{% endif %}</span>
+            </button>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('admin_logout') }}">
+              <i class="fas fa-sign-out-alt"></i> Çıkış
+            </a>
+          </li>
+        </ul>
+      </div>
     </div>
+  </nav>
+
+  <div class="campaigns-container">
+    <div class="page-header">
+      <h1><i class="fas fa-bullhorn"></i> Kampanya Yönetimi</h1>
+      <p>Kampanyaları görüntüle ve yönet</p>
+    </div>
+
+    {% if campaigns %}
+      {% for campaign in campaigns %}
+      <div class="campaign-card">
+        <div class="campaign-header">
+          <div class="campaign-title">{{ campaign.title }}</div>
+          <div class="campaign-date">{{ campaign.created_at.strftime('%d.%m.%Y %H:%M') }}</div>
+        </div>
+        <div class="campaign-content">{{ campaign.description }}</div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="campaign-card">
+        <div class="no-campaigns">
+          <i class="fas fa-bullhorn"></i>
+          <h4>Henüz kampanya yok</h4>
+          <p>Yeni kampanyalar burada görünecek</p>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    function toggleTheme() {
+      const body = document.body;
+      const themeIcon = document.getElementById('themeIcon');
+      const themeText = document.getElementById('themeText');
+      
+      const isDark = body.classList.toggle('dark-mode');
+      
+      if (isDark) {
+        themeIcon.className = 'fas fa-sun';
+        themeText.textContent = 'Light';
+      } else {
+        themeIcon.className = 'fas fa-moon';
+        themeText.textContent = 'Dark';
+      }
+      
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    }
+    
+    // Sayfa yüklendiğinde tema durumunu kontrol et
+    document.addEventListener('DOMContentLoaded', function() {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        document.getElementById('themeIcon').className = 'fas fa-sun';
+        document.getElementById('themeText').textContent = 'Light';
+      }
+    });
+  </script>
 </body>
 </html> 

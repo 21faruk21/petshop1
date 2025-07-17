@@ -151,6 +151,30 @@
   </style>
 </head>
 <body class="{% if theme=='dark' %}dark-mode{% endif %}" style="background:#f0f0f2;">
+  <a href="/" style="position:absolute;top:24px;left:24px;z-index:20;text-decoration:none;">
+    <button class="btn btn-back" type="button">
+      <i class="fas fa-arrow-left"></i>
+    </button>
+  </a>
+  <style>
+    .btn-back {
+      background: #fff !important;
+      color: #053ff3 !important;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      box-shadow: 0 2px 8px rgba(5,63,243,0.08);
+      font-size: 1.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      transition: background .2s, color .2s;
+    }
+    .btn-back i { color: #053ff3; transition: color .2s; }
+    .btn-back:hover { background: #e3f0ff !important; }
+    .btn-back:hover i { color: #032b9c; }
+  </style>
 
   <!-- Kampanya Çubuğu -->
   <div class="campaign-bar">
@@ -171,10 +195,10 @@
         </ul>
         <div class="d-flex align-items-center gap-2">
           <form action="/toggle_theme" method="post" class="d-none">
-            <button class="btn btn-sm btn-light">
-              {% if theme=='dark' %}Light{% else %}Dark{% endif %}
-            </button>
-          </form>
+          <button class="btn btn-sm btn-light">
+            {% if theme=='dark' %}Light{% else %}Dark{% endif %}
+          </button>
+        </form>
           <button id="themeToggle" class="btn btn-light d-flex align-items-center" style="border-radius:50%;width:42px;height:42px;justify-content:center;box-shadow:0 2px 8px rgba(5,63,243,0.08);font-size:1.3rem;" title="Tema Değiştir">
             <i id="themeIcon" class="fa fa-moon"></i>
           </button>
@@ -223,7 +247,7 @@
                 </div>
               </td>
               <td>
-                <a href="/remove_from_cart/{{ loop.index0 }}" class="btn btn-sm btn-outline-secondary">Sil</a>
+                <a href="/remove_from_cart/{{ loop.index0 }}" class="btn btn-sm" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; padding: 6px 12px; border-radius: 15px; font-weight: 600; font-size: 11px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3); text-decoration: none;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(239, 68, 68, 0.4)'; this.style.background='linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(239, 68, 68, 0.3)'; this.style.background='linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'">Sil</a>
               </td>
             </tr>
             {% endfor %}
@@ -259,7 +283,7 @@
             <textarea name="note" class="form-control" rows="2"></textarea>
           </div>
           <div class="col-12">
-            <button type="submit" class="btn btn-primary w-100">
+            <button type="submit" class="btn w-100" style="background: linear-gradient(135deg, #25d366 0%, #128c7e 100%); color: white; border: none; padding: 15px 24px; border-radius: 30px; font-weight: 600; font-size: 16px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(37, 211, 102, 0.4)'; this.style.background='linear-gradient(135deg, #128c7e 0%, #075e54 100%)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(37, 211, 102, 0.3)'; this.style.background='linear-gradient(135deg, #25d366 0%, #128c7e 100%)'">
               Siparişi WhatsApp'tan Tamamla
             </button>
           </div>
@@ -268,7 +292,7 @@
 
       <!-- Sepeti Temizle -->
       <div class="text-center">
-        <a href="/clear_cart" class="btn btn-outline-secondary">Sepeti Temizle</a>
+        <a href="/clear_cart" class="btn" style="background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); color: white; border: none; padding: 10px 20px; border-radius: 25px; font-weight: 600; font-size: 13px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3); text-decoration: none;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(107, 114, 128, 0.4)'; this.style.background='linear-gradient(135deg, #4b5563 0%, #374151 100%)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(107, 114, 128, 0.3)'; this.style.background='linear-gradient(135deg, #6b7280 0%, #4b5563 100%)'">Sepeti Temizle</a>
       </div>
 
     {% else %}

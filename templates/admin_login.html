@@ -4,169 +4,242 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Admin Giriş - MaviPetShop</title>
-
-  <!-- Google Font: Outfit -->
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-  <!-- Bootstrap & FontAwesome -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
-
+  <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet"/>
   <style>
-    /* Temel değişkenler */
     body {
       font-family: 'Outfit', sans-serif !important;
-      background: var(--bg, #fafafa);
-      color: var(--fg, #212121);
-      transition: background .3s, color .3s;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+      padding: 20px;
+      transition: background 0.3s ease;
     }
-    body.dark-mode {
-      --bg: #121212;
-      --fg: #f5f5f5;
-    }
-
-    /* Kampanya Çubuğu */
-    .campaign-bar {
-      background: linear-gradient(90deg, #ff6b6b, #ff9f43, #1dd1a1, #54a0ff);
-      background-size: 300% 300%;
-      color: white;
-      padding: .5rem 0;
-      text-align: center;
-      font-weight: 500;
-      animation: slide 8s linear infinite;
-    }
-    @keyframes slide {
-      0% { background-position: 0% }
-      100% { background-position: 100% }
-    }
-
-    /* Navbar */
-    .navbar {
-      background: #053ff3;
-    }
-    .navbar .nav-link {
-      color: white !important;
-      font-weight: 500;
-    }
-    .navbar .nav-link.active {
-      text-decoration: underline;
-    }
-
-    /* Kategori Çubuğu */
-    .category-scroll {
-      overflow-x: auto;
-      white-space: nowrap;
-      padding: .5rem 0;
-      background: #053ff3;
-    }
-    .category-scroll a {
-      display: inline-block;
-      color: #fff;
-      margin: 0 .5rem;
-      padding: .4rem .8rem;
-      border-radius: 50px;
-      background: rgba(255,255,255,0.15);
-      font-size: .9rem;
-      transition: background .3s;
-    }
-    .category-scroll a:hover {
-      background: rgba(255,255,255,0.3);
-      text-decoration: none;
-    }
-
-    /* Login Kartı */
-    .login-card {
-      background: var(--card-bg, #fff);
-      color: var(--fg, #212121);
-      padding: 2.5rem;
-      border-radius: 1.25rem;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    
+    .login-container {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      padding: 3rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
       max-width: 400px;
       width: 100%;
-      transition: background .3s, color .3s;
+      transition: all 0.3s ease;
     }
-    body.dark-mode .login-card {
-      --card-bg: #1f1f1f;
-      --fg: #f5f5f5;
+    
+    .login-header {
+      text-align: center;
+      margin-bottom: 2rem;
     }
-
-    /* Buton */
-    .btn-custom {
-      background: linear-gradient(135deg, #667eea, #764ba2);
+    
+    .login-header h1 {
+      color: #053ff3;
+      font-weight: 700;
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .login-header p {
+      color: #6b7280;
+      font-size: 1rem;
+      margin: 0;
+    }
+    
+    .login-form {
+      margin-bottom: 2rem;
+    }
+    
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    .form-label {
+      color: #374151;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+    
+    .form-control {
+      border-radius: 12px;
+      border: 2px solid #e5e7eb;
+      padding: 12px 16px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      background: #fff;
+    }
+    
+    .form-control:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      outline: none;
+    }
+    
+    .btn-login {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
       border: none;
-      border-radius: .75rem;
+      border-radius: 12px;
+      padding: 12px 24px;
       font-weight: 600;
-      padding: .75rem;
-      transition: transform .2s, box-shadow .2s;
+      font-size: 1rem;
+      width: 100%;
+      transition: all 0.3s ease;
+      cursor: pointer;
     }
-    .btn-custom:hover {
+    
+    .btn-login:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
     }
-
-    /* Footer */
-    footer {
-      background: #053ff3;
-      color: #fff;
-      padding: 1rem 0;
+    
+    .btn-login:active {
+      transform: translateY(0);
+    }
+    
+    .login-footer {
       text-align: center;
-      margin-top: 3rem;
+      margin-top: 2rem;
+    }
+    
+    .login-footer a {
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+    
+    .login-footer a:hover {
+      color: #5a67d8;
+    }
+    
+    .alert {
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      border: none;
+    }
+    
+    .alert-danger {
+      background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+      color: #991b1b;
+    }
+    
+    .theme-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+    
+    .theme-toggle:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.1);
+    }
+    
+    @media (max-width: 480px) {
+      .login-container {
+        padding: 2rem;
+        margin: 1rem;
+      }
+      
+      .login-header h1 {
+        font-size: 1.8rem;
+      }
     }
   </style>
 </head>
 <body class="{% if theme=='dark' %}dark-mode{% endif %}">
-
-  <!-- Kampanya Çubuğu -->
-  <div class="campaign-bar">
-    🎉 300 TL ve üzeri siparişlerde ÜCRETSİZ KARGO! 🚚
-  </div>
-
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg">
-    <div class="container">
-      <a class="navbar-brand text-white" href="/"><i class="fa-solid fa-paw"></i> MaviPetShop</a>
-      <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#mainNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="mainNav">
-        <ul class="navbar-nav me-auto">
-          <li class="nav-item"><a class="nav-link" href="/">Anasayfa</a></li>
-          <li class="nav-item"><a class="nav-link" href="/cart"><i class="fa fa-shopping-cart"></i> Sepet</a></li>
-          <li class="nav-item"><a class="nav-link active" href="/admin"><i class="fa fa-user-shield"></i> Admin Giriş</a></li>
-        </ul>
-        <form action="/toggle_theme" method="post" class="d-flex">
-          <button class="btn btn-sm btn-light">
-            {% if theme=='dark' %}Light{% else %}Dark{% endif %}
-          </button>
-        </form>
-      </div>
+  <button class="theme-toggle" onclick="toggleTheme()">
+    <i class="fas fa-moon" id="themeIcon"></i>
+  </button>
+  
+  <div class="login-container">
+    <div class="login-header">
+      <h1><i class="fas fa-paw"></i> Mavi Petshop</h1>
+      <p>Admin Paneli Girişi</p>
     </div>
-  </nav>
-
-
-
-  <!-- Admin Giriş Kartı -->
-  <div class="container my-5 d-flex justify-content-center">
-    <div class="login-card">
-      <h3 class="text-center mb-4">Admin Giriş</h3>
-      {% if error %}
-        <div class="alert alert-danger">{{ error }}</div>
+    
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle"></i> {{ message }}
+          </div>
+        {% endfor %}
       {% endif %}
-      <form method="POST">
-        <div class="mb-3">
-          <label class="form-label">Şifre</label>
-          <input type="password" name="password" class="form-control" required>
-        </div>
-        <button type="submit" class="btn-custom w-100">Giriş Yap</button>
-      </form>
+    {% endwith %}
+    
+    <form class="login-form" method="POST">
+      <div class="form-group">
+        <label class="form-label" for="username">
+          <i class="fas fa-user"></i> Kullanıcı Adı
+        </label>
+        <input type="text" class="form-control" id="username" name="username" required>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label" for="password">
+          <i class="fas fa-lock"></i> Şifre
+        </label>
+        <input type="password" class="form-control" id="password" name="password" required>
+      </div>
+      
+      <button type="submit" class="btn-login">
+        <i class="fas fa-sign-in-alt"></i> Giriş Yap
+      </button>
+    </form>
+    
+    <div class="login-footer">
+      <a href="{{ url_for('index') }}">
+        <i class="fas fa-arrow-left"></i> Ana Sayfaya Dön
+      </a>
     </div>
   </div>
-
-  <!-- Footer -->
-  <footer>
-    © 2025 Mavi Petshop. Tüm hakları saklıdır.
-  </footer>
-
+  
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    function toggleTheme() {
+      const body = document.body;
+      const themeIcon = document.getElementById('themeIcon');
+      
+      const isDark = body.classList.toggle('dark-mode');
+      
+      if (isDark) {
+        themeIcon.className = 'fas fa-sun';
+      } else {
+        themeIcon.className = 'fas fa-moon';
+      }
+      
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    }
+    
+    // Sayfa yüklendiğinde tema durumunu kontrol et
+    document.addEventListener('DOMContentLoaded', function() {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        document.getElementById('themeIcon').className = 'fas fa-sun';
+      }
+    });
+  </script>
 </body>
 </html>

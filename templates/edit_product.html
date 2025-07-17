@@ -173,14 +173,173 @@
           <input type="number" step="0.01" name="price" value="{{ product[2] }}" class="form-control" required>
         </div>
         <div class="col-md-6">
-          <label class="form-label">Kategori</label>
-          <input type="text" name="category" value="{{ product[4] }}" class="form-control">
+          <label class="form-label">Hayvan Türü</label>
+          <select name="category" class="form-select" required>
+            <option value="">Seçiniz</option>
+            <option value="Kedi" {% if product[4]=='Kedi' %}selected{% endif %}>Kedi</option>
+            <option value="Köpek" {% if product[4]=='Köpek' %}selected{% endif %}>Köpek</option>
+            <option value="Kuş" {% if product[4]=='Kuş' %}selected{% endif %}>Kuş</option>
+            <option value="Balık" {% if product[4]=='Balık' %}selected{% endif %}>Balık</option>
+          </select>
         </div>
       </div>
       <div class="mb-3">
-        <label class="form-label">Alt Kategori</label>
-        <input type="text" name="subcategory" value="{{ product[5] }}" class="form-control">
+        <label class="form-label">Ana Kategori</label>
+        <select name="main_category" class="form-select" id="mainCategorySelect" required>
+          <option value="">Önce hayvan türünü seçin</option>
+        </select>
       </div>
+      <div class="mb-3">
+        <label class="form-label">Alt Kategori</label>
+        <select name="subcategory" class="form-select" id="subcategorySelect" multiple required>
+          <!-- JS ile doldurulacak -->
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Marka</label>
+        <select name="brand" class="form-select" required>
+          <option value="">Seçiniz</option>
+          <option value="Acana" {% if product[9]=='Acana' %}selected{% endif %}>Acana</option>
+          <option value="Advance" {% if product[9]=='Advance' %}selected{% endif %}>Advance</option>
+          <option value="Brit Care" {% if product[9]=='Brit Care' %}selected{% endif %}>Brit Care</option>
+          <option value="Pro Plan" {% if product[9]=='Pro Plan' %}selected{% endif %}>Pro Plan</option>
+          <option value="Royal Canin" {% if product[9]=='Royal Canin' %}selected{% endif %}>Royal Canin</option>
+          <option value="Hill's" {% if product[9]=="Hill's" %}selected{% endif %}>Hill's</option>
+          <option value="Orijen" {% if product[9]=='Orijen' %}selected{% endif %}>Orijen</option>
+        </select>
+      </div>
+      <script>
+      const subcategories = {
+          'Kedi': {
+              'Mama': [
+                  'Yavru Kedi Maması', 'Yetişkin Kedi Maması', 'Kısırlaştırılmış Kedi Maması', 'Konserve Kedi Maması'
+              ],
+              'Ödül & Eğitim': [
+                  'Kedi Ödülleri', 'Kedi Eğitim Ürünleri'
+              ],
+              'Bakım & Sağlık': [
+                  'Kedi Bakım Ürünleri', 'Kedi Sağlık Ürünleri'
+              ],
+              'Aksesuar': [
+                  'Kedi Kumları', 'Kedi Tuvaleti ve Ürünleri', 'Kedi Aksesuarları', 'Kedi Oyuncakları', 'Kedi Tasmaları', 'Kedi Mama ve Su Kapları', 'Kedi Kafesleri', 'Kedi Taşıma Çantaları', 'Kedi Tırmalamaları', 'Kedi Yatakları'
+              ],
+              'Marka': [
+                  'Popüler Markalar'
+              ]
+          },
+          'Köpek': {
+              'Mama': [
+                  'Yavru Köpek Maması', 'Yetişkin Köpek Maması', 'Kısırlaştırılmış Köpek Maması', 'Konserve Köpek Maması'
+              ],
+              'Ödül & Eğitim': [
+                  'Köpek Ödülleri', 'Köpek Eğitim Ürünleri'
+              ],
+              'Bakım & Sağlık': [
+                  'Köpek Bakım Ürünleri', 'Köpek Sağlık Ürünleri'
+              ],
+              'Aksesuar': [
+                  'Köpek Tasmaları', 'Köpek Mama ve Su Kapları', 'Köpek Kafesleri', 'Köpek Taşıma Çantaları', 'Köpek Yatakları', 'Köpek Oyuncakları'
+              ],
+              'Marka': [
+                  'Popüler Markalar'
+              ]
+          },
+          'Kuş': {
+              'Yem': [
+                  'Kuş Yemleri'
+              ],
+              'Bakım & Sağlık': [
+                  'Kuş Vitaminleri', 'Kuş Sağlık Ürünleri'
+              ],
+              'Aksesuar': [
+                  'Kuş Kafesleri', 'Kuş Oyuncakları', 'Kuş Aksesuarları', 'Kuş Banyosu'
+              ],
+              'Marka': [
+                  'Popüler Markalar'
+              ]
+          },
+          'Balık': {
+              'Yem': [
+                  'Balık Yemleri'
+              ],
+              'Bakım & Sağlık': [
+                  'Balık Sağlık Ürünleri'
+              ],
+              'Aksesuar': [
+                  'Akvaryumlar', 'Akvaryum Ekipmanları', 'Balık Dekorasyon'
+              ],
+              'Marka': [
+                  'Popüler Markalar'
+              ]
+          }
+      };
+      const categorySelect = document.querySelector('select[name="category"]');
+      const mainCategorySelect = document.getElementById('mainCategorySelect');
+      const subcategorySelect = document.getElementById('subcategorySelect');
+      
+      function updateMainCategories() {
+          const animalType = categorySelect.value;
+          mainCategorySelect.innerHTML = '<option value="">Seçiniz</option>';
+          subcategorySelect.innerHTML = '<option value="">Önce ana kategoriyi seçin</option>';
+          
+          if(subcategories[animalType]) {
+              Object.keys(subcategories[animalType]).forEach(mainCat => {
+                  const opt = document.createElement('option');
+                  opt.value = mainCat;
+                  opt.textContent = mainCat;
+                  mainCategorySelect.appendChild(opt);
+              });
+          }
+          
+          // Mevcut ürünün ana kategorisini seç
+          let selectedSubs = [];
+          try {
+              selectedSubs = JSON.parse('{{ product[5]|tojson|safe }}');
+          } catch(e) {
+              if('{{ product[5] }}') selectedSubs = ['{{ product[5] }}'];
+          }
+          
+          // Ana kategoriyi bul ve seç
+          if(selectedSubs.length > 0) {
+              Object.keys(subcategories[animalType] || {}).forEach(mainCat => {
+                  if(subcategories[animalType][mainCat].some(sub => selectedSubs.includes(sub))) {
+                      mainCategorySelect.value = mainCat;
+                      updateSubcategories();
+                  }
+              });
+          }
+      }
+      
+      function updateSubcategories() {
+          const animalType = categorySelect.value;
+          const mainCat = mainCategorySelect.value;
+          subcategorySelect.innerHTML = '';
+          
+          if(subcategories[animalType] && subcategories[animalType][mainCat]) {
+              subcategories[animalType][mainCat].forEach(sub => {
+                  const opt = document.createElement('option');
+                  opt.value = sub;
+                  opt.textContent = sub;
+                  subcategorySelect.appendChild(opt);
+              });
+          }
+          
+          // Mevcut ürünün alt kategorilerini seç
+          let selectedSubs = [];
+          try {
+              selectedSubs = JSON.parse('{{ product[5]|tojson|safe }}');
+          } catch(e) {
+              if('{{ product[5] }}') selectedSubs = ['{{ product[5] }}'];
+          }
+          Array.from(subcategorySelect.options).forEach(opt => {
+              if(selectedSubs.includes(opt.value)) opt.selected = true;
+          });
+      }
+      
+      categorySelect.addEventListener('change', updateMainCategories);
+      mainCategorySelect.addEventListener('change', updateSubcategories);
+      window.addEventListener('DOMContentLoaded', updateMainCategories);
+      </script>
       <div class="mb-3">
         <label class="form-label">Açıklama</label>
         <textarea name="description" rows="3" class="form-control">{{ product[8] or '' }}</textarea>

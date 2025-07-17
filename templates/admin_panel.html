@@ -6,27 +6,16 @@
     <title>Admin Panel | Mavi Petshop</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+    <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet"/>
     <style>
         body {
             background: #f0f0f2;
             font-family: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
             margin: 0;
             padding: 0;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
-        .dark-mode {
-            background: #181a1b !important;
-        }
-        .navbar {
-            background: #053ff3;
-            border-radius: 0 0 1.2em 1.2em;
-        }
-        .navbar .navbar-brand, .navbar .nav-link, .navbar .btn-link {
-            color: #fff !important;
-            font-weight: 500;
-        }
-        .navbar .nav-link.active {
-            text-decoration: underline;
-        }
+        
         .admin-panel-card {
             max-width: 1100px;
             margin: 2rem auto;
@@ -34,204 +23,331 @@
             border-radius: 1.5rem;
             box-shadow: 0 8px 32px rgba(5,63,243,0.08);
             padding: 2.5rem 2rem 2rem 2rem;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
-        .dark-mode .admin-panel-card {
-            background: #23272f;
-            color: #f5f5f5;
-            box-shadow: 0 8px 32px rgba(5,63,243,0.18);
+        
+        .admin-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
         }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-card h3 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-card p {
+            margin: 0;
+            font-size: 1.1rem;
+        }
+        
+        .admin-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .action-card {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .action-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .action-card i {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #667eea;
+        }
+        
+        .action-card h4 {
+            margin-bottom: 1rem;
+            color: #1f2937;
+        }
+        
+        .action-card p {
+            color: #6b7280;
+            margin-bottom: 1.5rem;
+        }
+        
+        .btn-admin {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+        
+        .btn-admin:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+        
         h2 {
             color: #053ff3;
             font-weight: 900;
             text-align: center;
             margin-bottom: 2rem;
         }
-        .dark-mode h2 {
-            color: #6ea8fe;
-        }
-        .table {
+        
+        .recent-orders {
             background: #fff;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
         }
-        .dark-mode .table {
-            background: #23272f;
-            color: #f5f5f5;
+        
+        .recent-orders h3 {
+            color: #1f2937;
+            margin-bottom: 1rem;
         }
-        .table img {
-            max-height: 60px;
-            border-radius: 0.5rem;
+        
+        .order-item {
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        .btn-outline-danger, .btn-outline-warning {
-            border-radius: .75rem;
+        
+        .order-item:last-child {
+            border-bottom: none;
         }
-        .btn-outline-warning {
-            color: #ff9800;
-            border-color: #ff9800;
+        
+        .order-info {
+            display: flex;
+            flex-direction: column;
         }
-        .btn-outline-warning:hover {
-            background: #ff9800;
-            color: #fff;
+        
+        .order-id {
+            font-weight: 600;
+            color: #1f2937;
         }
-        .btn-outline-danger {
-            color: #e53935;
-            border-color: #e53935;
+        
+        .order-date {
+            color: #6b7280;
+            font-size: 0.9rem;
         }
-        .btn-outline-danger:hover {
-            background: #e53935;
-            color: #fff;
+        
+        .order-amount {
+            font-weight: 600;
+            color: #10b981;
         }
-        .badge-success {
-            background: #009688;
+        
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
         }
-        .badge-secondary {
-            background: #bdbdbd;
+        
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
         }
-        .dark-mode .admin-panel-card, .dark-mode .table, .dark-mode .table th, .dark-mode .table td {
-            background: #23272f !important;
-            color: #f5f5f5 !important;
+        
+        .status-processing {
+            background: #dbeafe;
+            color: #1e40af;
         }
-        .dark-mode .btn-outline-warning {
-            color: #ffb74d;
-            border-color: #ffb74d;
+        
+        .status-completed {
+            background: #dcfce7;
+            color: #166534;
         }
-        .dark-mode .btn-outline-warning:hover {
-            background: #ffb74d;
-            color: #23272f;
+        
+        .status-cancelled {
+            background: #fecaca;
+            color: #991b1b;
         }
-        .dark-mode .btn-outline-danger {
-            color: #ef9a9a;
-            border-color: #ef9a9a;
-        }
-        .dark-mode .btn-outline-danger:hover {
-            background: #ef9a9a;
-            color: #23272f;
+        
+        @media (max-width: 768px) {
+            .admin-panel-card {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+            
+            .admin-stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .admin-actions {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body class="{% if theme=='dark' %}dark-mode{% endif %}">
-    <nav class="navbar navbar-expand-lg">
-      <div class="container">
-        <a class="navbar-brand text-white" href="/"> <i class="fa-solid fa-paw"></i> MaviPetShop</a>
-        <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#nav">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="nav">
-          <ul class="navbar-nav me-auto">
-            <li class="nav-item"><a class="nav-link" href="/">Anasayfa</a></li>
-            <!-- Sepet butonunu admin panelinde gizle -->
-            <!-- <li class="nav-item"><a class="nav-link" href="/cart"><i class="fa fa-shopping-cart"></i> Sepet</a></li> -->
-            <li class="nav-item"><a class="nav-link" href="/add_product"><i class="fa fa-plus-circle"></i> Ürün Ekle</a></li>
-            <li class="nav-item"><a class="nav-link active" href="/admin"><i class="fa fa-cog"></i> Admin Panel</a></li>
-            <li class="nav-item"><a class="nav-link" href="/admin/orders"><i class="fa-solid fa-box-open"></i> Siparişler</a></li>
-            <li class="nav-item"><a class="nav-link" href="/admin/campaigns"><i class="fa fa-bullhorn"></i> Kampanya Yönetimi</a></li>
-            <li class="nav-item"><a class="nav-link" href="/admin/messages"><i class="fa fa-envelope"></i> Gelen Mesajlar</a></li>
-          </ul>
-          <form action="/toggle_theme" method="post" class="d-flex">
-            <button class="btn btn-sm btn-light">
-              {% if theme=='dark' %}Light{% else %}Dark{% endif %}
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background: #053ff3;">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="fas fa-paw"></i> Mavi Petshop
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
             </button>
-          </form>
-          <a href="/admin/logout" class="btn btn-link">Çıkış Yap</a>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">Ana Sayfa</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('admin_panel') }}">Admin Panel</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <button class="btn btn-link nav-link" onclick="toggleTheme()">
+                            <i class="fas fa-moon" id="themeIcon"></i>
+                            <span id="themeText">{% if theme=='dark' %}Light{% else %}Dark{% endif %}</span>
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_logout') }}">
+                            <i class="fas fa-sign-out-alt"></i> Çıkış
+                        </a>
+                    </li>
+                </ul>
+            </div>
         </div>
-      </div>
     </nav>
+
+    <!-- Admin Panel Content -->
     <div class="admin-panel-card">
         <h2>Admin Panel</h2>
-        <div class="table-responsive">
-            <table class="table table-bordered align-middle">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Görsel</th>
-                        <th>İsim</th>
-                        <th>Fiyat</th>
-                        <th>Kategori</th>
-                        <th>Alt Kategori</th>
-                        <th>Stok</th>
-                        <th>Düzenle</th>
-                        <th>Sil</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for product in products %}
-                    <tr>
-                        <td>{{ product.id }}</td>
-                        <td><img src="{{ product.image }}" alt="{{ product.name }}" style="max-width:60px;max-height:60px;"></td>
-                        <td>{{ product.name }}</td>
-                        <td>{{ product.price }} TL</td>
-                        <td>{{ product.category }}</td>
-                        <td>{{ product.subcategory }}</td>
-                        <td>
-                            {% if product.in_stock %}
-                                <span class="badge badge-success">Stokta</span>
-                            {% else %}
-                                <span class="badge badge-secondary">Elde Yok</span>
-                            {% endif %}
-                        </td>
-                        <td><a href="/admin/edit/{{ product.id }}" class="btn btn-outline-warning btn-sm"><i class="fa fa-edit"></i> Düzenle</a></td>
-                        <td><a href="/admin/delete/{{ product.id }}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Silmek istediğine emin misin?')"><i class="fa fa-trash"></i> Sil</a></td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        
+        <!-- İstatistikler -->
+        <div class="admin-stats">
+            <div class="stat-card">
+                <h3>{{ product_count or 0 }}</h3>
+                <p>Toplam Ürün</p>
+            </div>
+            <div class="stat-card">
+                <h3>{{ order_count or 0 }}</h3>
+                <p>Toplam Sipariş</p>
+            </div>
+            <div class="stat-card">
+                <h3>{{ message_count or 0 }}</h3>
+                <p>Mesaj</p>
+            </div>
+            <div class="stat-card">
+                <h3>{{ campaign_count or 0 }}</h3>
+                <p>Kampanya</p>
+            </div>
         </div>
-    </div>
-    <div class="admin-panel-card mt-5">
-        <h2>Siparişler</h2>
-        <div class="table-responsive">
-            <table class="table table-bordered align-middle">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Kod</th>
-                        <th>Müşteri</th>
-                        <th>Toplam</th>
-                        <th>Tarih</th>
-                        <th>Durum</th>
-                        <th>Kargo Şirketi</th>
-                        <th>Takip No</th>
-                        <th>Ürünler</th>
-                        <th>Güncelle</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for order in orders %}
-                    <tr>
-                        <td>{{ order.id }}</td>
-                        <td>{{ order.order_code }}</td>
-                        <td>{{ order.customer_name }}</td>
-                        <td>{{ order.total_price }} TL</td>
-                        <td>{{ order.created_at }}</td>
-                        <form method="POST" id="form_{{ order.id }}" action="/admin/update_order_status/{{ order.id }}">
-                        <td>
-                            <select name="status" class="form-select form-select-sm w-auto">
-                                <option value="Hazırlanıyor" {% if order.status=='Hazırlanıyor' %}selected{% endif %}>Hazırlanıyor</option>
-                                <option value="Kargoda" {% if order.status=='Kargoda' %}selected{% endif %}>Kargoda</option>
-                                <option value="Teslim Edildi" {% if order.status=='Teslim Edildi' %}selected{% endif %}>Teslim Edildi</option>
-                            </select>
-                        </td>
-                        <td>
-                            <input type="text" name="shipping_company" class="form-control form-control-sm" placeholder="Kargo Şirketi" value="{{ order.shipping_company or '' }}" style="min-width:110px;">
-                        </td>
-                        <td>
-                            <input type="text" name="tracking_number" class="form-control form-control-sm" placeholder="Takip No" value="{{ order.tracking_number or '' }}" style="min-width:110px;">
-                        </td>
-                        <td>
-                            <ul class="mb-0 ps-3">
-                                {% for item in order["items"] %}
-                                    <li>{{ item.name }} ({{ item.price }} TL × {{ item.quantity or 1 }})</li>
-                                {% endfor %}
-                            </ul>
-                        </td>
-                        <td>
-                            <button type="submit" class="btn btn-sm btn-primary">Güncelle</button>
-                        </td>
-                        </form>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+
+        <!-- Yönetim Eylemleri -->
+        <div class="admin-actions">
+            <div class="action-card">
+                <i class="fas fa-box"></i>
+                <h4>Ürün Yönetimi</h4>
+                <p>Ürünleri ekle, düzenle ve sil</p>
+                <a href="{{ url_for('add_product') }}" class="btn-admin">Ürün Ekle</a>
+            </div>
+            
+            <div class="action-card">
+                <i class="fas fa-shopping-cart"></i>
+                <h4>Sipariş Yönetimi</h4>
+                <p>Siparişleri görüntüle ve yönet</p>
+                <a href="{{ url_for('admin_orders') }}" class="btn-admin">Siparişleri Görüntüle</a>
+            </div>
+            
+            <div class="action-card">
+                <i class="fas fa-envelope"></i>
+                <h4>Mesaj Yönetimi</h4>
+                <p>Müşteri mesajlarını yönet</p>
+                <a href="{{ url_for('admin_messages') }}" class="btn-admin">Mesajları Görüntüle</a>
+            </div>
+            
+            <div class="action-card">
+                <i class="fas fa-bullhorn"></i>
+                <h4>Kampanya Yönetimi</h4>
+                <p>Kampanyaları yönet</p>
+                <a href="{{ url_for('admin_campaigns') }}" class="btn-admin">Kampanyalar</a>
+            </div>
         </div>
+
+        <!-- Son Siparişler -->
+        {% if recent_orders %}
+        <div class="recent-orders">
+            <h3>Son Siparişler</h3>
+            {% for order in recent_orders %}
+            <div class="order-item">
+                <div class="order-info">
+                    <span class="order-id">Sipariş #{{ order.id }}</span>
+                    <span class="order-date">{{ order.created_at.strftime('%d.%m.%Y %H:%M') }}</span>
+                </div>
+                <div class="order-amount">{{ order.total_amount }}₺</div>
+                <span class="status-badge status-{{ order.status }}">
+                    {{ order.status|title }}
+                </span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function toggleTheme() {
+            const body = document.body;
+            const themeIcon = document.getElementById('themeIcon');
+            const themeText = document.getElementById('themeText');
+            
+            const isDark = body.classList.toggle('dark-mode');
+            
+            if (isDark) {
+                themeIcon.className = 'fas fa-sun';
+                themeText.textContent = 'Light';
+            } else {
+                themeIcon.className = 'fas fa-moon';
+                themeText.textContent = 'Dark';
+            }
+            
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        }
+        
+        // Sayfa yüklendiğinde tema durumunu kontrol et
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+                document.getElementById('themeIcon').className = 'fas fa-sun';
+                document.getElementById('themeText').textContent = 'Light';
+            }
+        });
+    </script>
 </body>
 </html>

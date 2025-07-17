@@ -5,6 +5,7 @@ import sqlite3
 import random, string, json
 from urllib.parse import quote
 from functools import wraps
+from markupsafe import Markup
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -144,7 +145,9 @@ def index():
 
     # Kategori seçilmişse, sadece o kategorinin ürünlerini göster
     category = selected_category
+    main_category = request.args.get("main_category", "")
     subcategory = request.args.get("subcategory", "")
+    brand = request.args.get("brand", "")
     min_price = request.args.get("min_price", "")
     max_price = request.args.get("max_price", "")
 
@@ -159,21 +162,52 @@ def index():
 
         query = "SELECT * FROM products WHERE in_stock = 1 AND LOWER(category) = LOWER(?)"
         params = [category]
-        if subcategory and subcategory != "" and subcategory != "Hepsi":
-            query += " AND LOWER(subcategory) = LOWER(?)"
-            params.append(subcategory)
+        
+        # Marka filtresi
+        if brand:
+            query += " AND LOWER(brand) = LOWER(?)"
+            params.append(brand)
+            
+        # Fiyat aralığı filtresi
         if min_price:
             query += " AND price >= ?"
             params.append(float(min_price))
         if max_price:
             query += " AND price <= ?"
             params.append(float(max_price))
-
+            
         cursor.execute(query, params)
         products = cursor.fetchall()
         conn.close()
 
-        return render_template("index.html", products=products, selected_category=category, campaigns=campaigns)
+        # Çoklu subcategory desteği: filtreleme
+        filtered_products = []
+        for p in products:
+            try:
+                subs = json.loads(p[5]) if p[5] else []
+            except:
+                subs = [p[5]] if p[5] else []
+            
+            # Ana kategori filtresi - subcategory içinde ana kategori var mı kontrol et
+            if main_category:
+                # Ana kategori filtresi varsa, alt kategorileri kontrol et
+                found_main_category = False
+                for sub in subs:
+                    if main_category.lower() in sub.lower():
+                        found_main_category = True
+                        break
+                if not found_main_category:
+                    continue
+            
+            # Alt kategori filtresi
+            if subcategory and subcategory != "Hepsi":
+                if subcategory not in subs:
+                    continue
+            
+            # Filtre yoksa veya geçtiyse ürünü ekle
+            filtered_products.append(dict(p, subcategory=subs))
+            
+        return render_template("index.html", products=filtered_products, selected_category=category, campaigns=campaigns)
     except Exception as e:
         print(f"Database error in index: {e}")
         return render_template("index.html", products=[], selected_category=category, campaigns=[])
@@ -182,6 +216,87 @@ def index():
 @app.route("/products")
 def products():
     return redirect(url_for("index"))
+
+@app.route("/api/filter_products")
+def filter_products():
+    """AJAX için dinamik ürün filtreleme endpoint'i"""
+    selected_category = session.get("selected_category")
+    if not selected_category:
+        return jsonify({"error": "Kategori seçilmemiş"}), 400
+
+    category = selected_category
+    main_category = request.args.get("main_category", "")
+    subcategory = request.args.get("subcategory", "")
+    brand = request.args.get("brand", "")
+    min_price = request.args.get("min_price", "")
+    max_price = request.args.get("max_price", "")
+
+    try:
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+
+        query = "SELECT * FROM products WHERE in_stock = 1 AND LOWER(category) = LOWER(?)"
+        params = [category]
+        
+        # Marka filtresi
+        if brand:
+            query += " AND LOWER(brand) = LOWER(?)"
+            params.append(brand)
+            
+        # Fiyat aralığı filtresi
+        if min_price:
+            query += " AND price >= ?"
+            params.append(float(min_price))
+        if max_price:
+            query += " AND price <= ?"
+            params.append(float(max_price))
+            
+        cursor.execute(query, params)
+        products = cursor.fetchall()
+        conn.close()
+
+        # Çoklu subcategory desteği: filtreleme
+        filtered_products = []
+        for p in products:
+            try:
+                subs = json.loads(p[5]) if p[5] else []
+            except:
+                subs = [p[5]] if p[5] else []
+            
+            # Ana kategori filtresi - subcategory içinde ana kategori var mı kontrol et
+            if main_category:
+                # Ana kategori filtresi varsa, alt kategorileri kontrol et
+                found_main_category = False
+                for sub in subs:
+                    if main_category.lower() in sub.lower():
+                        found_main_category = True
+                        break
+                if not found_main_category:
+                    continue
+            
+            # Alt kategori filtresi
+            if subcategory and subcategory != "Hepsi":
+                if subcategory not in subs:
+                    continue
+            
+            # JSON için ürünü düzenle
+            product_dict = {
+                "id": p["id"],
+                "name": p["name"],
+                "price": p["price"],
+                "image": p["image"],
+                "category": p["category"],
+                "subcategory": subs,
+                "brand": p["brand"],
+                "description": p["description"]
+            }
+            filtered_products.append(product_dict)
+            
+        return jsonify({"products": filtered_products, "count": len(filtered_products)})
+    except Exception as e:
+        print(f"Database error in filter_products: {e}")
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/contact", methods=["GET", "POST"])
@@ -218,8 +333,18 @@ def edit_product(product_id):
     if request.method == "POST":
         name = request.form["name"]
         price = float(request.form["price"])
-        category = request.form["category"]
-        subcategory = request.form["subcategory"]
+        category = request.form["category"]  # Hayvan türü
+        main_category = request.form.get("main_category", "")  # Ana kategori
+        brand = request.form.get("brand", "")
+        subcategory = request.form.getlist("subcategory")
+        if not subcategory:
+            subcategory = []
+        
+        # Ana kategori bilgisini de subcategory listesine dahil et
+        if main_category and main_category not in subcategory:
+            subcategory.insert(0, main_category)
+        
+        subcategory_json = json.dumps(subcategory, ensure_ascii=False)
         description = request.form["description"]
 
         # Mevcut resim bilgisini al
@@ -235,12 +360,11 @@ def edit_product(product_id):
                 file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
                 image = f"/static/uploads/{filename}"
 
-        # SQL sorgusunu çalıştır
         cursor.execute("""
             UPDATE products
-            SET name = ?, price = ?, image = ?, category = ?, subcategory = ?, description = ?
+            SET name = ?, price = ?, image = ?, category = ?, subcategory = ?, description = ?, brand = ?
             WHERE id = ?
-        """, (name, price, image, category, subcategory, description, product_id))
+        """, (name, price, image, category, subcategory_json, description, brand, product_id))
 
         conn.commit()
         conn.close()
@@ -418,8 +542,20 @@ def add_product():
     if request.method == "POST":
         name = request.form["name"]
         price = float(request.form["price"])
-        category = request.form["category"]
-        subcategory = request.form["subcategory"]
+        category = request.form["category"]  # Hayvan türü
+        main_category = request.form.get("main_category", "")  # Ana kategori (Mama, Aksesuar, vb.)
+        brand = request.form.get("brand", "")
+        # Çoklu seçim desteği: subcategory birden fazla ise liste olarak gelir
+        subcategory = request.form.getlist("subcategory")
+        if not subcategory:
+            subcategory = []
+        
+        # Ana kategori bilgisini de subcategory listesine dahil et
+        if main_category and main_category not in subcategory:
+            subcategory.insert(0, main_category)
+        
+        # JSON string olarak kaydet
+        subcategory_json = json.dumps(subcategory, ensure_ascii=False)
         description = request.form["description"]
 
         file = request.files.get("image")
@@ -433,9 +569,9 @@ def add_product():
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO products (name, price, image, category, subcategory, description)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, (name, price, image_path, category, subcategory, description))
+            INSERT INTO products (name, price, image, category, subcategory, description, brand)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (name, price, image_path, category, subcategory_json, description, brand))
         conn.commit()
         conn.close()
         return redirect(url_for("admin_panel"))
@@ -602,6 +738,16 @@ def not_found(error):
 def internal_error(error):
     return render_template("index.html", products=[]), 500
 
+
+@app.template_filter('fromjson')
+def fromjson_filter(s):
+    return json.loads(s)
+
+
+def escapejs_filter(value):
+    return Markup(json.dumps(str(value)))
+
+app.jinja_env.filters['escapejs'] = escapejs_filter
 
 if __name__ == "__main__":
     app.run(debug=True)

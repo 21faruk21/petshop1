@@ -1,7 +1,282 @@
 body {
     font-family: 'Segoe UI', sans-serif;
     background-color: #f5faff;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
+
+/* DARK MODE STYLES */
+body.dark-mode {
+    background-color: #181a20 !important;
+    color: #f3f6fa !important;
+}
+
+body.dark-mode .navbar {
+    background-color: #23262f !important;
+    border-bottom: 1px solid #3d4852;
+}
+
+body.dark-mode .navbar-brand,
+body.dark-mode .nav-link {
+    color: #f3f6fa !important;
+}
+
+body.dark-mode .navbar-brand:hover,
+body.dark-mode .nav-link:hover {
+    color: #6ea8fe !important;
+}
+
+/* Product Cards Dark Mode */
+body.dark-mode .product-card {
+    background-color: #23262f !important;
+    color: #f3f6fa !important;
+    border: 1px solid #3d4852;
+    box-shadow: 0 4px 16px rgba(5,63,243,0.18);
+}
+
+body.dark-mode .card-title {
+    color: #f3f6fa !important;
+}
+
+body.dark-mode .text-muted {
+    color: #bfc9d8 !important;
+}
+
+body.dark-mode .card-text {
+    color: #bfc9d8 !important;
+}
+
+/* Buttons Dark Mode */
+body.dark-mode .btn-primary {
+    background: linear-gradient(135deg, #6ea8fe 0%, #053ff3 100%);
+    border-color: #6ea8fe;
+    color: #fff;
+}
+
+body.dark-mode .btn-primary:hover {
+    background: linear-gradient(135deg, #053ff3 0%, #6ea8fe 100%);
+    border-color: #053ff3;
+}
+
+body.dark-mode .btn-outline-primary {
+    color: #6ea8fe;
+    border-color: #6ea8fe;
+    background: transparent;
+}
+
+body.dark-mode .btn-outline-primary:hover {
+    background: #6ea8fe;
+    color: #fff;
+}
+
+body.dark-mode .btn-secondary {
+    background: #3d4852;
+    border-color: #3d4852;
+    color: #f3f6fa;
+}
+
+body.dark-mode .btn-secondary:hover {
+    background: #4a5568;
+    border-color: #4a5568;
+}
+
+body.dark-mode .btn-light {
+    background: #23262f;
+    border-color: #3d4852;
+    color: #f3f6fa;
+}
+
+body.dark-mode .btn-light:hover {
+    background: #3d4852;
+    border-color: #4a5568;
+}
+
+/* Forms Dark Mode */
+body.dark-mode .form-control,
+body.dark-mode .form-select {
+    background-color: #23262f !important;
+    color: #f3f6fa !important;
+    border-color: #3d4852 !important;
+}
+
+body.dark-mode .form-control:focus,
+body.dark-mode .form-select:focus {
+    background-color: #23262f !important;
+    color: #f3f6fa !important;
+    border-color: #6ea8fe !important;
+    box-shadow: 0 0 0 0.2rem rgba(110, 168, 254, 0.25);
+}
+
+body.dark-mode .form-label {
+    color: #f3f6fa !important;
+}
+
+/* Cards Dark Mode */
+body.dark-mode .card {
+    background-color: #23262f !important;
+    border-color: #3d4852 !important;
+    color: #f3f6fa !important;
+}
+
+body.dark-mode .card-header {
+    background-color: #3d4852 !important;
+    border-bottom-color: #4a5568 !important;
+    color: #f3f6fa !important;
+}
+
+body.dark-mode .card-body {
+    background-color: #23262f !important;
+    color: #f3f6fa !important;
+}
+
+/* Cart Dark Mode */
+body.dark-mode .cart-btn {
+    background: #181a20;
+    color: #6ea8fe;
+    border-color: #6ea8fe;
+}
+
+body.dark-mode .cart-btn:hover {
+    background: #6ea8fe;
+    color: #fff;
+}
+
+/* Tables Dark Mode */
+body.dark-mode .table {
+    color: #f3f6fa !important;
+}
+
+body.dark-mode .table-striped > tbody > tr:nth-of-type(odd) {
+    background-color: #23262f !important;
+}
+
+body.dark-mode .table-striped > tbody > tr:nth-of-type(even) {
+    background-color: #3d4852 !important;
+}
+
+body.dark-mode .table thead th {
+    background-color: #3d4852 !important;
+    color: #f3f6fa !important;
+    border-color: #4a5568 !important;
+}
+
+body.dark-mode .table td {
+    border-color: #4a5568 !important;
+}
+
+/* Alerts Dark Mode */
+body.dark-mode .alert-info {
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+    border-color: #3b82f6;
+    color: #dbeafe;
+}
+
+body.dark-mode .alert-success {
+    background: linear-gradient(135deg, #166534 0%, #15803d 100%);
+    border-color: #10b981;
+    color: #dcfce7;
+}
+
+body.dark-mode .alert-danger {
+    background: linear-gradient(135deg, #991b1b 0%, #dc2626 100%);
+    border-color: #ef4444;
+    color: #fecaca;
+}
+
+body.dark-mode .alert-warning {
+    background: linear-gradient(135deg, #92400e 0%, #d97706 100%);
+    border-color: #f59e0b;
+    color: #fef3c7;
+}
+
+/* Filter Card Dark Mode */
+body.dark-mode .filter-card {
+    background: #23262f !important;
+    border-color: #3d4852 !important;
+    box-shadow: 0 4px 16px rgba(5,63,243,0.18);
+}
+
+/* Subcategory Dropdown Dark Mode */
+body.dark-mode .subcategory-dropdown {
+    background: linear-gradient(135deg, #23262f 0%, #3d4852 100%);
+    border-color: #4a5568;
+    color: #f3f6fa;
+}
+
+body.dark-mode .subcat-link {
+    color: #bfc9d8;
+}
+
+body.dark-mode .subcat-link:hover {
+    background: linear-gradient(135deg, #6ea8fe 0%, #053ff3 100%);
+    color: #fff;
+}
+
+/* Modal Dark Mode */
+body.dark-mode .modal-content {
+    background-color: #23262f !important;
+    color: #f3f6fa !important;
+    border-color: #3d4852 !important;
+}
+
+body.dark-mode .modal-header {
+    background-color: #3d4852 !important;
+    border-bottom-color: #4a5568 !important;
+}
+
+body.dark-mode .modal-footer {
+    background-color: #3d4852 !important;
+    border-top-color: #4a5568 !important;
+}
+
+/* Pagination Dark Mode */
+body.dark-mode .pagination .page-link {
+    background-color: #23262f !important;
+    border-color: #3d4852 !important;
+    color: #f3f6fa !important;
+}
+
+body.dark-mode .pagination .page-link:hover {
+    background-color: #6ea8fe !important;
+    border-color: #6ea8fe !important;
+    color: #fff !important;
+}
+
+body.dark-mode .pagination .page-item.active .page-link {
+    background-color: #6ea8fe !important;
+    border-color: #6ea8fe !important;
+    color: #fff !important;
+}
+
+/* Navbar Dark Mode */
+body.dark-mode .navbar-expand-lg {
+    background-color: #23262f !important;
+}
+
+body.dark-mode .navbar-toggler {
+    border-color: #3d4852 !important;
+}
+
+body.dark-mode .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.75%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* Breadcrumb Dark Mode */
+body.dark-mode .breadcrumb {
+    background-color: #23262f !important;
+}
+
+body.dark-mode .breadcrumb-item + .breadcrumb-item::before {
+    color: #bfc9d8 !important;
+}
+
+body.dark-mode .breadcrumb-item a {
+    color: #6ea8fe !important;
+}
+
+body.dark-mode .breadcrumb-item.active {
+    color: #f3f6fa !important;
+}
+
 .navbar-brand {
     font-weight: bold;
     font-size: 1.5rem;
@@ -19,4 +294,289 @@ body {
 }
 .category-box:hover {
     transform: scale(1.05);
+}
+
+/* Modern Buton Tasarımları */
+.category-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    margin: 0 8px 8px 0;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.category-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.category-btn:hover::before {
+    left: 100%;
+}
+
+.category-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+}
+
+.category-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+/* Kategoriyi Değiştir Butonu */
+.btn-outline-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-outline-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn-outline-primary:hover::before {
+    left: 100%;
+}
+
+.btn-outline-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+    background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+    color: white;
+}
+
+/* Sepet Butonu */
+.cart-btn {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.cart-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.cart-btn:hover::before {
+    left: 100%;
+}
+
+.cart-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    color: white;
+}
+
+/* Bize Ulaşın Butonu */
+.btn-primary {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn-primary:hover::before {
+    left: 100%;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4);
+    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+    color: white;
+}
+
+/* Sipariş Takip Butonu */
+.btn-secondary {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-secondary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn-secondary:hover::before {
+    left: 100%;
+}
+
+.btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    color: white;
+}
+
+/* Tema Değiştir Butonu */
+.btn-light {
+    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    color: #374151;
+    border: none;
+    padding: 12px;
+    border-radius: 50%;
+    font-weight: 600;
+    font-size: 16px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-light::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+    transition: left 0.5s;
+}
+
+.btn-light:hover::before {
+    left: 100%;
+}
+
+.btn-light:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
+    color: #1f2937;
+}
+
+/* Alt menü stilleri */
+.subcategory-dropdown {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border: 1px solid rgba(99, 102, 241, 0.1);
+    border-radius: 15px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    backdrop-filter: blur(10px);
+}
+
+.subcat-link {
+    color: #4b5563;
+    text-decoration: none;
+    display: block;
+    padding: 8px 15px;
+    border-radius: 10px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-weight: 500;
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.subcat-link:hover {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    transform: translateX(5px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+/* Alert stilleri */
+.alert-info {
+    background: linear-gradient(135deg, #e0f2fe 0%, #b3e5fc 100%);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 15px;
+    padding: 15px 20px;
+    color: #1565c0;
+    font-weight: 500;
+}
+
+/* Responsive tasarım */
+@media (max-width: 768px) {
+    .category-btn {
+        padding: 10px 18px;
+        font-size: 12px;
+        margin: 0 4px 6px 0;
+    }
+    
+    .btn-outline-primary, .cart-btn, .btn-primary, .btn-secondary {
+        padding: 10px 16px;
+        font-size: 12px;
+    }
 }
