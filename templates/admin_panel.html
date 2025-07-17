@@ -192,6 +192,27 @@
             color: #991b1b;
         }
         
+        .status-dropdown {
+            padding: 0.5rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            background: white;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .status-dropdown:hover {
+            border-color: #667eea;
+        }
+        
+        .status-dropdown:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
         .product-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -394,13 +415,16 @@
              {% for order in recent_orders %}
              <div class="order-item">
                  <div class="order-info">
-                     <span class="order-id">Sipariş #{{ order.id }}</span>
+                     <span class="order-id">{{ order.order_code }}</span>
                      <span class="order-date">{{ order.created_at.strftime('%d.%m.%Y %H:%M') }}</span>
                  </div>
                  <div class="order-amount">{{ order.total_price }}₺</div>
-                 <span class="status-badge status-{{ order.status|lower }}">
-                     {{ order.status }}
-                 </span>
+                 <select class="status-dropdown" onchange="updateOrderStatus('{{ order.id }}', this.value)">
+                     <option value="Hazırlanıyor" {% if order.status == 'Hazırlanıyor' %}selected{% endif %}>Hazırlanıyor</option>
+                     <option value="Kargoda" {% if order.status == 'Kargoda' %}selected{% endif %}>Kargoda</option>
+                     <option value="Teslim Edildi" {% if order.status == 'Teslim Edildi' %}selected{% endif %}>Teslim Edildi</option>
+                     <option value="İptal Edildi" {% if order.status == 'İptal Edildi' %}selected{% endif %}>İptal Edildi</option>
+                 </select>
              </div>
              {% endfor %}
          </div>
@@ -464,6 +488,33 @@
                 document.getElementById('themeText').textContent = 'Light';
             }
         });
+        
+        // Sipariş durumunu güncelle
+        function updateOrderStatus(orderId, newStatus) {
+            fetch('/admin/update_order_status', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    order_id: orderId,
+                    status: newStatus
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Başarılı mesajı göster
+                    alert('Sipariş durumu güncellendi!');
+                } else {
+                    alert('Hata: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Bir hata oluştu!');
+            });
+        }
     </script>
 </body>
 </html>

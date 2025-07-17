@@ -195,6 +195,27 @@
       box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
     
+    .status-dropdown {
+      padding: 0.5rem 1rem;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      background: white;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .status-dropdown:hover {
+      border-color: #667eea;
+    }
+    
+    .status-dropdown:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
     .btn-update {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
@@ -300,17 +321,99 @@
     <div class="page-header">
       <h1><i class="fas fa-shopping-cart"></i> Sipariş Yönetimi</h1>
       <p>Tüm siparişleri görüntüle ve yönet</p>
+      
+      <!-- Sipariş Arama Formu -->
+      <div class="search-form mt-3">
+        <form method="POST" class="d-flex justify-content-center">
+          <div class="input-group" style="max-width: 400px;">
+            <input 
+              type="text" 
+              name="code" 
+              class="form-control" 
+              placeholder="Sipariş kodunu girin (örn: ABCD-1234-EFGH-5678)"
+              value="{{ request.form.get('code', '') }}"
+              style="border-radius: 0.5rem 0 0 0.5rem;"
+            >
+            <button class="btn btn-primary" type="submit" style="border-radius: 0 0.5rem 0.5rem 0;">
+              <i class="fas fa-search"></i> Ara
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
 
-    {% if orders %}
-      {% for order in orders %}
+    <!-- Arama Sonucu -->
+    {% if result %}
+    <div class="order-card">
+      <div class="order-header">
+        <div>
+          <div class="order-id">{{ result.order_code }}</div>
+          <div class="order-date">{{ result.created_at.strftime('%d.%m.%Y %H:%M') }}</div>
+        </div>
+        <div class="total-amount">{{ result.total_price }}₺</div>
+      </div>
+      
+      <div class="order-body">
+        <div class="customer-info">
+          <div class="info-item">
+            <i class="fas fa-user"></i>
+            <span>{{ result.customer_name }}</span>
+          </div>
+        </div>
+        
+        <div class="order-items">
+          <h6><i class="fas fa-box"></i> Sipariş Detayları</h6>
+          <ul class="item-list">
+            {% for item in items %}
+            <li>
+              <div>
+                <div class="item-name">{{ item.name }}</div>
+                <div class="item-details">{{ item.quantity }} adet × {{ item.price }}₺</div>
+              </div>
+              <div class="item-total">{{ item.quantity * item.price }}₺</div>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+      
+      <div class="order-footer">
+        <div class="status-section">
+          <span class="status-badge status-{{ result.status|lower }}">
+            {{ result.status }}
+          </span>
+          <select class="status-dropdown" onchange="updateOrderStatus('{{ result.id }}', this.value)">
+            <option value="Hazırlanıyor" {% if result.status == 'Hazırlanıyor' %}selected{% endif %}>Hazırlanıyor</option>
+            <option value="Kargoda" {% if result.status == 'Kargoda' %}selected{% endif %}>Kargoda</option>
+            <option value="Teslim Edildi" {% if result.status == 'Teslim Edildi' %}selected{% endif %}>Teslim Edildi</option>
+            <option value="İptal Edildi" {% if result.status == 'İptal Edildi' %}selected{% endif %}>İptal Edildi</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    {% elif not_found %}
+    <div class="order-card">
+      <div class="no-orders">
+        <i class="fas fa-exclamation-triangle"></i>
+        <h4>Sipariş bulunamadı</h4>
+        <p>Girdiğiniz kodla eşleşen sipariş bulunmuyor</p>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Tüm Siparişler -->
+    {% if all_orders %}
+    <div class="page-header mt-4">
+      <h2>Tüm Siparişler</h2>
+    </div>
+      {% for order in all_orders %}
       <div class="order-card">
         <div class="order-header">
           <div>
-            <div class="order-id">Sipariş #{{ order.id }}</div>
-            <div class="order-date">{{ order.created_at.strftime('%d.%m.%Y %H:%M') }}</div>
+            <div class="order-id">{{ order["order_code"] }}</div>
+            <div class="order-date">{{ order["created_at"].strftime('%d.%m.%Y %H:%M') }}</div>
           </div>
-          <div class="total-amount">{{ order.total_price }}₺</div>
+          <div class="total-amount">{{ order["total_price"] }}₺</div>
         </div>
         
         <div class="order-body">
@@ -336,7 +439,7 @@
           <div class="order-items">
             <h6><i class="fas fa-box"></i> Sipariş Detayları</h6>
             <ul class="item-list">
-              {% for item in order.items %}
+              {% for item in order["items"] %}
               <li>
                 <div>
                   <div class="item-name">{{ item.name }}</div>
@@ -349,37 +452,19 @@
           </div>
         </div>
         
-        <form method="POST" action="{{ url_for('admin_update_order', order_id=order.id) }}">
-          <div class="tracking-info">
-            <div>
-              <label class="form-label">Kargo Şirketi</label>
-              <input type="text" class="form-control" name="shipping_company" 
-                     value="{{ order.shipping_company or '' }}" placeholder="Kargo şirketi adı">
-            </div>
-            <div>
-              <label class="form-label">Takip Numarası</label>
-              <input type="text" class="form-control" name="tracking_number" 
-                     value="{{ order.tracking_number or '' }}" placeholder="Takip numarası">
-            </div>
+        <div class="order-footer">
+          <div class="status-section">
+            <span class="status-badge status-{{ order.status|lower }}">
+              {{ order.status }}
+            </span>
+            <select class="status-dropdown" onchange="updateOrderStatus('{{ order.id }}', this.value)">
+              <option value="Hazırlanıyor" {% if order.status=='Hazırlanıyor' %}selected{% endif %}>Hazırlanıyor</option>
+              <option value="Kargoda" {% if order.status=='Kargoda' %}selected{% endif %}>Kargoda</option>
+              <option value="Teslim Edildi" {% if order.status=='Teslim Edildi' %}selected{% endif %}>Teslim Edildi</option>
+              <option value="İptal Edildi" {% if order.status=='İptal Edildi' %}selected{% endif %}>İptal Edildi</option>
+            </select>
           </div>
-          
-          <div class="order-footer">
-            <div class="status-section">
-              <span class="status-badge status-{{ order.status|lower }}">
-                {{ order.status }}
-              </span>
-              <select class="form-select" name="status" style="width: auto;">
-                <option value="Hazırlanıyor" {% if order.status=='Hazırlanıyor' %}selected{% endif %}>Hazırlanıyor</option>
-                <option value="Kargoda" {% if order.status=='Kargoda' %}selected{% endif %}>Kargoda</option>
-                <option value="Teslim Edildi" {% if order.status=='Teslim Edildi' %}selected{% endif %}>Teslim Edildi</option>
-                <option value="İptal Edildi" {% if order.status=='İptal Edildi' %}selected{% endif %}>İptal Edildi</option>
-              </select>
-            </div>
-            <button type="submit" class="btn-update">
-              <i class="fas fa-save"></i> Güncelle
-            </button>
-          </div>
-        </form>
+        </div>
       </div>
       {% endfor %}
     {% else %}
@@ -422,6 +507,33 @@
         document.getElementById('themeText').textContent = 'Light';
       }
     });
+    
+    // Sipariş durumunu güncelle
+    function updateOrderStatus(orderId, newStatus) {
+      fetch('/admin/update_order_status', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          order_id: orderId,
+          status: newStatus
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('Sipariş durumu güncellendi!');
+          location.reload();
+        } else {
+          alert('Hata: ' + data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Bir hata oluştu!');
+      });
+    }
   </script>
 </body>
 </html>

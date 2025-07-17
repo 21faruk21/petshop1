@@ -141,10 +141,10 @@
       {% for message in messages %}
       <div class="message-card">
         <div class="message-header">
-          <div class="message-from">{{ message.name }} ({{ message.email }})</div>
-          <div class="message-date">{{ message.created_at.strftime('%d.%m.%Y %H:%M') }}</div>
+          <div class="message-from">{{ message["name"] }} ({{ message["email"] }})</div>
+          <div class="message-date">{{ message["created_at"].strftime('%d.%m.%Y %H:%M') }}</div>
         </div>
-        <div class="message-content">{{ message.message }}</div>
+        <div class="message-content">{{ message["message"] }}</div>
       </div>
       {% endfor %}
     {% else %}

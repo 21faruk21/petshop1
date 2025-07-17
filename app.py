@@ -6,6 +6,7 @@ import random, string, json
 from urllib.parse import quote
 from functools import wraps
 from markupsafe import Markup
+from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -519,6 +520,8 @@ def order():
 
         # Kullanıcıdan alınan veriler
         customer_name = request.form.get("customer_name", "")
+        phone = request.form.get("phone", "")
+        email = request.form.get("email", "")
         address = request.form.get("address", "")
         note = request.form.get("note", "")
 
@@ -526,9 +529,9 @@ def order():
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO orders (order_code, items, total_price, customer_name, address, note, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, (order_code, json.dumps(cart_items), total, customer_name, address, note, 'Hazırlanıyor'))
+            INSERT INTO orders (order_code, items, total_price, customer_name, customer_phone, customer_email, customer_address, address, note, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (order_code, json.dumps(cart_items), total, customer_name, phone, email, address, address, note, 'Hazırlanıyor'))
         conn.commit()
         conn.close()
 
@@ -564,25 +567,56 @@ def admin_orders():
     result = None
     not_found = False
     items = []
+    all_orders = []
 
+    # Tüm siparişleri her durumda getir
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM orders ORDER BY id DESC")
+    orders = cursor.fetchall()
+    
+    # Siparişleri formatla
+    for order in orders:
+        order_dict = dict(order)
+        try:
+            order_dict["items"] = json.loads(order["items"])
+        except:
+            order_dict["items"] = []
+        
+        # created_at'i datetime object'e çevir
+        try:
+            if order_dict["created_at"]:
+                order_dict["created_at"] = datetime.strptime(order_dict["created_at"], "%Y-%m-%d %H:%M:%S")
+        except:
+            order_dict["created_at"] = datetime.now()
+        
+        all_orders.append(order_dict)
+    
+    # Spesifik sipariş arama
     if request.method == "POST":
         code = request.form["code"].strip().upper()
-        conn = sqlite3.connect(db_path)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
         cursor.execute("SELECT * FROM orders WHERE order_code = ?", (code,))
         result = cursor.fetchone()
-        conn.close()
 
         if result:
             try:
                 items = json.loads(result["items"])
             except:
                 items = []
+            
+            # created_at'i datetime object'e çevir
+            result = dict(result)
+            try:
+                if result["created_at"]:
+                    result["created_at"] = datetime.strptime(result["created_at"], "%Y-%m-%d %H:%M:%S")
+            except:
+                result["created_at"] = datetime.now()
         else:
             not_found = True
 
-    return render_template("admin_orders.html", result=result, items=items, not_found=not_found)
+    conn.close()
+    return render_template("admin_orders.html", result=result, items=items, not_found=not_found, all_orders=all_orders)
 
 
 @app.route("/add_product", methods=["GET", "POST"])
@@ -654,6 +688,79 @@ def admin_login():
     return render_template("admin_login.html")
 
 
+@app.route("/admin/update_order_status", methods=["POST"])
+@login_required
+def update_order_status_api():
+    try:
+        data = request.get_json()
+        order_id = data.get("order_id")
+        new_status = data.get("status")
+        
+        if not order_id or not new_status:
+            return jsonify({"success": False, "message": "Eksik parametreler"}), 400
+        
+        # Geçerli durumlar
+        valid_statuses = ["Hazırlanıyor", "Kargoda", "Teslim Edildi", "İptal Edildi"]
+        if new_status not in valid_statuses:
+            return jsonify({"success": False, "message": "Geçersiz durum"}), 400
+        
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        
+        # Sipariş var mı kontrol et
+        cursor.execute("SELECT id FROM orders WHERE id = ?", (order_id,))
+        if not cursor.fetchone():
+            conn.close()
+            return jsonify({"success": False, "message": "Sipariş bulunamadı"}), 404
+        
+        # Durumu güncelle
+        cursor.execute("UPDATE orders SET status = ? WHERE id = ?", (new_status, order_id))
+        conn.commit()
+        conn.close()
+        
+        return jsonify({"success": True, "message": "Sipariş durumu güncellendi"})
+    
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@app.route("/admin/update_shipping_info", methods=["POST"])
+@login_required
+def update_shipping_info():
+    try:
+        data = request.get_json()
+        order_id = data.get("order_id")
+        field = data.get("field")
+        value = data.get("value")
+        
+        if not order_id or not field:
+            return jsonify({"success": False, "message": "Eksik parametreler"}), 400
+        
+        # Güvenlik kontrolü - sadece belirli alanlar güncellenebilir
+        allowed_fields = ["shipping_company", "tracking_number"]
+        if field not in allowed_fields:
+            return jsonify({"success": False, "message": "Geçersiz alan"}), 400
+        
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        
+        # Sipariş var mı kontrol et
+        cursor.execute("SELECT id FROM orders WHERE id = ?", (order_id,))
+        if not cursor.fetchone():
+            conn.close()
+            return jsonify({"success": False, "message": "Sipariş bulunamadı"}), 404
+        
+        # Bilgiyi güncelle
+        cursor.execute(f"UPDATE orders SET {field} = ? WHERE id = ?", (value, order_id))
+        conn.commit()
+        conn.close()
+        
+        return jsonify({"success": True, "message": "Kargo bilgisi güncellendi"})
+    
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
 @app.route("/admin/logout")
 def admin_logout():
     session.pop("admin_logged_in", None)
@@ -684,6 +791,15 @@ def admin_panel():
             order_dict["items"] = json.loads(order["items"])
         except:
             order_dict["items"] = []
+        
+        # created_at'i datetime object'e çevir
+        try:
+            if order_dict["created_at"]:
+                order_dict["created_at"] = datetime.strptime(order_dict["created_at"], "%Y-%m-%d %H:%M:%S")
+        except:
+            # Eğer datetime dönüşümü başarısız olursa şu anki zamanı kullan
+            order_dict["created_at"] = datetime.now()
+        
         orders_with_items.append(order_dict)
     
     # İstatistikler için sayıları hesapla
@@ -728,40 +844,84 @@ def admin_campaigns():
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     message = None
+    
     # Kampanya ekleme
     if request.method == "POST":
         title = request.form.get("title", "")
         link = request.form.get("link", "")
+        description = request.form.get("description", "")
         active = 1 if request.form.get("active") == "on" else 0
         file = request.files.get("image")
+        
         if file and file.filename and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             image_path = f"/static/uploads/{filename}"
-            cursor.execute("INSERT INTO campaigns (image, link, title, active) VALUES (?, ?, ?, ?)", (image_path, link, title, active))
+            created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            
+            # description kolonu yoksa ekle
+            try:
+                cursor.execute("ALTER TABLE campaigns ADD COLUMN description TEXT")
+                conn.commit()
+            except:
+                pass
+            
+            cursor.execute("INSERT INTO campaigns (image, link, title, description, active, created_at) VALUES (?, ?, ?, ?, ?, ?)", 
+                         (image_path, link, title, description, active, created_at))
             conn.commit()
-            message = "Kampanya eklendi."
+            message = "Kampanya başarıyla eklendi!"
         else:
-            message = "Geçerli bir görsel seçmelisiniz."
+            message = "Lütfen geçerli bir görsel dosyası seçin."
+    
     # Kampanya silme
     if request.args.get("delete"):
         cid = request.args.get("delete")
-        cursor.execute("DELETE FROM campaigns WHERE id = ?", (cid,))
-        conn.commit()
-        message = "Kampanya silindi."
+        try:
+            cursor.execute("DELETE FROM campaigns WHERE id = ?", (cid,))
+            conn.commit()
+            message = "Kampanya başarıyla silindi!"
+        except Exception as e:
+            message = f"Kampanya silinirken hata oluştu: {str(e)}"
+    
     # Aktif/pasif yapma
     if request.args.get("toggle"):
         cid = request.args.get("toggle")
-        cursor.execute("SELECT active FROM campaigns WHERE id = ?", (cid,))
-        row = cursor.fetchone()
-        if row:
-            new_status = 0 if row[0] else 1
-            cursor.execute("UPDATE campaigns SET active = ? WHERE id = ?", (new_status, cid))
-            conn.commit()
-            message = "Kampanya durumu değiştirildi."
+        try:
+            cursor.execute("SELECT active FROM campaigns WHERE id = ?", (cid,))
+            row = cursor.fetchone()
+            if row:
+                new_status = 0 if row[0] else 1
+                cursor.execute("UPDATE campaigns SET active = ? WHERE id = ?", (new_status, cid))
+                conn.commit()
+                status_text = "aktif" if new_status else "pasif"
+                message = f"Kampanya durumu {status_text} yapıldı!"
+        except Exception as e:
+            message = f"Kampanya durumu güncellenirken hata oluştu: {str(e)}"
+    
+    # Kampanyaları getir
     cursor.execute("SELECT * FROM campaigns ORDER BY id DESC")
-    campaigns = cursor.fetchall()
+    campaigns_raw = cursor.fetchall()
     conn.close()
+    
+    # Campaigns'ı formatla
+    campaigns = []
+    for campaign in campaigns_raw:
+        campaign_dict = dict(campaign)
+        # created_at'i datetime object'e çevir - güvenli şekilde
+        try:
+            if campaign_dict.get("created_at"):
+                campaign_dict["created_at"] = datetime.strptime(campaign_dict["created_at"], "%Y-%m-%d %H:%M:%S")
+            else:
+                campaign_dict["created_at"] = datetime.now()
+        except:
+            campaign_dict["created_at"] = datetime.now()
+        
+        # description alanını kontrol et
+        if "description" not in campaign_dict:
+            campaign_dict["description"] = ""
+        
+        campaigns.append(campaign_dict)
+    
     return render_template("admin_campaigns.html", campaigns=campaigns, message=message)
 
 
@@ -772,14 +932,27 @@ def admin_messages():
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM messages ORDER BY created_at DESC")
-    messages = cursor.fetchall()
+    messages_raw = cursor.fetchall()
     conn.close()
+    
+    # Messages'ı formatla
+    messages = []
+    for message in messages_raw:
+        message_dict = dict(message)
+        # created_at'i datetime object'e çevir
+        try:
+            if message_dict["created_at"]:
+                message_dict["created_at"] = datetime.strptime(message_dict["created_at"], "%Y-%m-%d %H:%M:%S")
+        except:
+            message_dict["created_at"] = datetime.now()
+        messages.append(message_dict)
+    
     return render_template("admin_messages.html", messages=messages)
 
 
-@app.route("/admin/update_order_status/<int:order_id>", methods=["POST"])
-@login_required
-def update_order_status(order_id):
+@app.route("/admin/update_order_status/<int:order_id>", methods=["POST"], endpoint="update_order_status_form")
+@login_required  
+def update_order_status_form(order_id):
     new_status = request.form.get("status", "Hazırlanıyor")
     shipping_company = request.form.get("shipping_company", "")
     tracking_number = request.form.get("tracking_number", "")
