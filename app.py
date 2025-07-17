@@ -47,7 +47,8 @@ def init_database():
         category TEXT,
         subcategory TEXT,
         description TEXT,
-        in_stock INTEGER DEFAULT 1
+        in_stock INTEGER DEFAULT 1,
+        brand TEXT
     )
     """)
 
@@ -63,6 +64,31 @@ def init_database():
         note TEXT,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         status TEXT DEFAULT 'Hazırlanıyor'
+    )
+    """)
+
+    # Messages tablosunu oluştur
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS messages (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        email TEXT NOT NULL,
+        phone TEXT,
+        message TEXT NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    # Campaigns tablosunu oluştur
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS campaigns (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT,
+        description TEXT,
+        image TEXT,
+        link TEXT,
+        active INTEGER DEFAULT 1,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
     """)
 
@@ -96,6 +122,29 @@ def migrate_orders_table():
             cursor.execute("ALTER TABLE orders ADD COLUMN tracking_number TEXT")
         except Exception as e:
             print("tracking_number kolonu zaten var veya eklenemedi:", e)
+        
+        # Products tablosuna brand sütunu ekle
+        try:
+            cursor.execute("ALTER TABLE products ADD COLUMN brand TEXT")
+        except Exception as e:
+            print("brand kolonu zaten var veya eklenemedi:", e)
+        
+        # Orders tablosuna eksik sütunları ekle
+        try:
+            cursor.execute("ALTER TABLE orders ADD COLUMN customer_phone TEXT")
+        except Exception as e:
+            print("customer_phone kolonu zaten var veya eklenemedi:", e)
+        
+        try:
+            cursor.execute("ALTER TABLE orders ADD COLUMN customer_email TEXT")
+        except Exception as e:
+            print("customer_email kolonu zaten var veya eklenemedi:", e)
+        
+        try:
+            cursor.execute("ALTER TABLE orders ADD COLUMN customer_address TEXT")
+        except Exception as e:
+            print("customer_address kolonu zaten var veya eklenemedi:", e)
+        
         conn.commit()
         conn.close()
         print("orders tablosu migration tamamlandı.")
@@ -618,10 +667,15 @@ def admin_panel():
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
+    
+    # Ürünleri al
     cursor.execute("SELECT * FROM products ORDER BY id DESC")
     products = cursor.fetchall()
+    
+    # Siparişleri al
     cursor.execute("SELECT * FROM orders ORDER BY id DESC")
     orders = cursor.fetchall()
+    
     # Her siparişi dict'e çevirip ürünlerini ekle
     orders_with_items = []
     for order in orders:
@@ -631,8 +685,40 @@ def admin_panel():
         except:
             order_dict["items"] = []
         orders_with_items.append(order_dict)
+    
+    # İstatistikler için sayıları hesapla
+    cursor.execute("SELECT COUNT(*) as count FROM products")
+    product_count = cursor.fetchone()["count"]
+    
+    cursor.execute("SELECT COUNT(*) as count FROM orders")
+    order_count = cursor.fetchone()["count"]
+    
+    # Mesaj tablosu varsa mesaj sayısını al
+    try:
+        cursor.execute("SELECT COUNT(*) as count FROM messages")
+        message_count = cursor.fetchone()["count"]
+    except:
+        message_count = 0
+    
+    # Kampanya tablosu varsa kampanya sayısını al
+    try:
+        cursor.execute("SELECT COUNT(*) as count FROM campaigns")
+        campaign_count = cursor.fetchone()["count"]
+    except:
+        campaign_count = 0
+    
+    # Son 5 siparişi al
+    recent_orders = orders_with_items[:5]
+    
     conn.close()
-    return render_template("admin_panel.html", products=products, orders=orders_with_items)
+    return render_template("admin_panel.html", 
+                         products=products, 
+                         orders=orders_with_items,
+                         product_count=product_count,
+                         order_count=order_count,
+                         message_count=message_count,
+                         campaign_count=campaign_count,
+                         recent_orders=recent_orders)
 
 
 @app.route("/admin/campaigns", methods=["GET", "POST"])
