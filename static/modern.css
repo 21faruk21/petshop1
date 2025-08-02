@@ -222,6 +222,9 @@ body.dark-mode {
 .category-mega-menu {
   position: relative;
   margin-bottom: 2rem;
+  
+  /* Hover alanını genişlet */
+  padding-bottom: 15px; /* Alt boşluk ekle - dropdown geçişi için */
 }
 
 .category-buttons {
@@ -456,7 +459,7 @@ body.dark-mode {
 .subcategory-dropdown {
   display: none;
   position: absolute;
-  top: 60px;
+  top: 55px; /* 5px daha yakın - gap'i azalttık */
   left: 0;
   min-width: 220px;
   background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
@@ -467,6 +470,18 @@ body.dark-mode {
   backdrop-filter: blur(10px);
   z-index: 100;
   list-style: none;
+  
+  /* Mouse geçiş köprüsü için invisible padding */
+}
+
+.subcategory-dropdown::before {
+  content: '';
+  position: absolute;
+  top: -10px; /* Yukarıya doğru 10px invisible alan */
+  left: 0;
+  right: 0;
+  height: 10px;
+  background: transparent;
 }
 
 body.dark-mode .subcategory-dropdown {

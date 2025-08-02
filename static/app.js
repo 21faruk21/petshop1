@@ -187,7 +187,7 @@ const PetShopApp = {
       button.addEventListener('mouseleave', () => {
         hideTimeout = setTimeout(() => {
           this.hideSubcategories();
-        }, 300);
+        }, 800); // 300ms'den 800ms'ye çıkardık - daha rahat navigasyon
       });
     },
     
@@ -204,7 +204,7 @@ const PetShopApp = {
       dropdown.addEventListener('mouseleave', () => {
         hideTimeout = setTimeout(() => {
           this.hideSubcategories();
-        }, 300);
+        }, 800); // Alt menüden çıkarken de 800ms bekle
       });
     },
     
