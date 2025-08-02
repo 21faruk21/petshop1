@@ -2080,41 +2080,57 @@ def product_detail(product_id):
                 except:
                     product['subcategory'] = []
             
-            # Get reviews
-            cursor.execute("""
-                SELECT r.*, u.first_name, u.last_name
-                FROM reviews r
-                JOIN users u ON r.user_id = u.id
-                WHERE r.product_id = ?
-                ORDER BY r.created_at DESC
-                LIMIT 5
-            """, (product_id,))
-            
+            # Get reviews (only if tables exist)
             reviews = []
-            total_rating = 0
-            
-            for row in cursor.fetchall():
-                review = dict(row)
-                review['author_name'] = f"{review['first_name']} {review['last_name'][0]}."
-                
-                if review['created_at']:
-                    try:
-                        review['created_at'] = datetime.strptime(review['created_at'], "%Y-%m-%d %H:%M:%S")
-                    except:
-                        review['created_at'] = datetime.now()
-                
-                reviews.append(review)
-                total_rating += review['rating']
-            
-            # Calculate average rating
-            avg_rating = round(total_rating / len(reviews), 1) if reviews else 0
-            
-            # Check if user already reviewed (if logged in)
+            avg_rating = 0
             user_reviewed = False
-            if session.get("user_logged_in"):
-                cursor.execute("SELECT id FROM reviews WHERE user_id = ? AND product_id = ?", 
-                             (session["user_id"], product_id))
-                user_reviewed = cursor.fetchone() is not None
+            
+            try:
+                # Check if reviews and users tables exist
+                cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='reviews'")
+                reviews_table_exists = cursor.fetchone()
+                
+                cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='users'")
+                users_table_exists = cursor.fetchone()
+                
+                if reviews_table_exists and users_table_exists:
+                    cursor.execute("""
+                        SELECT r.*, u.first_name, u.last_name
+                        FROM reviews r
+                        JOIN users u ON r.user_id = u.id
+                        WHERE r.product_id = ?
+                        ORDER BY r.created_at DESC
+                        LIMIT 5
+                    """, (product_id,))
+                    
+                    total_rating = 0
+                    
+                    for row in cursor.fetchall():
+                        review = dict(row)
+                        review['author_name'] = f"{review['first_name']} {review['last_name'][0]}."
+                        
+                        if review['created_at']:
+                            try:
+                                review['created_at'] = datetime.strptime(review['created_at'], "%Y-%m-%d %H:%M:%S")
+                            except:
+                                review['created_at'] = datetime.now()
+                        
+                        reviews.append(review)
+                        total_rating += review['rating']
+                    
+                    # Calculate average rating
+                    avg_rating = round(total_rating / len(reviews), 1) if reviews else 0
+                    
+                    # Check if user already reviewed (if logged in)
+                    if session.get("user_logged_in"):
+                        cursor.execute("SELECT id FROM reviews WHERE user_id = ? AND product_id = ?", 
+                                     (session["user_id"], product_id))
+                        user_reviewed = cursor.fetchone() is not None
+            except Exception as reviews_error:
+                print(f"Reviews check error (normal if tables don't exist): {reviews_error}")
+                reviews = []
+                avg_rating = 0
+                user_reviewed = False
             
             return render_template("product_detail.html", 
                                  product=product, 
