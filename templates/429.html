@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Çok Fazla İstek - Mavi Petshop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+    <style>
+        body {
+            background: linear-gradient(135deg, #42a5f5 0%, #478ed1 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        .error-container {
+            text-align: center;
+            color: white;
+            max-width: 600px;
+            padding: 2rem;
+        }
+        
+        .error-code {
+            font-size: 8rem;
+            font-weight: 900;
+            line-height: 1;
+            margin-bottom: 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+        }
+        
+        .error-message {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+        
+        .error-description {
+            font-size: 1.1rem;
+            margin-bottom: 3rem;
+            opacity: 0.8;
+        }
+        
+        .btn-home {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-home:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .spinner-animation {
+            animation: spin 2s linear infinite;
+            font-size: 3rem;
+            margin-bottom: 2rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .countdown {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="spinner-animation">
+            <i class="fas fa-hourglass-half"></i>
+        </div>
+        
+        <div class="error-code">429</div>
+        
+        <h1 class="error-message">Çok Fazla İstek</h1>
+        
+        <p class="error-description">
+            Çok hızlı işlem yapıyorsunuz. Lütfen biraz yavaşlayın ve 
+            birkaç saniye bekledikten sonra tekrar deneyin.
+        </p>
+        
+        <div class="countdown">
+            <h5><i class="fas fa-clock me-2"></i>Lütfen Bekleyin</h5>
+            <p>Güvenlik önlemi olarak geçici bir sınır uygulandı.</p>
+            <div id="countdown-timer">60</div>
+            <small>saniye sonra tekrar deneyebilirsiniz</small>
+        </div>
+        
+        <div style="margin-top: 2rem;">
+            <a href="/" class="btn-home">
+                <i class="fas fa-home"></i>
+                Ana Sayfaya Dön
+            </a>
+        </div>
+    </div>
+    
+    <script>
+        let countdown = 60;
+        const timerElement = document.getElementById('countdown-timer');
+        
+        const timer = setInterval(() => {
+            countdown--;
+            timerElement.textContent = countdown;
+            
+            if (countdown <= 0) {
+                clearInterval(timer);
+                timerElement.textContent = '0';
+                timerElement.nextElementSibling.textContent = 'artık tekrar deneyebilirsiniz!';
+                
+                // Add retry button
+                setTimeout(() => {
+                    const retryBtn = document.createElement('a');
+                    retryBtn.href = 'javascript:window.location.reload()';
+                    retryBtn.className = 'btn-home';
+                    retryBtn.innerHTML = '<i class="fas fa-redo me-2"></i>Tekrar Dene';
+                    retryBtn.style.marginTop = '1rem';
+                    timerElement.parentElement.appendChild(retryBtn);
+                }, 1000);
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

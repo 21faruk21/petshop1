@@ -43,13 +43,21 @@ const PetShopApp = {
     }
   },
   
-  // Theme management
+  // Enhanced Theme Management System
   theme: {
     init() {
-      const themeToggle = document.getElementById('themeToggle');
-      const themeIcon = document.getElementById('themeIcon');
+      console.log('🎨 Tema sistemi başlatılıyor...');
       
-      if (!themeToggle || !themeIcon) return;
+      // Handle multiple theme toggle buttons
+      const themeToggles = document.querySelectorAll('#themeToggle, .theme-btn');
+      const themeIcons = document.querySelectorAll('#themeIcon');
+      
+      // Fix: migrate old darkMode key to new theme key for consistency
+      const oldDarkMode = localStorage.getItem('darkMode');
+      if (oldDarkMode && !localStorage.getItem('theme')) {
+        localStorage.setItem('theme', oldDarkMode === 'true' ? 'dark' : 'light');
+        localStorage.removeItem('darkMode'); // Clean up old key
+      }
       
       // Load saved theme
       const savedTheme = localStorage.getItem('theme');
@@ -57,12 +65,22 @@ const PetShopApp = {
         this.setTheme(true);
       }
       
-      // Theme toggle event
-      themeToggle.addEventListener('click', (e) => {
-        e.preventDefault();
+      // Attach event listeners to all theme buttons
+      themeToggles.forEach(toggle => {
+        toggle.addEventListener('click', (e) => {
+          e.preventDefault();
+          const isDark = !document.body.classList.contains('dark-mode');
+          this.setTheme(isDark);
+        });
+      });
+      
+      // Handle legacy theme toggle functions
+      window.toggleTheme = () => {
         const isDark = !document.body.classList.contains('dark-mode');
         this.setTheme(isDark);
-      });
+      };
+      
+      console.log('✅ Tema sistemi başlatıldı!');
     },
     
     setTheme(isDark) {
@@ -330,7 +348,7 @@ const PetShopApp = {
       }
       
       try {
-        const response = await fetch(`/api/suggestions?q=${encodeURIComponent(query)}`);
+        const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&autocomplete=true`);
         const data = await response.json();
         
         if (data.suggestions) {
@@ -443,7 +461,7 @@ const PetShopApp = {
       this.filter(mainCategory, '', '');
     },
     
-    async filter(mainCategory = '', subcategory = '', brand = '') {
+    async filter(mainCategory = '', subcategory = '', brand = '', minPrice = '', maxPrice = '', sort = 'name') {
       PetShopApp.performance.mark('filter-start');
       
       // Cancel previous request
@@ -455,12 +473,16 @@ const PetShopApp = {
       if (mainCategory) params.set('main_category', mainCategory);
       if (subcategory) params.set('subcategory', subcategory);
       if (brand) params.set('brand', brand);
+      if (minPrice) params.set('min_price', minPrice);
+      if (maxPrice) params.set('max_price', maxPrice);
+      if (sort) params.set('sort', sort);
       
       const cacheKey = params.toString();
       
       // Check cache first
       if (this.cache.has(cacheKey)) {
         this.displayProducts(this.cache.get(cacheKey));
+        this.updateProductCount(this.cache.get(cacheKey).length);
         PetShopApp.performance.mark('filter-end');
         PetShopApp.performance.measure('filter-cached', 'filter-start', 'filter-end');
         return;
@@ -487,8 +509,10 @@ const PetShopApp = {
           // Cache the result
           this.cache.set(cacheKey, data.products);
           this.displayProducts(data.products);
+          this.updateProductCount(data.count || data.products.length);
         } else {
           this.showNoResults();
+          this.updateProductCount(0);
         }
         
       } catch (error) {
@@ -500,6 +524,13 @@ const PetShopApp = {
         this.currentRequest = null;
         PetShopApp.performance.mark('filter-end');
         PetShopApp.performance.measure('filter-network', 'filter-start', 'filter-end');
+      }
+    },
+    
+    updateProductCount(count) {
+      const productCount = document.getElementById('productCount');
+      if (productCount) {
+        productCount.textContent = `${count} ürün listeleniyor`;
       }
     },
     
@@ -561,11 +592,109 @@ const PetShopApp = {
       productList.innerHTML = '';
       productList.appendChild(fragment);
       
-      // Initialize lazy loading for new images
+      // Initialize enhanced lazy loading for new images
       this.initLazyLoading();
       
       PetShopApp.performance.mark('display-end');
       PetShopApp.performance.measure('display-products', 'display-start', 'display-end');
+    },
+    
+    // Enhanced lazy loading with WebP support and optimization
+    initLazyLoading() {
+      PetShopApp.performance.mark('lazy-loading-start');
+      
+      if ('IntersectionObserver' in window) {
+        const imageObserver = new IntersectionObserver((entries, observer) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const img = entry.target;
+              const originalSrc = img.dataset.src || img.src;
+              
+              // WebP support detection and optimization
+              if (this.supportsWebP() && originalSrc && !originalSrc.includes('.webp')) {
+                const webpSrc = originalSrc.replace(/\.(jpg|jpeg|png)$/i, '.webp');
+                
+                // Try WebP first, fallback to original
+                const webpImg = new Image();
+                webpImg.onload = () => {
+                  img.src = webpSrc;
+                  img.classList.remove('lazy-load');
+                  img.classList.add('loaded');
+                };
+                webpImg.onerror = () => {
+                  img.src = originalSrc;
+                  img.classList.remove('lazy-load');
+                  img.classList.add('loaded');
+                };
+                webpImg.src = webpSrc;
+              } else {
+                img.src = originalSrc;
+                img.classList.remove('lazy-load');
+                img.classList.add('loaded');
+              }
+              
+              observer.unobserve(img);
+            }
+          });
+        }, {
+          rootMargin: '50px', // Start loading 50px before image comes into view
+          threshold: 0.1
+        });
+        
+        document.querySelectorAll('.lazy-load').forEach(img => {
+          imageObserver.observe(img);
+        });
+        
+        // Also observe new images that might be added dynamically
+        const mutationObserver = new MutationObserver((mutations) => {
+          mutations.forEach((mutation) => {
+            mutation.addedNodes.forEach((node) => {
+              if (node.nodeType === 1) { // Element node
+                const lazyImages = node.querySelectorAll ? node.querySelectorAll('.lazy-load') : [];
+                lazyImages.forEach(img => imageObserver.observe(img));
+              }
+            });
+          });
+        });
+        
+        mutationObserver.observe(document.body, {
+          childList: true,
+          subtree: true
+        });
+        
+      } else {
+        // Fallback for browsers without Intersection Observer
+        document.querySelectorAll('.lazy-load').forEach(img => {
+          if (img.dataset.src) {
+            img.src = img.dataset.src;
+          }
+          img.classList.remove('lazy-load');
+        });
+      }
+      
+      PetShopApp.performance.mark('lazy-loading-end');
+      PetShopApp.performance.measure('lazy-loading-init', 'lazy-loading-start', 'lazy-loading-end');
+    },
+    
+    // WebP support detection with caching
+    supportsWebP() {
+      if (this.webpSupport !== undefined) return this.webpSupport;
+      
+      // Check if browser supports WebP
+      const canvas = document.createElement('canvas');
+      canvas.width = 1;
+      canvas.height = 1;
+      try {
+        const webpData = canvas.toDataURL('image/webp');
+        this.webpSupport = webpData.indexOf('data:image/webp') === 0;
+      } catch (e) {
+        this.webpSupport = false;
+      }
+      
+      // Store in localStorage for future visits
+      localStorage.setItem('webp_support', this.webpSupport.toString());
+      
+      return this.webpSupport;
     },
     
     createProductElement(product) {
@@ -582,7 +711,8 @@ const PetShopApp = {
       div.innerHTML = `
         <div class="card product-card h-100">
           <a href="/product/${product.id}">
-            <img src="${product.image}" 
+            <img data-src="${product.image}" 
+                 src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 200'%3E%3Crect fill='%23f0f0f0'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23999'%3EYükleniyor...%3C/text%3E%3C/svg%3E"
                  class="card-img-top lazy-load" 
                  alt="${product.name}"
                  loading="lazy"/>
@@ -591,11 +721,18 @@ const PetShopApp = {
             <h5 class="card-title">${product.name}${brandBadge}</h5>
             <p class="text-muted">${product.category} / ${subcategoryText}</p>
             <h6 class="text-success">${product.price} TL</h6>
-            <a href="/add_to_cart/${product.id}" 
-               class="btn add-to-cart-btn mt-auto"
-               onclick="PetShopApp.products.handleAddToCart(event, ${product.id})">
-               Sepete Ekle
-            </a>
+            <div class="d-flex gap-2 mt-auto">
+              <a href="/add_to_cart/${product.id}" 
+                 class="btn add-to-cart-btn flex-grow-1"
+                 onclick="PetShopApp.products.handleAddToCart(event, ${product.id})">
+                 Sepete Ekle
+              </a>
+              <button class="btn btn-outline-danger wishlist-btn" 
+                      onclick="PetShopApp.wishlist.toggle(${product.id}, this)"
+                      title="Favorilere Ekle">
+                <i class="fas fa-heart"></i>
+              </button>
+            </div>
           </div>
         </div>
       `;
@@ -659,8 +796,19 @@ const PetShopApp = {
     }
   },
   
-  // Quick filters functionality
+  // Enhanced filters functionality
   filters: {
+    currentFilters: {
+      main_category: '',
+      subcategory: '',
+      brand: '',
+      min_price: '',
+      max_price: '',
+      sort: 'name'
+    },
+    
+    brandsCache: null,
+    
     init() {
       const filterButtons = document.querySelectorAll('.filter-btn');
       const sortSelect = document.getElementById('sortSelect');
@@ -681,9 +829,125 @@ const PetShopApp = {
       // Sort dropdown events
       if (sortSelect) {
         sortSelect.addEventListener('change', (e) => {
-          this.applySorting(e.target.value);
+          this.currentFilters.sort = e.target.value;
+          this.applyAdvancedFilters();
         });
       }
+      
+      // Initialize advanced filters
+      this.initAdvancedFilters();
+      this.loadBrands();
+    },
+    
+    async loadBrands() {
+      try {
+        if (this.brandsCache) {
+          this.populateBrandFilter(this.brandsCache);
+          return;
+        }
+        
+        const response = await fetch('/api/brands');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.brands) {
+            this.brandsCache = data.brands;
+            this.populateBrandFilter(data.brands);
+          }
+        }
+      } catch (error) {
+        console.error('Brand loading error:', error);
+      }
+    },
+    
+    populateBrandFilter(brands) {
+      const brandSelect = document.getElementById('brandFilter');
+      if (!brandSelect) return;
+      
+      // Clear existing options except the first one
+      brandSelect.innerHTML = '<option value="">Tüm Markalar</option>';
+      
+      brands.forEach(brand => {
+        const option = document.createElement('option');
+        option.value = brand;
+        option.textContent = brand;
+        brandSelect.appendChild(option);
+      });
+    },
+    
+    initAdvancedFilters() {
+      const applyBtn = document.getElementById('applyFilters');
+      const clearBtn = document.getElementById('clearFilters');
+      const brandFilter = document.getElementById('brandFilter');
+      const minPrice = document.getElementById('minPriceFilter');
+      const maxPrice = document.getElementById('maxPriceFilter');
+      
+      if (applyBtn) {
+        applyBtn.addEventListener('click', () => {
+          this.currentFilters.brand = brandFilter?.value || '';
+          this.currentFilters.min_price = minPrice?.value || '';
+          this.currentFilters.max_price = maxPrice?.value || '';
+          this.applyAdvancedFilters();
+        });
+      }
+      
+      if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+          this.clearAllFilters();
+        });
+      }
+      
+      // Auto-apply on Enter key
+      [minPrice, maxPrice].forEach(input => {
+        if (input) {
+          input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+              applyBtn?.click();
+            }
+          });
+        }
+      });
+    },
+    
+    applyAdvancedFilters() {
+      PetShopApp.products.filter(
+        this.currentFilters.main_category,
+        this.currentFilters.subcategory,
+        this.currentFilters.brand,
+        this.currentFilters.min_price,
+        this.currentFilters.max_price,
+        this.currentFilters.sort
+      );
+    },
+    
+    clearAllFilters() {
+      // Reset all filters
+      this.currentFilters = {
+        main_category: '',
+        subcategory: '',
+        brand: '',
+        min_price: '',
+        max_price: '',
+        sort: 'name'
+      };
+      
+      // Clear UI elements
+      const brandFilter = document.getElementById('brandFilter');
+      const minPrice = document.getElementById('minPriceFilter');
+      const maxPrice = document.getElementById('maxPriceFilter');
+      const sortSelect = document.getElementById('sortSelect');
+      
+      if (brandFilter) brandFilter.value = '';
+      if (minPrice) minPrice.value = '';
+      if (maxPrice) maxPrice.value = '';
+      if (sortSelect) sortSelect.value = 'name';
+      
+      // Clear active buttons
+      document.querySelectorAll('.filter-btn.active, .category-btn.active').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      // Apply cleared filters
+      this.applyAdvancedFilters();
     },
     
     applyQuickFilter(filter) {

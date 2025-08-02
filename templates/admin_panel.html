@@ -353,9 +353,19 @@
         </div>
     </nav>
 
-    <!-- Admin Panel Content -->
-    <div class="admin-panel-card">
-        <h2>Admin Panel</h2>
+            <!-- Admin Panel Content -->
+        <div class="admin-panel-card">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0">Admin Panel</h2>
+            <div class="admin-header-actions d-flex align-items-center gap-2">
+              <button id="themeToggle" class="btn btn-outline-primary theme-btn" title="Tema Değiştir">
+                <i id="themeIcon" class="fa fa-moon"></i>
+              </button>
+              <a href="{{ url_for('index') }}" class="btn btn-outline-primary" title="Ana Sayfaya Dön">
+                <i class="fas fa-home me-2"></i>Ana Sayfa
+              </a>
+            </div>
+          </div>
         
         <!-- İstatistikler -->
         <div class="admin-stats">
@@ -384,6 +394,18 @@
                 <h4>Ürün Yönetimi</h4>
                 <p>Ürünleri ekle, düzenle ve sil</p>
                 <a href="{{ url_for('add_product') }}" class="btn-admin">Ürün Ekle</a>
+            </div>
+            
+            <div class="action-card">
+                <i class="fas fa-boxes"></i>
+                <h4>Stok Yönetimi</h4>
+                <p>Ürün stoklarını izleyin ve yönetin</p>
+                <a href="{{ url_for('admin_stock') }}" class="btn-admin">Stok Yönet</a>
+                {% if stock_stats and stock_stats.low_stock_count > 0 %}
+                <div class="mt-2">
+                    <span class="badge bg-danger">{{ stock_stats.low_stock_count }} düşük stok</span>
+                </div>
+                {% endif %}
             </div>
             
             <div class="action-card">

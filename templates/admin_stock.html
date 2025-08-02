@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Stok Yönetimi - Admin Panel</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+  <style>
+    .stock-card {
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+    }
+    .stock-card:hover {
+      transform: translateY(-2px);
+    }
+    .low-stock {
+      border-left: 4px solid #dc3545;
+      background: linear-gradient(45deg, #fff, #fff5f5);
+    }
+    .good-stock {
+      border-left: 4px solid #28a745;
+      background: linear-gradient(45deg, #fff, #f8fff8);
+    }
+    .out-of-stock {
+      border-left: 4px solid #6c757d;
+      background: linear-gradient(45deg, #fff, #f8f9fa);
+    }
+    .stat-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: white;
+    }
+    .table-stock-info {
+      font-size: 0.9rem;
+    }
+    .stock-input {
+      width: 80px;
+    }
+    .threshold-input {
+      width: 60px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h2><i class="fa fa-boxes text-primary"></i> Stok Yönetimi</h2>
+            <p class="text-muted">Ürün stoklarını yönetin ve izleyin</p>
+          </div>
+          <div>
+            <a href="/admin" class="btn btn-outline-secondary">
+              <i class="fa fa-arrow-left"></i> Admin Panel
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Messages -->
+    {% if message %}
+    <div class="row mb-3">
+      <div class="col-12">
+        <div class="alert alert-info alert-dismissible fade show">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Stock Statistics -->
+    <div class="row mb-4">
+      <div class="col-md-3">
+        <div class="card stock-card h-100">
+          <div class="card-body text-center">
+            <div class="stat-icon mx-auto mb-3" style="background: linear-gradient(45deg, #007bff, #0056b3);">
+              <i class="fa fa-cubes"></i>
+            </div>
+            <h5>Toplam Stok</h5>
+            <h3 class="text-primary">{{ stock_stats.total_stock_units or 0 }}</h3>
+            <small class="text-muted">Adet</small>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card stock-card h-100">
+          <div class="card-body text-center">
+            <div class="stat-icon mx-auto mb-3" style="background: linear-gradient(45deg, #28a745, #1e7e34);">
+              <i class="fa fa-lira-sign"></i>
+            </div>
+            <h5>Stok Değeri</h5>
+            <h3 class="text-success">{{ "%.2f"|format(stock_stats.total_stock_value or 0) }}</h3>
+            <small class="text-muted">TL</small>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card stock-card h-100">
+          <div class="card-body text-center">
+            <div class="stat-icon mx-auto mb-3" style="background: linear-gradient(45deg, #dc3545, #c82333);">
+              <i class="fa fa-exclamation-triangle"></i>
+            </div>
+            <h5>Düşük Stok</h5>
+            <h3 class="text-danger">{{ stock_stats.low_stock_count or 0 }}</h3>
+            <small class="text-muted">Ürün</small>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card stock-card h-100">
+          <div class="card-body text-center">
+            <div class="stat-icon mx-auto mb-3" style="background: linear-gradient(45deg, #6f42c1, #59359a);">
+              <i class="fa fa-chart-line"></i>
+            </div>
+            <h5>Aktif Ürün</h5>
+            <h3 class="text-info">{{ stock_stats.active_products or 0 }}</h3>
+            <small class="text-muted">Adet</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Low Stock Alert -->
+    {% if low_stock_products %}
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card border-danger">
+          <div class="card-header bg-danger text-white">
+            <h5 class="mb-0"><i class="fa fa-exclamation-triangle"></i> Düşük Stoklu Ürünler</h5>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              {% for product in low_stock_products[:6] %}
+              <div class="col-md-4 mb-3">
+                <div class="card low-stock h-100">
+                  <div class="card-body">
+                    <h6 class="card-title">{{ product.name }}</h6>
+                    <p class="card-text">
+                      <span class="badge bg-secondary">{{ product.category }}</span>
+                      {% if product.brand %}
+                      <span class="badge bg-info">{{ product.brand }}</span>
+                      {% endif %}
+                    </p>
+                    <div class="d-flex justify-content-between align-items-center">
+                      <span class="text-danger fw-bold">{{ product.stock_quantity or 0 }} adet</span>
+                      <span class="text-muted">Eşik: {{ product.low_stock_threshold or 5 }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- All Products Stock Management -->
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0"><i class="fa fa-list"></i> Tüm Ürünler - Stok Durumu</h5>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                  <tr>
+                    <th>Ürün</th>
+                    <th>Kategori</th>
+                    <th>Marka</th>
+                    <th>Fiyat</th>
+                    <th>Mevcut Stok</th>
+                    <th>Eşik</th>
+                    <th>Son Stok</th>
+                    <th>Durum</th>
+                    <th>İşlemler</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for product in all_products %}
+                  <tr>
+                    <td>
+                      <strong>{{ product.name }}</strong>
+                      {% if not product.in_stock %}
+                      <span class="badge bg-secondary ms-2">Pasif</span>
+                      {% endif %}
+                    </td>
+                    <td>{{ product.category or '-' }}</td>
+                    <td>{{ product.brand or '-' }}</td>
+                    <td>{{ product.price }} TL</td>
+                    <td>
+                      <span class="fw-bold 
+                        {% if (product.stock_quantity or 0) <= 0 %}text-danger
+                        {% elif (product.stock_quantity or 0) <= (product.low_stock_threshold or 5) %}text-warning
+                        {% else %}text-success{% endif %}">
+                        {{ product.stock_quantity or 0 }}
+                      </span>
+                    </td>
+                    <td>{{ product.low_stock_threshold or 5 }}</td>
+                    <td>
+                      {% if product.last_restocked %}
+                        {{ product.last_restocked.strftime('%d.%m.%Y') }}
+                      {% else %}
+                        -
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% set stock_qty = product.stock_quantity or 0 %}
+                      {% set threshold = product.low_stock_threshold or 5 %}
+                      {% if stock_qty <= 0 %}
+                      <span class="badge bg-danger">Tükendi</span>
+                      {% elif stock_qty <= threshold %}
+                      <span class="badge bg-warning">Düşük</span>
+                      {% else %}
+                      <span class="badge bg-success">Normal</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      <form method="post" class="d-inline">
+                        <input type="hidden" name="action" value="update_stock">
+                        <input type="hidden" name="product_id" value="{{ product.id }}">
+                        <div class="input-group input-group-sm">
+                          <input type="number" name="quantity" class="form-control stock-input" 
+                                 value="{{ product.stock_quantity or 0 }}" min="0" max="9999">
+                          <input type="number" name="threshold" class="form-control threshold-input" 
+                                 value="{{ product.low_stock_threshold or 5 }}" min="1" max="100" title="Eşik">
+                          <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="fa fa-save"></i>
+                          </button>
+                        </div>
+                      </form>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Auto-hide alerts after 5 seconds
+    setTimeout(function() {
+      const alerts = document.querySelectorAll('.alert');
+      alerts.forEach(alert => {
+        if (alert.classList.contains('show')) {
+          alert.classList.remove('show');
+        }
+      });
+    }, 5000);
+  </script>
+</body>
+</html>
