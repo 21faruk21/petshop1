@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>{{ product[1] }} – Ürün Detayı | MaviPetShop</title>
+  <title>{{ product.name }} – Ürün Detayı | MaviPetShop</title>
 
   <!-- Google Font: Outfit -->
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
@@ -64,38 +64,57 @@
     }
     .detail-info .text-success {
       color: #00e6a7 !important;
-      font-size: 1.3rem;
-      font-weight: 700;
-      margin-bottom: 1.5em;
+      font-weight: 900;
+      font-size: 1.8rem;
     }
-    .detail-info .btn-primary {
-      background: #053ff3;
+    .btn-primary {
+      background: linear-gradient(135deg, #053ff3, #0d5bff);
       border: none;
-      border-radius: .75rem;
       font-weight: 600;
-      padding: .7em 1.5em;
-      margin-right: 1em;
-      transition: background .2s, color .2s;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.8rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(5,63,243,0.25);
     }
-    .detail-info .btn-primary:hover {
-      background: #6ea8fe;
-      color: #23262f;
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #0d5bff, #053ff3);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(5,63,243,0.35);
     }
-    .detail-info .btn-secondary {
-      background: #23262f;
-      color: #fff;
-      border: 1.5px solid #6ea8fe;
-      border-radius: .75rem;
-      font-weight: 600;
-      padding: .7em 1.5em;
-      transition: background .2s, color .2s;
+    .btn-secondary {
+      background: #495057;
+      border: none;
+      font-weight: 500;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.8rem;
     }
-    .detail-info .btn-secondary:hover {
-      background: #6ea8fe;
-      color: #23262f;
+    .wishlist-btn {
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
     }
-    @media (max-width: 900px) {
-      .detail-card { flex-direction: column; gap: 1.5rem; padding: 1.5rem 0.7rem; }
+    .wishlist-btn:hover {
+      transform: scale(1.1);
+    }
+    .star-rating i {
+      cursor: pointer;
+      font-size: 1.2rem;
+      margin-right: 0.2rem;
+      transition: color 0.2s ease;
+    }
+    .star-rating i:hover {
+      color: #ffc107 !important;
+    }
+    .review-item {
+      background: rgba(35, 38, 47, 0.6);
+      border-color: rgba(108, 168, 254, 0.2) !important;
+    }
+    @media (max-width: 768px) {
+      .detail-card { flex-direction: column; padding: 1.5rem 1rem; }
       .detail-card img { max-width: 100%; }
     }
   </style>
@@ -107,42 +126,127 @@
   <div class="campaign-bar" style="max-width:900px;margin:2rem auto 0 auto;border-radius:1.2rem;box-shadow:0 4px 16px rgba(5,63,243,0.10);padding:.7em 1.2em;text-align:center;">
     🎉 300 TL ve üzeri siparişlerde ÜCRETSİZ KARGO! 🚚
   </div>
+  
   <!-- Tema Toggle -->
   <button id="themeToggle" class="btn btn-light d-flex align-items-center position-absolute" style="top:2.2rem;right:2.2rem;border-radius:50%;width:44px;height:44px;justify-content:center;box-shadow:0 2px 8px rgba(5,63,243,0.08);font-size:1.4rem;z-index:10;" title="Tema Değiştir">
     <i id="themeIcon" class="fa fa-moon"></i>
   </button>
+  
   <div class="container">
     <div class="card detail-card">
-      <img src="{{ product[3] }}" alt="{{ product[1] }}"/>
+      <img src="{{ product.image_url }}" alt="{{ product.name }}"/>
       <div class="detail-info">
-        <h3>{{ product[1] }}
-          {% if product[9] %}<span class="badge bg-secondary ms-2">{{ product[9] }}</span>{% endif %}
-        </h3>
-        <p class="text-muted">{{ product[4] }} /
-          {% set subs = product[5] %}
-          {% if subs %}
-            {% if subs.startswith('[') %}
-              {{ subs|fromjson|join(', ') }}
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <h3>{{ product.name }}
+            {% if product.brand %}<span class="badge bg-secondary ms-2">{{ product.brand }}</span>{% endif %}
+          </h3>
+          <!-- Wishlist Kalp Butonu -->
+          {% if session.user_logged_in %}
+          <button class="btn btn-outline-danger wishlist-btn" onclick="PetShopApp.wishlist.toggle({{ product.id }})" title="Favorilere Ekle/Çıkar">
+            <i id="wishlist-icon-{{ product.id }}" class="fas fa-heart"></i>
+          </button>
+          {% endif %}
+        </div>
+        
+        <p class="text-muted">{{ product.category }} /
+          {% if product.subcategory %}
+            {% if product.subcategory is string and product.subcategory.startswith('[') %}
+              {{ product.subcategory|fromjson|join(', ') }}
+            {% elif product.subcategory is list %}
+              {{ product.subcategory|join(', ') }}
             {% else %}
-              {{ subs }}
+              {{ product.subcategory }}
             {% endif %}
           {% endif %}
         </p>
-        {% if product[6] %}
-          <p class="mb-3">{{ product[8] }}</p>
+        
+        {% if product.description %}
+          <p class="mb-3">{{ product.description }}</p>
         {% endif %}
-        <h4 class="text-success mb-4">{{ product[2] }} TL</h4>
+        
+        <h4 class="text-success mb-4">{{ product.price }} TL</h4>
+        
         <div class="mt-auto d-flex gap-3">
-          <a href="/add_to_cart/{{ product[0] }}" class="btn btn-primary"><i class="fa fa-cart-plus me-2"></i>Sepete Ekle</a>
+          <a href="/add_to_cart/{{ product.id }}" class="btn btn-primary"><i class="fa fa-cart-plus me-2"></i>Sepete Ekle</a>
           <a href="/" class="btn btn-secondary"><i class="fa fa-arrow-left me-2"></i>Anasayfaya Dön</a>
         </div>
       </div>
     </div>
   </div>
+
+  <!-- Ürün Yorumları ve Puanlama -->
+  {% if reviews or session.user_logged_in %}
+  <div class="container">
+    <div class="card detail-card mt-4">
+      <div class="w-100">
+        <h4 class="mb-4">
+          <i class="fas fa-star text-warning me-2"></i>Ürün Yorumları
+          {% if avg_rating > 0 %}
+            <span class="badge bg-warning text-dark ms-2">{{ avg_rating }}/5 ⭐</span>
+            <small class="text-muted">({{ total_reviews }} yorum)</small>
+          {% endif %}
+        </h4>
+        
+        <!-- Yorum Yazma Formu (Sadece giriş yapmış kullanıcılar) -->
+        {% if session.user_logged_in and not user_reviewed %}
+        <div class="review-form mb-4 p-3 bg-dark rounded">
+          <h6 class="text-primary">Bu ürün hakkında yorum yapın:</h6>
+          <div class="rating-input mb-3">
+            <label class="form-label">Puanınız:</label>
+            <div class="star-rating">
+              <i class="fas fa-star" data-rating="1"></i>
+              <i class="fas fa-star" data-rating="2"></i>
+              <i class="fas fa-star" data-rating="3"></i>
+              <i class="fas fa-star" data-rating="4"></i>
+              <i class="fas fa-star" data-rating="5"></i>
+            </div>
+          </div>
+          <textarea class="form-control mb-3" id="reviewComment" placeholder="Yorumunuzu yazın..." rows="3"></textarea>
+          <button class="btn btn-primary" onclick="submitReview({{ product.id }})">Yorum Gönder</button>
+        </div>
+        {% elif session.user_logged_in and user_reviewed %}
+          <div class="alert alert-info">Bu ürün için daha önce yorum yapmışsınız.</div>
+        {% else %}
+          <div class="alert alert-warning">Yorum yapabilmek için <a href="/login" class="text-warning">giriş yapın</a>.</div>
+        {% endif %}
+        
+        <!-- Mevcut Yorumlar -->
+        {% if reviews %}
+        <div class="reviews-list">
+          {% for review in reviews %}
+          <div class="review-item p-3 mb-3 border rounded">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <strong class="text-primary">{{ review.author_name }}</strong>
+                <div class="stars text-warning">
+                  {% for i in range(1, 6) %}
+                    {% if i <= review.rating %}
+                      <i class="fas fa-star"></i>
+                    {% else %}
+                      <i class="far fa-star"></i>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+              </div>
+              <small class="text-muted">{{ review.created_at.strftime('%d.%m.%Y') if review.created_at else '' }}</small>
+            </div>
+            <p class="mb-0 mt-2">{{ review.comment }}</p>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+          <p class="text-muted text-center py-4">Henüz yorum bulunmuyor. İlk yorumu siz yapın!</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
   <!-- Footer -->
   <footer style="max-width:900px;margin:2.5rem auto 0 auto;text-align:center;color:#bfc9d8;background:none;">
     © 2025 Mavi Petshop. Tüm hakları saklıdır.
   </footer>
+  
   <!-- App Scripts -->
   <script src="{{ url_for('static', filename='app.js') }}"></script>
   <script>
@@ -154,7 +258,83 @@
       }
       
       console.log('🎨 Product Detail tema sistemi başlatıldı!');
+      
+      // Initialize wishlist status
+      {% if session.user_logged_in %}
+      checkWishlistStatus({{ product.id }});
+      {% endif %}
     });
+    
+    // Wishlist functions
+    function checkWishlistStatus(productId) {
+      if (!PetShopApp.wishlist) return;
+      PetShopApp.wishlist.checkStatus(productId).then(inWishlist => {
+        const icon = document.getElementById(`wishlist-icon-${productId}`);
+        if (icon) {
+          icon.className = inWishlist ? 'fas fa-heart text-danger' : 'fas fa-heart';
+        }
+      });
+    }
+    
+    // Star rating functionality
+    document.querySelectorAll('.star-rating i').forEach(star => {
+      star.addEventListener('click', function() {
+        const rating = this.getAttribute('data-rating');
+        const stars = this.parentElement.querySelectorAll('i');
+        
+        stars.forEach((s, index) => {
+          if (index < rating) {
+            s.className = 'fas fa-star text-warning';
+          } else {
+            s.className = 'fas fa-star';
+          }
+        });
+        
+        this.parentElement.setAttribute('data-selected-rating', rating);
+      });
+    });
+    
+    // Submit review function
+    function submitReview(productId) {
+      const ratingElement = document.querySelector('.star-rating');
+      const rating = ratingElement ? ratingElement.getAttribute('data-selected-rating') : null;
+      const comment = document.getElementById('reviewComment').value.trim();
+      
+      if (!rating) {
+        alert('Lütfen bir puan verin!');
+        return;
+      }
+      
+      if (!comment) {
+        alert('Lütfen yorumunuzu yazın!');
+        return;
+      }
+      
+      fetch('/api/reviews/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          product_id: productId,
+          rating: parseInt(rating),
+          comment: comment
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('Yorumunuz başarıyla gönderildi!');
+          location.reload();
+        } else {
+          alert('Hata: ' + data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Review submit error:', error);
+        alert('Bir hata oluştu!');
+      });
+    }
   </script>
 </body>
 </html>
