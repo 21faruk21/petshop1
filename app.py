@@ -408,6 +408,35 @@ def init_database():
     except Exception as e:
         print(f"Index creation error: {e}")
 
+    # Add sample products if database is empty
+    cursor.execute("SELECT COUNT(*) FROM products")
+    product_count = cursor.fetchone()[0]
+    
+    if product_count == 0:
+        print("🌱 Adding sample products...")
+        sample_products = [
+            ("Royal Canin Kitten Mama", 450.0, "/static/uploads/1.webp", "Kedi", '["Mama"]', "2-12 aylık yavrular için özel formül kedi maması", "Royal Canin"),
+            ("Lavital Kitten Somonlu Yavru Kedi Maması 1.5 KG", 340.0, "/static/uploads/2.webp", "Kedi", '["Mama"]', "6-52 hafta - 12 aylık dönemdeki yavru kediler için özel formüle edilen bir yavru kedi mamasıdır.", "Lavital"),
+            ("Whiskas Yetişkin Kedi Maması", 280.0, "/static/uploads/3.webp", "Kedi", '["Mama"]', "Yetişkin kediler için dengeli beslenme", "Whiskas"),
+            ("Pro Plan Köpek Maması", 520.0, "/static/uploads/4.webp", "Köpek", '["Mama"]', "Yetişkin köpekler için premium mama", "Pro Plan"),
+            ("Pedigree Köpek Maması", 380.0, "/static/uploads/5.webp", "Köpek", '["Mama"]', "Köpeklerin sağlıklı yaşamı için", "Pedigree"),
+            ("Kedi Oyuncağı Top", 45.0, "/static/uploads/6.webp", "Kedi", '["Oyuncak"]', "Renkli kedi oyun topu", "Generic"),
+            ("Köpek Tasması", 120.0, "/static/uploads/7.webp", "Köpek", '["Aksesuar"]', "Ayarlanabilir köpek tasması", "Generic"),
+            ("Kedi Kumu 10L", 85.0, "/static/uploads/8.webp", "Kedi", '["Bakım"]', "Kokusuz kedi kumu", "Generic"),
+            ("Balık Yemi", 25.0, "/static/uploads/9.webp", "Balık", '["Yem"]', "Tropikal balıklar için yem", "Generic"),
+            ("Kuş Yemi", 35.0, "/static/uploads/10.webp", "Kuş", '["Yem"]', "Muhabbet kuşları için karma yem", "Generic"),
+        ]
+        
+        for product in sample_products:
+            cursor.execute("""
+                INSERT INTO products (name, price, image, category, subcategory, description, brand, in_stock)
+                VALUES (?, ?, ?, ?, ?, ?, ?, 1)
+            """, product)
+        
+        print(f"✅ {len(sample_products)} sample products added!")
+    else:
+        print(f"📦 Database already has {product_count} products")
+
     conn.commit()
     conn.close()
     print("Database initialized successfully!")
