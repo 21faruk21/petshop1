@@ -1507,19 +1507,7 @@ def add_product():
     return render_template("add_product.html")
 
 
-@app.route("/product/<int:product_id>")
-def product_detail(product_id):
-    conn = sqlite3.connect(db_path)
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM products WHERE id = ?", (product_id,))
-    product = cursor.fetchone()
-    conn.close()
-
-    if not product:
-        return "Ürün bulunamadı", 404
-
-    return render_template("product_detail.html", product=product)
+# Removed duplicate product_detail route - using enhanced version below
 
 
 @app.route("/admin/login", methods=["GET", "POST"])
@@ -2885,15 +2873,7 @@ def get_suggestions():
     return search_products()
 
 
-# Error handlers
-@app.errorhandler(404)
-def not_found(error):
-    return render_template("index.html", products=[]), 404
-
-
-@app.errorhandler(500)
-def internal_error(error):
-    return render_template("index.html", products=[]), 500
+# Removed duplicate error handlers - using enhanced versions above
 
 
 @app.template_filter('fromjson')
