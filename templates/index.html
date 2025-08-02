@@ -208,6 +208,36 @@
     window.selectedCategory = "{{ selected_category|default('Köpek') }}";
   </script>
   <script src="{{ url_for('static', filename='app.js') }}"></script>
+  <script>
+    // Initialize the app modules
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize theme first (most important for UX)
+      if (PetShopApp && PetShopApp.theme) {
+        PetShopApp.theme.init();
+      }
+      
+      // Initialize other modules
+      if (PetShopApp && PetShopApp.megaMenu) {
+        PetShopApp.megaMenu.init();
+      }
+      
+      if (PetShopApp && PetShopApp.search) {
+        PetShopApp.search.init();
+      }
+      
+      if (PetShopApp && PetShopApp.ux) {
+        PetShopApp.ux.init();
+      }
+      
+      if (PetShopApp && PetShopApp.products) {
+        PetShopApp.products.init();
+      }
+      
+      if (PetShopApp && PetShopApp.filters) {
+        PetShopApp.filters.init();
+      }
+    });
+  </script>
   
   <!-- Structured Data for SEO -->
   <script type="application/ld+json">
