@@ -151,6 +151,44 @@
       gap: 1rem;
     }
     
+    .shipping-section {
+      background: rgba(59, 130, 246, 0.05);
+      border-radius: 0.75rem;
+      padding: 1rem;
+      border-left: 4px solid #3b82f6;
+    }
+    
+    .shipping-section .form-label {
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 0.5rem;
+    }
+    
+    .shipping-input {
+      border-radius: 0.5rem;
+      border: 2px solid #e5e7eb;
+      transition: all 0.3s ease;
+    }
+    
+    .shipping-input:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.15);
+    }
+    
+    .btn-success {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      border: none;
+      border-radius: 0.5rem;
+      padding: 0.5rem 1rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-success:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+    
     .status-badge {
       padding: 0.5rem 1rem;
       border-radius: 50px;
@@ -377,19 +415,53 @@
         </div>
       </div>
       
-      <div class="order-footer">
-        <div class="status-section">
-          <span class="status-badge status-{{ result.status|lower }}">
-            {{ result.status }}
-          </span>
-          <select class="status-dropdown" onchange="updateOrderStatus('{{ result.id }}', this.value)">
-            <option value="Hazırlanıyor" {% if result.status == 'Hazırlanıyor' %}selected{% endif %}>Hazırlanıyor</option>
-            <option value="Kargoda" {% if result.status == 'Kargoda' %}selected{% endif %}>Kargoda</option>
-            <option value="Teslim Edildi" {% if result.status == 'Teslim Edildi' %}selected{% endif %}>Teslim Edildi</option>
-            <option value="İptal Edildi" {% if result.status == 'İptal Edildi' %}selected{% endif %}>İptal Edildi</option>
-          </select>
+              <div class="order-footer">
+          <div class="status-section">
+            <span class="status-badge status-{{ result.status|lower }}">
+              {{ result.status }}
+            </span>
+            <select class="status-dropdown" onchange="updateOrderStatus('{{ result.id }}', this.value)">
+              <option value="Hazırlanıyor" {% if result.status == 'Hazırlanıyor' %}selected{% endif %}>Hazırlanıyor</option>
+              <option value="Kargoda" {% if result.status == 'Kargoda' %}selected{% endif %}>Kargoda</option>
+              <option value="Teslim Edildi" {% if result.status == 'Teslim Edildi' %}selected{% endif %}>Teslim Edildi</option>
+              <option value="İptal Edildi" {% if result.status == 'İptal Edildi' %}selected{% endif %}>İptal Edildi</option>
+            </select>
+          </div>
+          
+          <!-- Kargo Bilgileri -->
+          <div class="shipping-section mt-3">
+            <div class="row">
+              <div class="col-md-6">
+                <label class="form-label"><i class="fa fa-truck me-2"></i>Kargo Şirketi</label>
+                <select class="form-control shipping-input" data-order-id="{{ result.id }}" data-field="shipping_company">
+                  <option value="">Seçiniz</option>
+                  <option value="Yurtiçi Kargo" {% if result.shipping_company == 'Yurtiçi Kargo' %}selected{% endif %}>Yurtiçi Kargo</option>
+                  <option value="Aras Kargo" {% if result.shipping_company == 'Aras Kargo' %}selected{% endif %}>Aras Kargo</option>
+                  <option value="MNG Kargo" {% if result.shipping_company == 'MNG Kargo' %}selected{% endif %}>MNG Kargo</option>
+                  <option value="Sürat Kargo" {% if result.shipping_company == 'Sürat Kargo' %}selected{% endif %}>Sürat Kargo</option>
+                  <option value="PTT Kargo" {% if result.shipping_company == 'PTT Kargo' %}selected{% endif %}>PTT Kargo</option>
+                  <option value="UPS" {% if result.shipping_company == 'UPS' %}selected{% endif %}>UPS</option>
+                  <option value="DHL" {% if result.shipping_company == 'DHL' %}selected{% endif %}>DHL</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label"><i class="fa fa-barcode me-2"></i>Takip Numarası</label>
+                <input type="text" class="form-control shipping-input" 
+                       data-order-id="{{ result.id }}" 
+                       data-field="tracking_number"
+                       value="{{ result.tracking_number or '' }}" 
+                       placeholder="Takip numarası girin">
+              </div>
+            </div>
+            <div class="row mt-2">
+              <div class="col-12 text-end">
+                <button class="btn btn-success btn-sm" onclick="updateShippingInfo('{{ result.id }}')">
+                  <i class="fa fa-save me-1"></i>Kargo Bilgilerini Kaydet
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
     </div>
     {% elif not_found %}
     <div class="order-card">
@@ -464,6 +536,40 @@
               <option value="İptal Edildi" {% if order.status=='İptal Edildi' %}selected{% endif %}>İptal Edildi</option>
             </select>
           </div>
+          
+          <!-- Kargo Bilgileri -->
+          <div class="shipping-section mt-3">
+            <div class="row">
+              <div class="col-md-6">
+                <label class="form-label"><i class="fa fa-truck me-2"></i>Kargo Şirketi</label>
+                <select class="form-control shipping-input" data-order-id="{{ order.id }}" data-field="shipping_company">
+                  <option value="">Seçiniz</option>
+                  <option value="Yurtiçi Kargo" {% if order.shipping_company == 'Yurtiçi Kargo' %}selected{% endif %}>Yurtiçi Kargo</option>
+                  <option value="Aras Kargo" {% if order.shipping_company == 'Aras Kargo' %}selected{% endif %}>Aras Kargo</option>
+                  <option value="MNG Kargo" {% if order.shipping_company == 'MNG Kargo' %}selected{% endif %}>MNG Kargo</option>
+                  <option value="Sürat Kargo" {% if order.shipping_company == 'Sürat Kargo' %}selected{% endif %}>Sürat Kargo</option>
+                  <option value="PTT Kargo" {% if order.shipping_company == 'PTT Kargo' %}selected{% endif %}>PTT Kargo</option>
+                  <option value="UPS" {% if order.shipping_company == 'UPS' %}selected{% endif %}>UPS</option>
+                  <option value="DHL" {% if order.shipping_company == 'DHL' %}selected{% endif %}>DHL</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label"><i class="fa fa-barcode me-2"></i>Takip Numarası</label>
+                <input type="text" class="form-control shipping-input" 
+                       data-order-id="{{ order.id }}" 
+                       data-field="tracking_number"
+                       value="{{ order.tracking_number or '' }}" 
+                       placeholder="Takip numarası girin">
+              </div>
+            </div>
+            <div class="row mt-2">
+              <div class="col-12 text-end">
+                <button class="btn btn-success btn-sm" onclick="updateShippingInfo('{{ order.id }}')">
+                  <i class="fa fa-save me-1"></i>Kargo Bilgilerini Kaydet
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       {% endfor %}
@@ -532,6 +638,69 @@
       .catch(error => {
         console.error('Error:', error);
         alert('Bir hata oluştu!');
+      });
+    }
+    
+    // Kargo bilgilerini güncelle
+    function updateShippingInfo(orderId) {
+      const shippingInputs = document.querySelectorAll(`[data-order-id="${orderId}"]`);
+      const shippingData = {};
+      
+      shippingInputs.forEach(input => {
+        const field = input.dataset.field;
+        if (field) {
+          shippingData[field] = input.value;
+        }
+      });
+      
+      // En azından birisi dolu olmalı
+      if (!shippingData.shipping_company && !shippingData.tracking_number) {
+        alert('En azından kargo şirketi veya takip numarası girmelisiniz!');
+        return;
+      }
+      
+      fetch('/admin/update_shipping_info', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          order_id: orderId,
+          field: 'shipping_company',
+          value: shippingData.shipping_company
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Şimdi takip numarasını da güncelle
+          return fetch('/admin/update_shipping_info', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              order_id: orderId,
+              field: 'tracking_number',
+              value: shippingData.tracking_number
+            })
+          });
+        } else {
+          throw new Error(data.message);
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('🚚 Kargo bilgileri başarıyla güncellendi!');
+          // Sayfayı yenileme, sadece başarı mesajı
+        } else {
+          alert('Hata: ' + data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Bir hata oluştu: ' + error.message);
       });
     }
   </script>
