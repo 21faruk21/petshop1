@@ -1,18 +1,57 @@
 import os
 from werkzeug.utils import secure_filename
-from flask import Flask, render_template, session, redirect, url_for, request, jsonify
+from flask import Flask, render_template, session, redirect, url_for, request, jsonify, g
+from flask_caching import Cache
 import sqlite3
 import random, string, json
 from urllib.parse import quote
-from functools import wraps
+from functools import wraps, lru_cache
 from markupsafe import Markup
 from datetime import datetime
+import threading
+from contextlib import contextmanager
+import time
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
 UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000  # 1 year cache for static files
+app.config['CACHE_TYPE'] = 'SimpleCache'
+app.config['CACHE_DEFAULT_TIMEOUT'] = 300  # 5 minutes
+app.config['TEMPLATES_AUTO_RELOAD'] = False  # Production mode
+
+# Initialize caching
+cache = Cache(app)
+
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'}
+
+# Database connection pool
+class DatabasePool:
+    def __init__(self, db_path, max_connections=10):
+        self.db_path = db_path
+        self.max_connections = max_connections
+        self.connections = []
+        self.lock = threading.Lock()
+        
+    def get_connection(self):
+        with self.lock:
+            if self.connections:
+                return self.connections.pop()
+            else:
+                conn = sqlite3.connect(self.db_path, check_same_thread=False)
+                conn.row_factory = sqlite3.Row
+                return conn
+    
+    def return_connection(self, conn):
+        with self.lock:
+            if len(self.connections) < self.max_connections:
+                self.connections.append(conn)
+            else:
+                conn.close()
+
+# Global database pool
+db_pool = None
 
 # Veritabanı yolu - production ortamında farklı konumda olabilir
 if os.environ.get('RENDER'):
@@ -21,6 +60,20 @@ if os.environ.get('RENDER'):
 else:
     # Yerel geliştirme ortamında
     db_path = os.path.join(app.root_path, "instance", "petshop.db")
+
+# Database connection context manager
+@contextmanager
+def get_db_connection():
+    """Context manager for database connections with connection pooling"""
+    global db_pool
+    if not db_pool:
+        db_pool = DatabasePool(db_path)
+    
+    conn = db_pool.get_connection()
+    try:
+        yield conn
+    finally:
+        db_pool.return_connection(conn)
 
 
 # Veritabanı başlatma fonksiyonu
@@ -101,6 +154,8 @@ def init_database():
 # Uygulama başlatıldığında veritabanını oluştur
 try:
     init_database()
+    # Initialize database pool after database is ready
+    db_pool = DatabasePool(db_path)
 except Exception as e:
     print(f"Database initialization error: {e}")
 
@@ -170,6 +225,116 @@ def login_required(f):
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+# Helper function for subcategory filtering (optimized)
+def filter_products_by_subcategory(products, main_category, subcategory):
+    """Optimized subcategory filtering function"""
+    filtered_products = []
+    for p in products:
+        try:
+            if isinstance(p, dict):
+                subs = json.loads(p.get('subcategory', '[]')) if p.get('subcategory') else []
+            else:
+                # SQLite Row object
+                subs = json.loads(p[5]) if p[5] else []
+        except (json.JSONDecodeError, IndexError):
+            subs = [p.get('subcategory', '') if isinstance(p, dict) else p[5]] if (p.get('subcategory') if isinstance(p, dict) else p[5]) else []
+        
+        # Ana kategori filtresi
+        if main_category:
+            found_main_category = any(main_category.lower() in sub.lower() for sub in subs)
+            if not found_main_category:
+                continue
+        
+        # Alt kategori filtresi
+        if subcategory and subcategory != "Hepsi":
+            if subcategory not in subs:
+                continue
+        
+        # Convert to dict if needed and add subcategory info
+        if isinstance(p, dict):
+            product_dict = p.copy()
+        else:
+            product_dict = dict(p)
+        product_dict['subcategory'] = subs
+        filtered_products.append(product_dict)
+        
+    return filtered_products
+
+# Performance monitoring decorator
+def monitor_performance(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        result = func(*args, **kwargs)
+        end_time = time.time()
+        duration = end_time - start_time
+        if duration > 1.0:  # Log slow queries
+            print(f"SLOW QUERY: {func.__name__} took {duration:.2f} seconds")
+        return result
+    return wrapper
+
+# Cached database queries
+@cache.memoize(timeout=300)
+def get_popular_products(category=None, limit=10):
+    """Get popular products based on view/purchase patterns"""
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        query = "SELECT * FROM products WHERE in_stock = 1"
+        params = []
+        
+        if category:
+            query += " AND LOWER(category) = LOWER(?)"
+            params.append(category)
+            
+        # For now, order by ID desc (newest first) as popularity metric
+        query += " ORDER BY id DESC LIMIT ?"
+        params.append(limit)
+        
+        cursor.execute(query, params)
+        return [dict(row) for row in cursor.fetchall()]
+
+@cache.memoize(timeout=300)
+def get_products_by_category(category, brand=None, min_price=None, max_price=None):
+    """Cached product retrieval by category"""
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        query = "SELECT * FROM products WHERE in_stock = 1 AND LOWER(category) = LOWER(?)"
+        params = [category]
+        
+        if brand:
+            query += " AND LOWER(brand) = LOWER(?)"
+            params.append(brand)
+        if min_price:
+            query += " AND price >= ?"
+            params.append(float(min_price))
+        if max_price:
+            query += " AND price <= ?"
+            params.append(float(max_price))
+            
+        cursor.execute(query, params)
+        return [dict(row) for row in cursor.fetchall()]
+
+@cache.memoize(timeout=300)
+def get_campaigns():
+    """Cached campaigns retrieval"""
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM campaigns WHERE active = 1")
+        return [dict(row) for row in cursor.fetchall()]
+
+@cache.memoize(timeout=60)
+def get_product_count_by_category():
+    """Cached product count statistics"""
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT category, COUNT(*) as count 
+            FROM products 
+            WHERE in_stock = 1 
+            GROUP BY category
+        """)
+        return dict(cursor.fetchall())
+
 
 # ROUTES
 
@@ -187,6 +352,7 @@ def change_category():
     return redirect(url_for("index"))
 
 @app.route("/")
+@monitor_performance
 def index():
     # Eğer kullanıcı kategori seçmemişse, kategori seçme ekranı göster
     selected_category = session.get("selected_category")
@@ -202,60 +368,14 @@ def index():
     max_price = request.args.get("max_price", "")
 
     try:
-        conn = sqlite3.connect(db_path)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-
-        # Kampanyaları çek
-        cursor.execute("SELECT * FROM campaigns WHERE active = 1")
-        campaigns = cursor.fetchall()
-
-        query = "SELECT * FROM products WHERE in_stock = 1 AND LOWER(category) = LOWER(?)"
-        params = [category]
+        # Use cached campaign data
+        campaigns = get_campaigns()
         
-        # Marka filtresi
-        if brand:
-            query += " AND LOWER(brand) = LOWER(?)"
-            params.append(brand)
-            
-        # Fiyat aralığı filtresi
-        if min_price:
-            query += " AND price >= ?"
-            params.append(float(min_price))
-        if max_price:
-            query += " AND price <= ?"
-            params.append(float(max_price))
-            
-        cursor.execute(query, params)
-        products = cursor.fetchall()
-        conn.close()
+        # Use cached product data with filters
+        products = get_products_by_category(category, brand, min_price, max_price)
 
-        # Çoklu subcategory desteği: filtreleme
-        filtered_products = []
-        for p in products:
-            try:
-                subs = json.loads(p[5]) if p[5] else []
-            except:
-                subs = [p[5]] if p[5] else []
-            
-            # Ana kategori filtresi - subcategory içinde ana kategori var mı kontrol et
-            if main_category:
-                # Ana kategori filtresi varsa, alt kategorileri kontrol et
-                found_main_category = False
-                for sub in subs:
-                    if main_category.lower() in sub.lower():
-                        found_main_category = True
-                        break
-                if not found_main_category:
-                    continue
-            
-            # Alt kategori filtresi
-            if subcategory and subcategory != "Hepsi":
-                if subcategory not in subs:
-                    continue
-            
-            # Filtre yoksa veya geçtiyse ürünü ekle
-            filtered_products.append(dict(p, subcategory=subs))
+        # Çoklu subcategory desteği: filtreleme (optimized)
+        filtered_products = filter_products_by_subcategory(products, main_category, subcategory)
             
         return render_template("index.html", products=filtered_products, selected_category=category, campaigns=campaigns)
     except Exception as e:
@@ -267,9 +387,53 @@ def index():
 def products():
     return redirect(url_for("index"))
 
+@app.route("/api/search")
+@monitor_performance
+def search_products():
+    """Real-time product search API"""
+    query = request.args.get('q', '').strip()
+    category = session.get("selected_category")
+    
+    if not query or len(query) < 2:
+        return jsonify({"products": [], "suggestions": []})
+    
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            
+            # Search in product names, brands, and descriptions
+            search_query = """
+                SELECT * FROM products 
+                WHERE in_stock = 1 
+                AND (LOWER(name) LIKE ? OR LOWER(brand) LIKE ? OR LOWER(description) LIKE ?)
+            """
+            
+            if category:
+                search_query += " AND LOWER(category) = LOWER(?)"
+                params = [f"%{query.lower()}%", f"%{query.lower()}%", f"%{query.lower()}%", category]
+            else:
+                params = [f"%{query.lower()}%", f"%{query.lower()}%", f"%{query.lower()}%"]
+            
+            cursor.execute(search_query, params)
+            products = [dict(row) for row in cursor.fetchall()]
+            
+            # Generate search suggestions
+            suggestions = list(set([p['name'] for p in products[:5]]))
+            
+            return jsonify({
+                "products": products[:20],  # Limit to 20 results
+                "suggestions": suggestions,
+                "count": len(products)
+            })
+            
+    except Exception as e:
+        print(f"Search error: {e}")
+        return jsonify({"error": str(e)}), 500
+
 @app.route("/api/filter_products")
+@monitor_performance
 def filter_products():
-    """AJAX için dinamik ürün filtreleme endpoint'i"""
+    """AJAX için dinamik ürün filtreleme endpoint'i (optimized)"""
     selected_category = session.get("selected_category")
     if not selected_category:
         return jsonify({"error": "Kategori seçilmemiş"}), 400
@@ -282,68 +446,28 @@ def filter_products():
     max_price = request.args.get("max_price", "")
 
     try:
-        conn = sqlite3.connect(db_path)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-
-        query = "SELECT * FROM products WHERE in_stock = 1 AND LOWER(category) = LOWER(?)"
-        params = [category]
+        # Use cached product data
+        products = get_products_by_category(category, brand, min_price, max_price)
         
-        # Marka filtresi
-        if brand:
-            query += " AND LOWER(brand) = LOWER(?)"
-            params.append(brand)
-            
-        # Fiyat aralığı filtresi
-        if min_price:
-            query += " AND price >= ?"
-            params.append(float(min_price))
-        if max_price:
-            query += " AND price <= ?"
-            params.append(float(max_price))
-            
-        cursor.execute(query, params)
-        products = cursor.fetchall()
-        conn.close()
-
-        # Çoklu subcategory desteği: filtreleme
-        filtered_products = []
-        for p in products:
-            try:
-                subs = json.loads(p[5]) if p[5] else []
-            except:
-                subs = [p[5]] if p[5] else []
-            
-            # Ana kategori filtresi - subcategory içinde ana kategori var mı kontrol et
-            if main_category:
-                # Ana kategori filtresi varsa, alt kategorileri kontrol et
-                found_main_category = False
-                for sub in subs:
-                    if main_category.lower() in sub.lower():
-                        found_main_category = True
-                        break
-                if not found_main_category:
-                    continue
-            
-            # Alt kategori filtresi
-            if subcategory and subcategory != "Hepsi":
-                if subcategory not in subs:
-                    continue
-            
-            # JSON için ürünü düzenle
+        # Apply subcategory filtering
+        filtered_products = filter_products_by_subcategory(products, main_category, subcategory)
+        
+        # Convert to JSON format
+        json_products = []
+        for p in filtered_products:
             product_dict = {
                 "id": p["id"],
                 "name": p["name"],
                 "price": p["price"],
                 "image": p["image"],
                 "category": p["category"],
-                "subcategory": subs,
-                "brand": p["brand"],
-                "description": p["description"]
+                "subcategory": p.get("subcategory", []),
+                "brand": p.get("brand", ""),
+                "description": p.get("description", "")
             }
-            filtered_products.append(product_dict)
+            json_products.append(product_dict)
             
-        return jsonify({"products": filtered_products, "count": len(filtered_products)})
+        return jsonify({"products": json_products, "count": len(json_products)})
     except Exception as e:
         print(f"Database error in filter_products: {e}")
         return jsonify({"error": str(e)}), 500
@@ -985,6 +1109,53 @@ def order_track():
         else:
             not_found = True
     return render_template("order_track.html", result=result, items=items, not_found=not_found)
+
+
+@app.route("/api/suggestions")
+@monitor_performance 
+def get_suggestions():
+    """Get search suggestions for autocomplete"""
+    query = request.args.get('q', '').strip()
+    category = session.get("selected_category")
+    
+    if not query or len(query) < 2:
+        return jsonify({"suggestions": []})
+    
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            
+            # Get unique product names and brands for suggestions
+            suggestion_query = """
+                SELECT DISTINCT name, brand FROM products 
+                WHERE in_stock = 1 
+                AND (LOWER(name) LIKE ? OR LOWER(brand) LIKE ?)
+            """
+            
+            if category:
+                suggestion_query += " AND LOWER(category) = LOWER(?)"
+                params = [f"%{query.lower()}%", f"%{query.lower()}%", category]
+            else:
+                params = [f"%{query.lower()}%", f"%{query.lower()}%"]
+            
+            cursor.execute(suggestion_query + " LIMIT 10", params)
+            results = cursor.fetchall()
+            
+            suggestions = []
+            for row in results:
+                if row['name'] and query.lower() in row['name'].lower():
+                    suggestions.append(row['name'])
+                if row['brand'] and query.lower() in row['brand'].lower():
+                    suggestions.append(row['brand'])
+            
+            # Remove duplicates and limit to 8 suggestions
+            suggestions = list(set(suggestions))[:8]
+            
+            return jsonify({"suggestions": suggestions})
+            
+    except Exception as e:
+        print(f"Suggestions error: {e}")
+        return jsonify({"suggestions": []})
 
 
 # Error handlers
