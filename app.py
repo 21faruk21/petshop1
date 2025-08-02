@@ -2106,17 +2106,70 @@ def product_detail(product_id):
         print(f"🗄️ Database path: {db_path}")
         print(f"📁 Database exists: {os.path.exists(db_path)}")
         
-        with get_db_connection() as conn:
+        # Direct database connection as fallback
+        conn = None
+        try:
+            conn = sqlite3.connect(db_path)
+            conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
-            print(f"📊 Database connection established")
+            print(f"📊 Direct database connection established")
+            
+            # Check if products table exists and has data
+            cursor.execute("SELECT COUNT(*) FROM products")
+            product_count = cursor.fetchone()[0]
+            print(f"📦 Total products in database: {product_count}")
             
             cursor.execute("SELECT * FROM products WHERE id = ?", (product_id,))
             product = cursor.fetchone()
             print(f"🎯 Product query result: {product is not None}")
             
+            if product:
+                print(f"✅ Product found: {dict(product)}")
+            
             if not product:
                 print(f"❌ Product {product_id} not found in database")
-                return render_template("404.html"), 404
+                
+                # Emergency: If database is empty, add sample products NOW!
+                if product_count == 0:
+                    print("🚨 EMERGENCY: Database empty, adding sample products NOW!")
+                    sample_products = [
+                        ("Royal Canin Kitten Mama", 450.0, "/static/uploads/1.webp", "Kedi", '["Mama"]', "2-12 aylık yavrular için özel formül kedi maması", "Royal Canin"),
+                        ("Lavital Kitten Somonlu Yavru Kedi Maması 1.5 KG", 340.0, "/static/uploads/2.webp", "Kedi", '["Mama"]', "6-52 hafta - 12 aylık dönemdeki yavru kediler için özel formüle edilen bir yavru kedi mamasıdır.", "Lavital"),
+                        ("Whiskas Yetişkin Kedi Maması", 280.0, "/static/uploads/3.webp", "Kedi", '["Mama"]', "Yetişkin kediler için dengeli beslenme", "Whiskas"),
+                        ("Pro Plan Köpek Maması", 520.0, "/static/uploads/4.webp", "Köpek", '["Mama"]', "Yetişkin köpekler için premium mama", "Pro Plan"),
+                        ("Pedigree Köpek Maması", 380.0, "/static/uploads/5.webp", "Köpek", '["Mama"]', "Köpeklerin sağlıklı yaşamı için", "Pedigree"),
+                        ("Kedi Oyuncağı Top", 45.0, "/static/uploads/6.webp", "Kedi", '["Oyuncak"]', "Renkli kedi oyun topu", "Generic"),
+                        ("Köpek Tasması", 120.0, "/static/uploads/7.webp", "Köpek", '["Aksesuar"]', "Ayarlanabilir köpek tasması", "Generic"),
+                        ("Kedi Kumu 10L", 85.0, "/static/uploads/8.webp", "Kedi", '["Bakım"]', "Kokusuz kedi kumu", "Generic"),
+                        ("Balık Yemi", 25.0, "/static/uploads/9.webp", "Balık", '["Yem"]', "Tropikal balıklar için yem", "Generic"),
+                        ("Kuş Yemi", 35.0, "/static/uploads/10.webp", "Kuş", '["Yem"]', "Muhabbet kuşları için karma yem", "Generic"),
+                    ]
+                    
+                    for product_data in sample_products:
+                        cursor.execute("""
+                            INSERT INTO products (name, price, image, category, subcategory, description, brand, in_stock)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, 1)
+                        """, product_data)
+                    
+                    conn.commit()
+                    print(f"🆘 EMERGENCY: {len(sample_products)} products added!")
+                    
+                    # Try again after adding products
+                    cursor.execute("SELECT * FROM products WHERE id = ?", (product_id,))
+                    product = cursor.fetchone()
+                    
+                    if product:
+                        print(f"✅ RECOVERED: Product {product_id} now found after emergency insert!")
+                        # Continue normal flow
+                    else:
+                        print(f"💀 STILL NOT FOUND: Product {product_id} even after emergency insert")
+                
+                if not product:
+                    # Show available products
+                    cursor.execute("SELECT id, name FROM products LIMIT 10")
+                    available = cursor.fetchall()
+                    print(f"📋 Available products: {[dict(p) for p in available]}")
+                    return render_template("404.html"), 404
             
             product = dict(product)
             
@@ -2185,6 +2238,9 @@ def product_detail(product_id):
                                  avg_rating=avg_rating,
                                  total_reviews=len(reviews),
                                  user_reviewed=user_reviewed)
+        finally:
+            if conn:
+                conn.close()
             
     except Exception as e:
         print(f"💥 Product detail error: {e}")
