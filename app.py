@@ -414,12 +414,22 @@ def init_database():
 
 
 # Uygulama başlatıldığında veritabanını oluştur
+print(f"🚀 Mavi Petshop startup")
+print(f"🗄️ Database path: {db_path}")
+print(f"📁 Database exists before init: {os.path.exists(db_path)}")
+
 try:
     init_database()
+    print(f"✅ Database initialized successfully!")
+    print(f"📁 Database exists after init: {os.path.exists(db_path)}")
+    
     # Initialize database pool after database is ready
     db_pool = DatabasePool(db_path)
+    print(f"🏊 Database pool initialized")
 except Exception as e:
-    print(f"Database initialization error: {e}")
+    print(f"💥 Database initialization error: {e}")
+    import traceback
+    print(f"📋 Full init traceback: {traceback.format_exc()}")
 
 
 # --- Migration: Eksik kolonları ekle ---
@@ -2063,12 +2073,20 @@ def manage_user_reviews():
 @app.route("/product/<int:product_id>")
 def product_detail(product_id):
     try:
+        print(f"🔍 Product detail requested for ID: {product_id}")
+        print(f"🗄️ Database path: {db_path}")
+        print(f"📁 Database exists: {os.path.exists(db_path)}")
+        
         with get_db_connection() as conn:
             cursor = conn.cursor()
+            print(f"📊 Database connection established")
+            
             cursor.execute("SELECT * FROM products WHERE id = ?", (product_id,))
             product = cursor.fetchone()
+            print(f"🎯 Product query result: {product is not None}")
             
             if not product:
+                print(f"❌ Product {product_id} not found in database")
                 return render_template("404.html"), 404
             
             product = dict(product)
@@ -2140,7 +2158,10 @@ def product_detail(product_id):
                                  user_reviewed=user_reviewed)
             
     except Exception as e:
-        print(f"Product detail error: {e}")
+        print(f"💥 Product detail error: {e}")
+        print(f"🔍 Error type: {type(e).__name__}")
+        import traceback
+        print(f"📋 Full traceback: {traceback.format_exc()}")
         return render_template("404.html"), 404
 
 # ERROR HANDLERS
