@@ -437,6 +437,13 @@ def init_database():
     else:
         print(f"📦 Database already has {product_count} products")
 
+    # Add user balance column if not exists
+    try:
+        cursor.execute("ALTER TABLE users ADD COLUMN balance REAL DEFAULT 0.0")
+        print("✅ Balance column added to users table!")
+    except Exception as e:
+        print(f"Balance column already exists or error: {e}")
+
     conn.commit()
     conn.close()
     print("Database initialized successfully!")
@@ -1141,7 +1148,9 @@ def contact():
 
 @app.route("/thank_you")
 def thank_you():
-    return render_template("thank_you.html")
+    # Get and clear order message
+    order_message = session.pop('order_message', None)
+    return render_template("thank_you.html", order_message=order_message)
 
 
 @app.route("/admin/edit/<int:product_id>", methods=["GET", "POST"])
@@ -1257,7 +1266,20 @@ def add_to_cart(product_id):
 def cart():
     cart_items = session.get("cart", [])
     total = sum(item["price"] * item.get("quantity", 1) for item in cart_items)
-    return render_template("cart.html", cart_items=cart_items, total=total)
+    
+    # Get user info if logged in
+    user = None
+    user_balance = 0
+    if session.get("user_logged_in"):
+        user = user_manager.get_user_by_id(session["user_id"])
+        if user:
+            user_balance = user.get("balance", 0)
+    
+    return render_template("cart.html", 
+                         cart_items=cart_items, 
+                         total=total,
+                         user=user,
+                         user_balance=user_balance)
 
 
 @app.route("/admin/delete/<int:product_id>")
@@ -1331,6 +1353,17 @@ def order():
         email = request.form.get("email", "")
         address = request.form.get("address", "")
         note = request.form.get("note", "")
+        payment_method = request.form.get("payment_method", "whatsapp")
+        
+        # Check balance payment
+        balance_paid = False
+        if payment_method == "balance" and session.get("user_logged_in"):
+            user = user_manager.get_user_by_id(session["user_id"])
+            if user and user.get("balance", 0) >= total:
+                balance_paid = True
+            else:
+                session['cart_message'] = "Yetersiz bakiye! WhatsApp ile ödeme yapabilirsiniz."
+                return redirect(url_for("cart"))
 
         # Veritabanına kaydet ve stokları güncelle
         conn = sqlite3.connect(db_path)
@@ -1354,11 +1387,12 @@ def order():
             conn.close()
             return f"Stok yetersiz: {', '.join(stock_issues)}", 400
         
-        # Create order
+        # Create order with appropriate status
+        order_status = "Ödendi" if balance_paid else "Hazırlanıyor"
         cursor.execute("""
             INSERT INTO orders (order_code, items, total_price, customer_name, customer_phone, customer_email, customer_address, address, note, status)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (order_code, json.dumps(cart_items), total, customer_name, phone, email, address, address, note, 'Hazırlanıyor'))
+        """, (order_code, json.dumps(cart_items), total, customer_name, phone, email, address, address, note, order_status))
         
         # Update stock for each item and check for low stock
         for item in cart_items:
@@ -1373,6 +1407,12 @@ def order():
                 threshold = product[2] or 5
                 if current_stock <= threshold:
                     notification_service.notify_low_stock(product[0], current_stock, threshold)
+        
+        # Deduct balance if paid with balance
+        if balance_paid:
+            cursor.execute("UPDATE users SET balance = balance - ? WHERE id = ?", 
+                         (total, session["user_id"]))
+            print(f"💰 Balance payment: User {session['user_id']} paid {total} TL - Order: {order_code}")
         
         conn.commit()
         conn.close()
@@ -1414,13 +1454,19 @@ Mavi Petshop Ekibi
             
             notification_service.send_email(email, subject, body)
 
-        # WhatsApp yönlendirmesi
-        whatsapp_number = "905422192125"
-        message = f"""🐾 Merhaba! Siparişimi tamamlamak istiyorum.\n\nSipariş Kodu: {order_code}\nAd Soyad: {customer_name}\nToplam Tutar: {total} TL\n\nIBAN bilgilerinizi paylaşabilir misiniz?\n"""
-        whatsapp_link = f"https://wa.me/{whatsapp_number}?text={quote(message)}"
-
+        # Clear cart
         session.pop("cart", None)
-        return redirect(whatsapp_link)
+        
+        # Set success message
+        if balance_paid:
+            session['order_message'] = f"✅ Siparişiniz bakiyenizden ödenerek başarıyla alındı! Sipariş Kodu: {order_code}"
+            return redirect(url_for("thank_you"))
+        else:
+            # WhatsApp yönlendirmesi
+            whatsapp_number = "905422192125"
+            message = f"""🐾 Merhaba! Siparişimi tamamlamak istiyorum.\n\nSipariş Kodu: {order_code}\nAd Soyad: {customer_name}\nToplam Tutar: {total} TL\n\nIBAN bilgilerinizi paylaşabilir misiniz?\n"""
+            whatsapp_link = f"https://wa.me/{whatsapp_number}?text={quote(message)}"
+            return redirect(whatsapp_link)
     except Exception as e:
         print(f"ORDER ERROR: {e}")
         return f"Bir hata oluştu: {e}", 500
@@ -1785,7 +1831,8 @@ def user_profile():
     return render_template("user_profile.html", 
                          user=user, 
                          orders=orders, 
-                         wishlist_count=wishlist_count)
+                         wishlist_count=wishlist_count,
+                         user_balance=user.get("balance", 0))
 
 @app.route("/profile/edit", methods=["GET", "POST"])
 @user_login_required
@@ -2639,6 +2686,106 @@ def admin_panel():
                          stock_stats=stock_stats,
                          low_stock_products=low_stock_products)
 
+
+@app.route("/admin/users")
+@login_required
+def admin_users():
+    """Admin user management page"""
+    try:
+        search_query = request.args.get('search', '').strip()
+        users = []
+        
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            
+            if search_query:
+                # Search by user ID, email, or name
+                cursor.execute("""
+                    SELECT id, first_name, last_name, email, phone, balance, created_at
+                    FROM users 
+                    WHERE id LIKE ? OR email LIKE ? OR first_name LIKE ? OR last_name LIKE ?
+                    ORDER BY created_at DESC
+                """, (f"%{search_query}%", f"%{search_query}%", f"%{search_query}%", f"%{search_query}%"))
+            else:
+                # Get all users, recent first
+                cursor.execute("""
+                    SELECT id, first_name, last_name, email, phone, balance, created_at
+                    FROM users 
+                    ORDER BY created_at DESC
+                    LIMIT 50
+                """)
+            
+            users = [dict(row) for row in cursor.fetchall()]
+            
+            # Get total user count
+            cursor.execute("SELECT COUNT(*) FROM users")
+            total_users = cursor.fetchone()[0]
+            
+            # Get total balance in system
+            cursor.execute("SELECT SUM(balance) FROM users")
+            total_balance = cursor.fetchone()[0] or 0
+        
+        return render_template("admin_users.html", 
+                             users=users, 
+                             search_query=search_query,
+                             total_users=total_users,
+                             total_balance=total_balance)
+                             
+    except Exception as e:
+        print(f"Admin users error: {e}")
+        return render_template("admin_users.html", users=[], error=str(e))
+
+@app.route("/admin/users/balance", methods=["POST"])
+@login_required
+def admin_update_balance():
+    """Update user balance"""
+    try:
+        data = request.get_json()
+        user_id = data.get("user_id")
+        amount = float(data.get("amount", 0))
+        operation = data.get("operation")  # 'add' or 'subtract'
+        note = data.get("note", "")
+        
+        if not user_id or not operation:
+            return jsonify({"success": False, "message": "Eksik parametreler"}), 400
+            
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            
+            # Get current balance
+            cursor.execute("SELECT balance, first_name, last_name FROM users WHERE id = ?", (user_id,))
+            user = cursor.fetchone()
+            
+            if not user:
+                return jsonify({"success": False, "message": "Kullanıcı bulunamadı"}), 404
+                
+            current_balance = user[0] or 0
+            user_name = f"{user[1]} {user[2]}"
+            
+            if operation == "add":
+                new_balance = current_balance + amount
+            elif operation == "subtract":
+                new_balance = max(0, current_balance - amount)  # Don't allow negative balance
+            else:
+                return jsonify({"success": False, "message": "Geçersiz işlem"}), 400
+            
+            # Update balance
+            cursor.execute("UPDATE users SET balance = ? WHERE id = ?", (new_balance, user_id))
+            
+            # Log the transaction (you might want to create a balance_transactions table)
+            print(f"💰 Balance update: User {user_name} (ID:{user_id}) - {operation} {amount} TL - New balance: {new_balance} TL - Note: {note}")
+            
+            conn.commit()
+            
+            return jsonify({
+                "success": True, 
+                "message": f"Bakiye güncellendi: {current_balance:.2f} → {new_balance:.2f} TL",
+                "new_balance": new_balance
+            })
+            
+    except Exception as e:
+        print(f"Balance update error: {e}")
+        return jsonify({"success": False, "message": str(e)}), 500
 
 @app.route("/admin/campaigns", methods=["GET", "POST"])
 @login_required

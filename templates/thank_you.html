@@ -39,8 +39,17 @@
 <body>
   <div class="thank-card">
     <h1><i class="fas fa-check-circle"></i> Siparişiniz Alındı!</h1>
+    {% if order_message %}
+    <div class="alert alert-success mt-3">
+      {{ order_message }}
+    </div>
+    {% else %}
     <p class="lead mt-3">WhatsApp üzerinden sipariş detaylarınız iletildi. En kısa sürede sizinle iletişime geçeceğiz.</p>
+    {% endif %}
     <a href="/" class="btn btn-custom">Alışverişe Devam Et</a>
+    {% if session.user_logged_in %}
+    <a href="/profile" class="btn btn-outline-primary ms-2">Siparişlerim</a>
+    {% endif %}
   </div>
 <script src="https://kit.fontawesome.com/a2d9d6ea5c.js" crossorigin="anonymous"></script>
 </body>

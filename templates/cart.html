@@ -257,38 +257,77 @@
 
       <!-- Toplam Tutar Kartı -->
       <div class="card card-order p-4">
-        <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex justify-content-between align-items-center mb-3">
           <h4>Toplam Tutar:</h4>
           <h4 class="text-success">{{ total }} TL</h4>
         </div>
+        {% if user %}
+        <div class="d-flex justify-content-between align-items-center">
+          <span><strong>Bakiyeniz:</strong></span>
+          <span class="text-{{ 'success' if user_balance >= total else 'warning' }}">{{ "%.2f"|format(user_balance) }} TL</span>
+        </div>
+        {% if user_balance >= total %}
+        <div class="alert alert-success mt-2 mb-0">
+          <i class="fas fa-check-circle me-2"></i>Bu siparişi bakiyenizle ödeyebilirsiniz!
+        </div>
+        {% else %}
+        <div class="alert alert-warning mt-2 mb-0">
+          <i class="fas fa-exclamation-triangle me-2"></i>Yetersiz bakiye. {{ "%.2f"|format(total - user_balance) }} TL daha gerekli.
+        </div>
+        {% endif %}
+        {% endif %}
       </div>
 
       <!-- Sipariş Formu Kartı -->
       <div class="card card-order p-4">
+        <h5 class="mb-3">
+          <i class="fas fa-shipping-fast me-2"></i>Sipariş Bilgileri
+          {% if user %}
+          <span class="badge bg-primary ms-2">Üye - Otomatik Dolduruldu</span>
+          {% endif %}
+        </h5>
+        
         <form method="POST" action="/order" class="row g-3">
           <div class="col-md-6">
             <label class="form-label">Ad Soyad</label>
-            <input type="text" name="customer_name" class="form-control" required>
+            <input type="text" name="customer_name" class="form-control" 
+                   value="{{ (user.first_name + ' ' + user.last_name) if user else '' }}" required>
           </div>
           <div class="col-md-6">
             <label class="form-label">Telefon</label>
-            <input type="tel" name="phone" class="form-control" placeholder="05XX XXX XX XX" required>
+            <input type="tel" name="phone" class="form-control" placeholder="05XX XXX XX XX" 
+                   value="{{ user.phone if user else '' }}" required>
           </div>
           <div class="col-md-6">
             <label class="form-label">E-posta</label>
-            <input type="email" name="email" class="form-control" placeholder="ornek@mail.com" required>
+            <input type="email" name="email" class="form-control" placeholder="ornek@mail.com" 
+                   value="{{ user.email if user else '' }}" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Ödeme Yöntemi</label>
+            <select name="payment_method" class="form-control" id="paymentMethod" required>
+              <option value="whatsapp">WhatsApp ile Tamamla</option>
+              {% if user and user_balance >= total %}
+              <option value="balance">Bakiye ile Öde ({{ "%.2f"|format(user_balance) }} TL)</option>
+              {% endif %}
+            </select>
           </div>
           <div class="col-12">
             <label class="form-label">Adres</label>
-            <textarea name="address" class="form-control" rows="3" required></textarea>
+            <textarea name="address" class="form-control" rows="3" 
+                      placeholder="Detaylı adresinizi yazın..." required>{{ user.address if user and user.address else '' }}</textarea>
           </div>
           <div class="col-12">
             <label class="form-label">Not (isteğe bağlı)</label>
-            <textarea name="note" class="form-control" rows="2"></textarea>
+            <textarea name="note" class="form-control" rows="2" 
+                      placeholder="Sipariş ile ilgili notlarınız..."></textarea>
           </div>
           <div class="col-12">
-            <button type="submit" class="btn w-100" style="background: linear-gradient(135deg, #25d366 0%, #128c7e 100%); color: white; border: none; padding: 15px 24px; border-radius: 30px; font-weight: 600; font-size: 16px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(37, 211, 102, 0.4)'; this.style.background='linear-gradient(135deg, #128c7e 0%, #075e54 100%)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(37, 211, 102, 0.3)'; this.style.background='linear-gradient(135deg, #25d366 0%, #128c7e 100%)'">
-              Siparişi WhatsApp'tan Tamamla
+            <button type="submit" class="btn w-100" id="orderBtn" 
+                    style="background: linear-gradient(135deg, #25d366 0%, #128c7e 100%); color: white; border: none; padding: 15px 24px; border-radius: 30px; font-weight: 600; font-size: 16px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);" 
+                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(37, 211, 102, 0.4)'; this.style.background='linear-gradient(135deg, #128c7e 0%, #075e54 100%)'" 
+                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(37, 211, 102, 0.3)'; this.style.background='linear-gradient(135deg, #25d366 0%, #128c7e 100%)'">
+              <i class="fas fa-whatsapp me-2"></i>Siparişi WhatsApp'tan Tamamla
             </button>
           </div>
         </form>
@@ -340,6 +379,24 @@
       setDarkMode(isDark);
       localStorage.setItem('darkMode', isDark);
     });
+
+    // Payment method change handler
+    const paymentMethod = document.getElementById('paymentMethod');
+    const orderBtn = document.getElementById('orderBtn');
+    
+    if (paymentMethod && orderBtn) {
+      paymentMethod.addEventListener('change', function() {
+        if (this.value === 'balance') {
+          orderBtn.innerHTML = '<i class="fas fa-wallet me-2"></i>Bakiye ile Sipariş Ver';
+          orderBtn.style.background = 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)';
+          orderBtn.style.boxShadow = '0 4px 15px rgba(59, 130, 246, 0.3)';
+        } else {
+          orderBtn.innerHTML = '<i class="fas fa-whatsapp me-2"></i>Siparişi WhatsApp\'tan Tamamla';
+          orderBtn.style.background = 'linear-gradient(135deg, #25d366 0%, #128c7e 100%)';
+          orderBtn.style.boxShadow = '0 4px 15px rgba(37, 211, 102, 0.3)';
+        }
+      });
+    }
   </script>
 </body>
 </html>

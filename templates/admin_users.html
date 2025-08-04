@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Üye Yönetimi - Admin Panel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='modern.css') }}" rel="stylesheet">
+    
+    <style>
+        .user-card {
+            background: #23262f;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(108, 168, 254, 0.2);
+            transition: all 0.3s ease;
+        }
+        .user-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(108, 168, 254, 0.15);
+        }
+        .balance-display {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #00e6a7;
+        }
+        .balance-negative {
+            color: #ff4757;
+        }
+        .balance-actions {
+            gap: 10px;
+        }
+        .user-info {
+            border-bottom: 1px solid rgba(108, 168, 254, 0.1);
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .search-box {
+            background: #23262f;
+            border: 1px solid rgba(108, 168, 254, 0.3);
+            color: #f5f5f5;
+            border-radius: 25px;
+            padding: 12px 20px;
+            width: 100%;
+            max-width: 400px;
+        }
+        .search-box:focus {
+            border-color: #6ea8fe;
+            box-shadow: 0 0 0 0.2rem rgba(110, 168, 254, 0.25);
+            color: #f5f5f5;
+            background: #23262f;
+        }
+        .balance-input {
+            background: #2d3339;
+            border: 1px solid rgba(108, 168, 254, 0.3);
+            color: #f5f5f5;
+            border-radius: 8px;
+        }
+        .balance-input:focus {
+            background: #2d3339;
+            border-color: #6ea8fe;
+            color: #f5f5f5;
+            box-shadow: 0 0 0 0.2rem rgba(110, 168, 254, 0.25);
+        }
+    </style>
+</head>
+<body class="dark-mode">
+    <div class="container-fluid py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1><i class="fas fa-users text-primary me-2"></i>Üye Yönetimi</h1>
+                <p class="text-muted">Üyeleri yönet ve bakiye işlemleri yap</p>
+            </div>
+            <div class="admin-header-actions d-flex align-items-center gap-2">
+                <button id="themeToggle" class="btn btn-outline-primary theme-btn" title="Tema Değiştir">
+                    <i id="themeIcon" class="fa fa-moon"></i>
+                </button>
+                <a href="{{ url_for('admin_panel') }}" class="btn btn-outline-primary" title="Admin Panel'e Dön">
+                    <i class="fas fa-arrow-left me-2"></i>Geri
+                </a>
+            </div>
+        </div>
+
+        <!-- İstatistikler -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <h3>{{ total_users }}</h3>
+                    <p class="mb-0">Toplam Üye</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <h3>{{ "%.2f"|format(total_balance) }} TL</h3>
+                    <p class="mb-0">Toplam Bakiye</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <h3>{{ users|length }}</h3>
+                    <p class="mb-0">Gösterilen Üye</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Arama -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <form method="GET" class="d-flex">
+                    <input type="text" name="search" value="{{ search_query or '' }}" 
+                           placeholder="Üye No, Email, İsim ile ara..." class="search-box me-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Hata mesajı -->
+        {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+
+        <!-- Kullanıcı Listesi -->
+        {% if users %}
+        <div class="row">
+            {% for user in users %}
+            <div class="col-lg-6 col-xl-4">
+                <div class="user-card">
+                    <div class="user-info">
+                        <h5><i class="fas fa-user me-2"></i>{{ user.first_name }} {{ user.last_name }}</h5>
+                        <p class="text-muted mb-1"><strong>ID:</strong> {{ user.id }}</p>
+                        <p class="text-muted mb-1"><strong>Email:</strong> {{ user.email }}</p>
+                        {% if user.phone %}
+                        <p class="text-muted mb-1"><strong>Telefon:</strong> {{ user.phone }}</p>
+                        {% endif %}
+                        <p class="text-muted mb-0"><strong>Kayıt:</strong> {{ user.created_at or 'Bilinmiyor' }}</p>
+                    </div>
+                    
+                    <div class="balance-section">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span><strong>Bakiye:</strong></span>
+                            <span class="balance-display {{ 'balance-negative' if (user.balance or 0) < 0 else '' }}">
+                                {{ "%.2f"|format(user.balance or 0) }} TL
+                            </span>
+                        </div>
+                        
+                        <div class="balance-actions d-flex flex-column gap-2">
+                            <div class="input-group input-group-sm">
+                                <input type="number" step="0.01" min="0" class="form-control balance-input balance-amount-{{ user.id }}" 
+                                       placeholder="Miktar (TL)">
+                                <input type="text" class="form-control balance-input balance-note-{{ user.id }}" 
+                                       placeholder="Not (opsiyonel)">
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-success btn-sm flex-fill" 
+                                        onclick="updateBalance({{ user.id }}, 'add')">
+                                    <i class="fas fa-plus me-1"></i>Ekle
+                                </button>
+                                <button class="btn btn-warning btn-sm flex-fill" 
+                                        onclick="updateBalance({{ user.id }}, 'subtract')">
+                                    <i class="fas fa-minus me-1"></i>Çıkar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+            <h3>Üye Bulunamadı</h3>
+            <p class="text-muted">
+                {% if search_query %}
+                "{{ search_query }}" için arama sonucu bulunamadı.
+                {% else %}
+                Henüz hiç üye yok.
+                {% endif %}
+            </p>
+        </div>
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+    <script>
+        // Initialize theme system for admin users
+        document.addEventListener('DOMContentLoaded', function() {
+            if (PetShopApp && PetShopApp.theme) {
+                PetShopApp.theme.init();
+            }
+            console.log('🔧 Admin users tema sistemi başlatıldı!');
+        });
+
+        // Update user balance
+        function updateBalance(userId, operation) {
+            const amountInput = document.querySelector(`.balance-amount-${userId}`);
+            const noteInput = document.querySelector(`.balance-note-${userId}`);
+            
+            const amount = parseFloat(amountInput.value);
+            const note = noteInput.value.trim();
+            
+            if (!amount || amount <= 0) {
+                alert('Lütfen geçerli bir miktar girin!');
+                return;
+            }
+            
+            const operationText = operation === 'add' ? 'ekleniyor' : 'çıkarılıyor';
+            if (!confirm(`${amount} TL bakiye ${operationText}. Emin misiniz?`)) {
+                return;
+            }
+            
+            // Show loading
+            const buttons = document.querySelectorAll(`[onclick*="${userId}"]`);
+            buttons.forEach(btn => {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            });
+            
+            fetch('/admin/users/balance', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    user_id: userId,
+                    amount: amount,
+                    operation: operation,
+                    note: note
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update balance display
+                    const balanceDisplay = document.querySelector(`.user-card:has([onclick*="${userId}"]) .balance-display`);
+                    if (balanceDisplay) {
+                        balanceDisplay.textContent = `${data.new_balance.toFixed(2)} TL`;
+                        balanceDisplay.className = `balance-display ${data.new_balance < 0 ? 'balance-negative' : ''}`;
+                    }
+                    
+                    // Clear inputs
+                    amountInput.value = '';
+                    noteInput.value = '';
+                    
+                    // Show success
+                    alert(`✅ ${data.message}`);
+                } else {
+                    alert(`❌ Hata: ${data.message}`);
+                }
+            })
+            .catch(error => {
+                console.error('Balance update error:', error);
+                alert('❌ Bir hata oluştu!');
+            })
+            .finally(() => {
+                // Restore buttons
+                buttons.forEach((btn, index) => {
+                    btn.disabled = false;
+                    if (index === 0) {
+                        btn.innerHTML = '<i class="fas fa-plus me-1"></i>Ekle';
+                    } else {
+                        btn.innerHTML = '<i class="fas fa-minus me-1"></i>Çıkar';
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+</html>

@@ -56,6 +56,7 @@
         .stat-orders { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
         .stat-wishlist { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
         .stat-reviews { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .stat-balance { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
         
         .order-item {
             border: 1px solid #e9ecef;
@@ -145,7 +146,16 @@
     <div class="container">
         <!-- Profile Stats -->
         <div class="row mb-4">
-            <div class="col-md-4">
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="stat-card">
+                    <div class="stat-icon stat-balance">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                    <h3>{{ "%.2f"|format(user_balance or 0) }} TL</h3>
+                    <p class="text-muted mb-0">Bakiye</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
                 <div class="stat-card">
                     <div class="stat-icon stat-orders">
                         <i class="fas fa-shopping-bag"></i>
@@ -154,7 +164,7 @@
                     <p class="text-muted mb-0">Toplam Sipariş</p>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-lg-3 col-md-6 mb-3">
                 <div class="stat-card">
                     <div class="stat-icon stat-wishlist">
                         <i class="fas fa-heart"></i>
@@ -163,7 +173,7 @@
                     <p class="text-muted mb-0">Favori Ürün</p>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-lg-3 col-md-6 mb-3">
                 <div class="stat-card">
                     <div class="stat-icon stat-reviews">
                         <i class="fas fa-star"></i>
