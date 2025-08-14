@@ -1,5 +1,5 @@
 // Service Worker for Pethome PWA
-const CACHE_NAME = 'pethome-v1.6.0';
+const CACHE_NAME = 'pethome-v1.7.0';
 const urlsToCache = [
   '/',
   '/static/modern.css',

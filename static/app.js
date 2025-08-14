@@ -43,49 +43,13 @@ const PetShopApp = {
     }
   },
   
-  // Enhanced Theme Management System
+  // Theme system - DISABLED (using theme.js instead)
   theme: {
     initialized: false,
     init() {
-      if (this.initialized) {
-        return;
-      }
-      console.log('🎨 Tema sistemi başlatılıyor...');
-      
-      // Handle multiple theme toggle buttons
-      const themeToggles = document.querySelectorAll('#themeToggle, .theme-btn');
-      const themeIcons = document.querySelectorAll('#themeIcon');
-      
-      // Fix: migrate old darkMode key to new theme key for consistency
-      const oldDarkMode = localStorage.getItem('darkMode');
-      if (oldDarkMode && !localStorage.getItem('theme')) {
-        localStorage.setItem('theme', oldDarkMode === 'true' ? 'dark' : 'light');
-        localStorage.removeItem('darkMode'); // Clean up old key
-      }
-      
-      // Load saved theme
-      const savedTheme = localStorage.getItem('theme');
-      if (savedTheme === 'dark') {
-        this.setTheme(true);
-      }
-      
-      // Attach event listeners to all theme buttons
-      themeToggles.forEach(toggle => {
-        toggle.addEventListener('click', (e) => {
-          e.preventDefault();
-          const isDark = !document.body.classList.contains('dark-mode');
-          this.setTheme(isDark);
-        });
-      });
-      
-      // Handle legacy theme toggle functions
-      window.toggleTheme = () => {
-        const isDark = !document.body.classList.contains('dark-mode');
-        this.setTheme(isDark);
-      };
-      
-      console.log('✅ Tema sistemi başlatıldı!');
+      console.log('🎨 App.js tema sistemi devre dışı - theme.js kullanılıyor');
       this.initialized = true;
+      return; // Tema sistemi theme.js'de
     },
     
     setTheme(isDark) {

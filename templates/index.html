@@ -338,35 +338,35 @@
     // Set global variables for the app
     window.selectedCategory = "{{ selected_category|default('Köpek') }}";
   </script>
-  <script src="{{ url_for('static', filename='app.js') }}?v=1.6.0"></script>
-  <script src="{{ url_for('static', filename='theme.js') }}?v=1.6.0"></script>
+  <script src="{{ url_for('static', filename='app.js') }}?v=1.7.0"></script>
+  <script src="{{ url_for('static', filename='theme.js') }}?v=1.7.0"></script>
   <script>
-    // Initialize the app modules
+    // Sadece çalışan modülleri başlat - tema theme.js'de
     document.addEventListener('DOMContentLoaded', function() {
-      // Initialize theme first (most important for UX)
-      if (PetShopApp && PetShopApp.theme) {
-        PetShopApp.theme.init();
-      }
+      console.log('🚀 Sayfa yüklendi, modüller başlatılıyor...');
       
-      // Initialize other modules
-      if (PetShopApp && PetShopApp.megaMenu) {
-        PetShopApp.megaMenu.init();
-      }
-      
-      if (PetShopApp && PetShopApp.search) {
-        PetShopApp.search.init();
-      }
-      
-      if (PetShopApp && PetShopApp.ux) {
-        PetShopApp.ux.init();
-      }
-      
-      if (PetShopApp && PetShopApp.products) {
-        PetShopApp.products.init();
-      }
-      
-      if (PetShopApp && PetShopApp.filters) {
-        PetShopApp.filters.init();
+      // Sadece var olan modülleri güvenli şekilde başlat
+      try {
+        if (window.PetShopApp) {
+          if (PetShopApp.megaMenu && typeof PetShopApp.megaMenu.init === 'function') {
+            PetShopApp.megaMenu.init();
+          }
+          
+          if (PetShopApp.search && typeof PetShopApp.search.init === 'function') {
+            PetShopApp.search.init();
+          }
+          
+          if (PetShopApp.ux && typeof PetShopApp.ux.init === 'function') {
+            PetShopApp.ux.init();
+          }
+          
+          if (PetShopApp.wishlist && typeof PetShopApp.wishlist.init === 'function') {
+            PetShopApp.wishlist.init();
+          }
+        }
+        console.log('✅ Modüller başlatıldı!');
+      } catch (error) {
+        console.error('❌ Modül başlatma hatası:', error);
       }
     });
   </script>
