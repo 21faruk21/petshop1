@@ -338,17 +338,48 @@
     // Set global variables for the app
     window.selectedCategory = "{{ selected_category|default('Köpek') }}";
   </script>
-  <script src="{{ url_for('static', filename='app.js') }}?v=1.8.0"></script>
-  <script src="{{ url_for('static', filename='theme.js') }}?v=1.8.0"></script>
+  <script src="{{ url_for('static', filename='app.js') }}?v=2.0.0&bust={{ range(1000, 9999) | random }}"></script>
+  <script src="{{ url_for('static', filename='theme.js') }}?v=2.0.0&bust={{ range(1000, 9999) | random }}"></script>
   <script>
-    // Minimal başlatma - sadece tema theme.js'de çalışır
+    // MANUEL TEMA TEST KODU - MAX MODE
     document.addEventListener('DOMContentLoaded', function() {
       console.log('🚀 Sayfa hazır - tema theme.js aktif');
       
-      // Sadece wishlist için güvenli çağrı (ürün detay sayfası için)
-      if (window.PetShopApp && PetShopApp.wishlist) {
-        console.log('❤️ Wishlist hazır');
-      }
+      // Tema butonu manual test
+      setTimeout(() => {
+        const themeBtn = document.getElementById('themeToggle');
+        if (themeBtn) {
+          console.log('✅ Tema butonu bulundu:', themeBtn);
+          
+          // Manuel tema toggle fonksiyonu
+          window.manualThemeToggle = function() {
+            const body = document.body;
+            const isDark = body.classList.contains('dark-mode');
+            const newDark = !isDark;
+            
+            body.classList.toggle('dark-mode', newDark);
+            
+            const icon = document.getElementById('themeIcon');
+            if (icon) {
+              icon.className = newDark ? 'fa fa-sun' : 'fa fa-moon';
+            }
+            
+            localStorage.setItem('theme', newDark ? 'dark' : 'light');
+            console.log('🎨 Manuel tema değiştirildi:', newDark ? 'dark' : 'light');
+          };
+          
+          // Butona manuel event listener ekle
+          themeBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('🎨 Tema butonu tıklandı!');
+            window.manualThemeToggle();
+          });
+          
+          console.log('✅ Manuel tema sistemi aktif! Test için: manualThemeToggle()');
+        } else {
+          console.error('❌ Tema butonu bulunamadı!');
+        }
+      }, 1000);
     });
   </script>
   

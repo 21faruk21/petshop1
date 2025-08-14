@@ -53,45 +53,8 @@ const PetShopApp = {
     },
     
     setTheme(isDark) {
-      PetShopApp.performance.mark('theme-change-start');
-      
-      const elements = {
-        body: document.body,
-        mainBox: document.querySelector('.main-box'),
-        siteTitle: document.querySelector('.site-title'),
-        siteDesc: document.querySelector('.site-desc'),
-        filterCard: document.querySelector('.filter-card'),
-        productCards: document.querySelectorAll('.product-card'),
-        buttons: document.querySelectorAll('.btn-outline-primary, .btn-primary, .cart-btn, .btn-light'),
-        alerts: document.querySelectorAll('.alert-info'),
-        forms: document.querySelectorAll('.form-control, .form-select, .form-label'),
-        themeIcon: document.getElementById('themeIcon')
-      };
-      
-      // Apply theme classes efficiently
-      Object.keys(elements).forEach(key => {
-        const element = elements[key];
-        if (element) {
-          if (element.length) {
-            // NodeList
-            element.forEach(el => el.classList.toggle('dark-mode', isDark));
-          } else {
-            // Single element
-            element.classList.toggle('dark-mode', isDark);
-          }
-        }
-      });
-      
-      // Update theme icon
-      if (elements.themeIcon) {
-        elements.themeIcon.className = isDark ? 'fa fa-sun' : 'fa fa-moon';
-      }
-      
-      // Save theme preference
-      localStorage.setItem('theme', isDark ? 'dark' : 'light');
-      
-      PetShopApp.performance.mark('theme-change-end');
-      PetShopApp.performance.measure('theme-change', 'theme-change-start', 'theme-change-end');
+      console.log('🎨 App.js setTheme çağrıldı ama devre dışı - theme.js kullanın');
+      return; // Tema sistemi theme.js'de
     }
   },
   
