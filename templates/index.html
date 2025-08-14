@@ -9,7 +9,7 @@
   
   <!-- Preload critical resources -->
   <link rel="preload" href="{{ url_for('static', filename='modern.css') }}?v=1.3.0" as="style">
-  <link rel="preload" href="{{ url_for('static', filename='app.js') }}" as="script">
+  <!-- app.js preload kaldırıldı -->
   
   <!-- Critical CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
@@ -338,50 +338,68 @@
     // Set global variables for the app
     window.selectedCategory = "{{ selected_category|default('Köpek') }}";
   </script>
-  <script src="{{ url_for('static', filename='app.js') }}?v=2.0.0&bust={{ range(1000, 9999) | random }}"></script>
-  <script src="{{ url_for('static', filename='theme.js') }}?v=2.0.0&bust={{ range(1000, 9999) | random }}"></script>
+  <!-- APP.JS KALDIRILDI - SADECE TEMA -->
   <script>
-    // MANUEL TEMA TEST KODU - MAX MODE
-    document.addEventListener('DOMContentLoaded', function() {
-      console.log('🚀 Sayfa hazır - tema theme.js aktif');
+    // MINIMAL TEMA SİSTEMİ - HİÇBİR BAĞIMLILIK YOK
+    (function() {
+      'use strict';
       
-      // Tema butonu manual test
-      setTimeout(() => {
-        const themeBtn = document.getElementById('themeToggle');
-        if (themeBtn) {
-          console.log('✅ Tema butonu bulundu:', themeBtn);
-          
-          // Manuel tema toggle fonksiyonu
-          window.manualThemeToggle = function() {
-            const body = document.body;
-            const isDark = body.classList.contains('dark-mode');
-            const newDark = !isDark;
-            
-            body.classList.toggle('dark-mode', newDark);
-            
-            const icon = document.getElementById('themeIcon');
-            if (icon) {
-              icon.className = newDark ? 'fa fa-sun' : 'fa fa-moon';
-            }
-            
-            localStorage.setItem('theme', newDark ? 'dark' : 'light');
-            console.log('🎨 Manuel tema değiştirildi:', newDark ? 'dark' : 'light');
-          };
-          
-          // Butona manuel event listener ekle
-          themeBtn.addEventListener('click', function(e) {
+      console.log('🎨 Minimal tema sistemi başlıyor...');
+      
+      // Tema uygula
+      function applyTheme() {
+        const isDark = localStorage.getItem('theme') === 'dark';
+        if (isDark) {
+          document.body.classList.add('dark-mode');
+        }
+        
+        const icon = document.getElementById('themeIcon');
+        if (icon) {
+          icon.className = isDark ? 'fa fa-sun' : 'fa fa-moon';
+        }
+      }
+      
+      // Tema değiştir
+      function toggleTheme() {
+        const body = document.body;
+        const isDark = body.classList.contains('dark-mode');
+        const newDark = !isDark;
+        
+        body.classList.toggle('dark-mode', newDark);
+        
+        const icon = document.getElementById('themeIcon');
+        if (icon) {
+          icon.className = newDark ? 'fa fa-sun' : 'fa fa-moon';
+        }
+        
+        localStorage.setItem('theme', newDark ? 'dark' : 'light');
+        console.log('🎨 Tema değiştirildi:', newDark ? 'dark' : 'light');
+      }
+      
+      // Sayfa yüklenir yüklenmez uygula
+      applyTheme();
+      
+      // DOM hazır olduğunda buton bağla
+      document.addEventListener('DOMContentLoaded', function() {
+        const btn = document.getElementById('themeToggle');
+        if (btn) {
+          btn.addEventListener('click', function(e) {
             e.preventDefault();
-            console.log('🎨 Tema butonu tıklandı!');
-            window.manualThemeToggle();
+            toggleTheme();
           });
-          
-          console.log('✅ Manuel tema sistemi aktif! Test için: manualThemeToggle()');
+          console.log('✅ Tema butonu bağlandı!');
         } else {
           console.error('❌ Tema butonu bulunamadı!');
         }
-      }, 1000);
-    });
+      });
+      
+      // Global test fonksiyonu
+      window.testTheme = toggleTheme;
+      
+      console.log('✅ Minimal tema sistemi hazır!');
+    })();
   </script>
+
   
   <!-- Structured Data for SEO -->
   <script type="application/ld+json">
