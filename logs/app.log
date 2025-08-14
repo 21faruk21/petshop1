@@ -144,3 +144,7 @@
 2025-08-14 19:34:18,686 WARNING: 404 error: http://127.0.0.1:5000/.well-known/appspecific/com.chrome.devtools.json [in C:\Petshop\app.py:2322]
 2025-08-14 19:34:21,311 WARNING: 404 error: http://127.0.0.1:5000/.well-known/appspecific/com.chrome.devtools.json [in C:\Petshop\app.py:2322]
 2025-08-14 19:34:21,491 WARNING: 404 error: http://127.0.0.1:5000/static/icons/icon-144x144.png [in C:\Petshop\app.py:2322]
+2025-08-14 19:40:02,333 WARNING: 404 error: http://127.0.0.1:5000/.well-known/appspecific/com.chrome.devtools.json [in C:\Petshop\app.py:2322]
+2025-08-14 19:40:02,550 WARNING: 404 error: http://127.0.0.1:5000/static/icons/icon-144x144.png [in C:\Petshop\app.py:2322]
+2025-08-14 19:40:03,118 WARNING: 404 error: http://127.0.0.1:5000/.well-known/appspecific/com.chrome.devtools.json [in C:\Petshop\app.py:2322]
+2025-08-14 19:40:03,299 WARNING: 404 error: http://127.0.0.1:5000/static/icons/icon-144x144.png [in C:\Petshop\app.py:2322]

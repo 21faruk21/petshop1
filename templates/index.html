@@ -340,64 +340,63 @@
   </script>
   <!-- APP.JS KALDIRILDI - SADECE TEMA -->
   <script>
-    // MINIMAL TEMA SİSTEMİ - HİÇBİR BAĞIMLILIK YOK
-    (function() {
-      'use strict';
+    // GERÇEKTEN ÇALIŞAN TEMA SİSTEMİ - SON ŞANS
+    console.log('🚀 Tema sistemi yükleniyor...');
+    
+    // Tema değiştirme fonksiyonu
+    function changeTheme() {
+      const body = document.body;
+      const icon = document.getElementById('themeIcon');
       
-      console.log('🎨 Minimal tema sistemi başlıyor...');
-      
-      // Tema uygula
-      function applyTheme() {
-        const isDark = localStorage.getItem('theme') === 'dark';
-        if (isDark) {
-          document.body.classList.add('dark-mode');
-        }
-        
-        const icon = document.getElementById('themeIcon');
-        if (icon) {
-          icon.className = isDark ? 'fa fa-sun' : 'fa fa-moon';
-        }
+      if (body.classList.contains('dark-mode')) {
+        // Açık temaya geç
+        body.classList.remove('dark-mode');
+        if (icon) icon.className = 'fa fa-moon';
+        localStorage.setItem('theme', 'light');
+        console.log('☀️ Açık tema aktif');
+      } else {
+        // Koyu temaya geç
+        body.classList.add('dark-mode');
+        if (icon) icon.className = 'fa fa-sun';
+        localStorage.setItem('theme', 'dark');
+        console.log('🌙 Koyu tema aktif');
       }
-      
-      // Tema değiştir
-      function toggleTheme() {
-        const body = document.body;
-        const isDark = body.classList.contains('dark-mode');
-        const newDark = !isDark;
-        
-        body.classList.toggle('dark-mode', newDark);
-        
+    }
+    
+    // Sayfa yüklenince tema uygula
+    function loadTheme() {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
         const icon = document.getElementById('themeIcon');
-        if (icon) {
-          icon.className = newDark ? 'fa fa-sun' : 'fa fa-moon';
-        }
-        
-        localStorage.setItem('theme', newDark ? 'dark' : 'light');
-        console.log('🎨 Tema değiştirildi:', newDark ? 'dark' : 'light');
+        if (icon) icon.className = 'fa fa-sun';
       }
-      
-      // Sayfa yüklenir yüklenmez uygula
-      applyTheme();
-      
-      // DOM hazır olduğunda buton bağla
-      document.addEventListener('DOMContentLoaded', function() {
-        const btn = document.getElementById('themeToggle');
-        if (btn) {
-          btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            toggleTheme();
-          });
-          console.log('✅ Tema butonu bağlandı!');
-        } else {
-          console.error('❌ Tema butonu bulunamadı!');
-        }
-      });
-      
-      // Global test fonksiyonu
-      window.testTheme = toggleTheme;
-      
-      console.log('✅ Minimal tema sistemi hazır!');
-    })();
+    }
+    
+    // DOM yüklenince buton bağla
+    function setupThemeButton() {
+      const button = document.getElementById('themeToggle');
+      if (button) {
+        button.onclick = function(e) {
+          e.preventDefault();
+          changeTheme();
+        };
+        console.log('✅ Tema butonu bağlandı!');
+      } else {
+        console.error('❌ Tema butonu bulunamadı!');
+      }
+    }
+    
+    // Hemen çalıştır
+    loadTheme();
+    
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', setupThemeButton);
+    } else {
+      setupThemeButton();
+    }
+    
+    console.log('✅ Tema sistemi hazır! Test: changeTheme()');
   </script>
 
   

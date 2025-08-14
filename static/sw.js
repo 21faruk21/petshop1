@@ -1,5 +1,5 @@
 // Service Worker for Pethome PWA - CACHE BUSTER
-const CACHE_NAME = 'pethome-v3.0.0';
+const CACHE_NAME = 'pethome-v4.0.0';
 
 // Clear all old caches on activation
 self.addEventListener('activate', event => {
