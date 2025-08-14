@@ -338,35 +338,16 @@
     // Set global variables for the app
     window.selectedCategory = "{{ selected_category|default('Köpek') }}";
   </script>
-  <script src="{{ url_for('static', filename='app.js') }}?v=1.7.0"></script>
-  <script src="{{ url_for('static', filename='theme.js') }}?v=1.7.0"></script>
+  <script src="{{ url_for('static', filename='app.js') }}?v=1.8.0"></script>
+  <script src="{{ url_for('static', filename='theme.js') }}?v=1.8.0"></script>
   <script>
-    // Sadece çalışan modülleri başlat - tema theme.js'de
+    // Minimal başlatma - sadece tema theme.js'de çalışır
     document.addEventListener('DOMContentLoaded', function() {
-      console.log('🚀 Sayfa yüklendi, modüller başlatılıyor...');
+      console.log('🚀 Sayfa hazır - tema theme.js aktif');
       
-      // Sadece var olan modülleri güvenli şekilde başlat
-      try {
-        if (window.PetShopApp) {
-          if (PetShopApp.megaMenu && typeof PetShopApp.megaMenu.init === 'function') {
-            PetShopApp.megaMenu.init();
-          }
-          
-          if (PetShopApp.search && typeof PetShopApp.search.init === 'function') {
-            PetShopApp.search.init();
-          }
-          
-          if (PetShopApp.ux && typeof PetShopApp.ux.init === 'function') {
-            PetShopApp.ux.init();
-          }
-          
-          if (PetShopApp.wishlist && typeof PetShopApp.wishlist.init === 'function') {
-            PetShopApp.wishlist.init();
-          }
-        }
-        console.log('✅ Modüller başlatıldı!');
-      } catch (error) {
-        console.error('❌ Modül başlatma hatası:', error);
+      // Sadece wishlist için güvenli çağrı (ürün detay sayfası için)
+      if (window.PetShopApp && PetShopApp.wishlist) {
+        console.log('❤️ Wishlist hazır');
       }
     });
   </script>

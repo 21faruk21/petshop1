@@ -1245,5 +1245,5 @@ window.filterProducts = function(mainCategory = '', subcategory = '', brand = ''
 
 window.selectedCategory = window.selectedCategory || 'Köpek';
 
-// Initialize the app
-PetShopApp.init();
+// App initialization disabled - modules init manually when needed
+// PetShopApp.init();

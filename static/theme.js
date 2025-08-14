@@ -70,12 +70,30 @@
     }
   }
   
+  // Tema butonunu agresif şekilde bağla
+  function forceInitTheme() {
+    initThemeButton();
+    
+    // Eğer buton hâlâ yoksa, tekrar dene
+    setTimeout(() => {
+      if (document.getElementById('themeToggle')) {
+        initThemeButton();
+      }
+    }, 500);
+    
+    // Son deneme
+    setTimeout(() => {
+      if (document.getElementById('themeToggle')) {
+        initThemeButton();
+      }
+    }, 1000);
+  }
+  
   // DOM hazır olduğunda veya hemen çalıştır
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initThemeButton);
+    document.addEventListener('DOMContentLoaded', forceInitTheme);
   } else {
-    // Kısa bir gecikme ile çakışmayı önle
-    setTimeout(initThemeButton, 100);
+    forceInitTheme();
   }
   
   // Global olarak erişilebilir yap
