@@ -462,6 +462,12 @@ const PetShopApp = {
     cache: new Map(),
     currentRequest: null,
     
+    init() {
+      console.log('🛍️ Products module initialized');
+      // Initialize lazy loading if needed
+      this.initLazyLoading();
+    },
+    
     filterByMainCategory(mainCategory) {
       this.filter(mainCategory, '', '');
     },
@@ -1210,6 +1216,56 @@ const PetShopApp = {
       console.log('Custom Metrics:', PetShopApp.config.performance.metrics);
       console.groupEnd();
     }, 1000);
+  },
+  
+  // Wishlist system
+  wishlist: {
+    init() {
+      console.log('❤️ Wishlist module initialized');
+    },
+    
+    toggle(productId, button) {
+      try {
+        console.log('Wishlist toggle for product:', productId);
+        
+        // Simulate wishlist toggle
+        if (button) {
+          const icon = button.querySelector('i');
+          if (icon) {
+            const isActive = icon.classList.contains('fas');
+            if (isActive) {
+              icon.classList.remove('fas');
+              icon.classList.add('far');
+              console.log('Removed from wishlist:', productId);
+            } else {
+              icon.classList.remove('far');
+              icon.classList.add('fas');
+              console.log('Added to wishlist:', productId);
+            }
+          }
+        }
+        
+        return true;
+      } catch (error) {
+        console.error('Wishlist toggle error:', error);
+        return false;
+      }
+    }
+  },
+  
+  // Main initialization
+  init() {
+    console.log('🚀 PetShopApp initializing...');
+    
+    // Initialize all modules
+    if (this.theme) this.theme.init();
+    if (this.megaMenu) this.megaMenu.init();
+    if (this.search) this.search.init();
+    if (this.products) this.products.init();
+    if (this.ux) this.ux.init();
+    if (this.wishlist) this.wishlist.init();
+    
+    console.log('✅ PetShopApp initialized successfully!');
   }
 };
 

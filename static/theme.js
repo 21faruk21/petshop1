@@ -50,8 +50,15 @@
   function initThemeButton() {
     const button = document.getElementById('themeToggle');
     if (button) {
+      // PetShopApp tema sistemi varsa ve zaten init edilmişse, çakışmayı önle
+      if (window.PetShopApp && window.PetShopApp.theme && window.PetShopApp.theme.initialized) {
+        console.log('PetShopApp tema sistemi zaten aktif, theme.js pasif kalıyor');
+        return;
+      }
+      
       // Önceki event listener'ları temizle
-      button.replaceWith(button.cloneNode(true));
+      const existingListeners = button.cloneNode(true);
+      button.parentNode.replaceChild(existingListeners, button);
       const newButton = document.getElementById('themeToggle');
       
       newButton.addEventListener('click', function(e) {
@@ -60,7 +67,7 @@
         toggleTheme();
       });
       
-      console.log('Tema butonu bağlandı');
+      console.log('Theme.js tema butonu bağlandı');
     }
   }
   
@@ -68,7 +75,8 @@
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initThemeButton);
   } else {
-    initThemeButton();
+    // Kısa bir gecikme ile çakışmayı önle
+    setTimeout(initThemeButton, 100);
   }
   
   // Global olarak erişilebilir yap
