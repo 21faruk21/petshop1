@@ -1,6 +1,6 @@
 {
-  "name": "Mavi Petshop - Pet Ürünleri",
-  "short_name": "MaviPetshop",
+  "name": "Pethome - Pet Ürünleri",
+  "short_name": "Pethome",
   "description": "Türkiye'nin en güvenilir online petshop'u. Kedi, köpek, kuş ve balık ürünlerinde uygun fiyat ve hızlı teslimat!",
   "start_url": "/",
   "display": "standalone",

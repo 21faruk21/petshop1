@@ -45,7 +45,11 @@ const PetShopApp = {
   
   // Enhanced Theme Management System
   theme: {
+    initialized: false,
     init() {
+      if (this.initialized) {
+        return;
+      }
       console.log('🎨 Tema sistemi başlatılıyor...');
       
       // Handle multiple theme toggle buttons
@@ -81,6 +85,7 @@ const PetShopApp = {
       };
       
       console.log('✅ Tema sistemi başlatıldı!');
+      this.initialized = true;
     },
     
     setTheme(isDark) {

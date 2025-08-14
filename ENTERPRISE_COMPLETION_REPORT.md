@@ -1,4 +1,4 @@
-# 🚀 MAVI PETSHOP - ENTERPRISE-LEVEL COMPLEX APPLICATION
+# 🚀 PETHOME - ENTERPRISE-LEVEL COMPLEX APPLICATION
 
 ## ✅ **COMPLETION STATUS: 100%**
 
@@ -147,7 +147,7 @@ Relationships: Foreign keys with proper constraints
 SMTP_SERVER=smtp.gmail.com
 EMAIL_USER=your-email@gmail.com
 EMAIL_PASSWORD=your-app-password
-ADMIN_EMAIL=admin@mavipetshop.com
+ADMIN_EMAIL=admin@pethome.com
 
 # Optional: SMS Service
 SMS_API_KEY=your-sms-api-key
@@ -243,7 +243,7 @@ Petshop/
 
 ## 🎉 **CONCLUSION**
 
-**MAVI PETSHOP** is now a **COMPLETE ENTERPRISE-LEVEL E-COMMERCE PLATFORM** with:
+**PETHOME** is now a **COMPLETE ENTERPRISE-LEVEL E-COMMERCE PLATFORM** with:
 
 ✅ **10/10 Major Features Implemented**
 ✅ **Modern Architecture & Clean Code**  

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>{{ product.name }} – Ürün Detayı | MaviPetShop</title>
+  <title>{{ product.name }} – Ürün Detayı | Pethome</title>
 
   <!-- Google Font: Outfit -->
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
@@ -244,11 +244,12 @@
 
   <!-- Footer -->
   <footer style="max-width:900px;margin:2.5rem auto 0 auto;text-align:center;color:#bfc9d8;background:none;">
-    © 2025 Mavi Petshop. Tüm hakları saklıdır.
+    © 2025 Pethome. Tüm hakları saklıdır.
   </footer>
   
   <!-- App Scripts -->
   <script src="{{ url_for('static', filename='app.js') }}"></script>
+  <script src="{{ url_for('static', filename='theme.js') }}?v=1.0.0"></script>
   <script>
     // Initialize theme on page load
     document.addEventListener('DOMContentLoaded', function() {
@@ -335,6 +336,8 @@
         alert('Bir hata oluştu!');
       });
     }
+
+
   </script>
 </body>
 </html>

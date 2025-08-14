@@ -1,6 +1,6 @@
 # 🔧 Environment Variables Konfigürasyonu
 
-Mavi Petshop projesinin tüm özelliklerini aktif etmek için aşağıdaki environment variable'ları ayarlayın:
+Pethome projesinin tüm özelliklerini aktif etmek için aşağıdaki environment variable'ları ayarlayın:
 
 ## 🔒 Güvenlik
 
@@ -9,7 +9,7 @@ Mavi Petshop projesinin tüm özelliklerini aktif etmek için aşağıdaki envir
 SECRET_KEY=your-super-secret-key-here
 
 # Admin email adresi (düşük stok bildirimleri için)
-ADMIN_EMAIL=admin@mavipetshop.com
+ADMIN_EMAIL=admin@pethome.com
 ```
 
 ## 📧 Email Bildirimleri (Opsiyonel)
@@ -22,7 +22,7 @@ SMTP_SERVER=smtp.gmail.com
 SMTP_PORT=587
 EMAIL_USER=your-email@gmail.com
 EMAIL_PASSWORD=your-app-password
-EMAIL_FROM=noreply@mavipetshop.com
+EMAIL_FROM=noreply@pethome.com
 ```
 
 ### Gmail için App Password Alma:
@@ -37,7 +37,7 @@ SMS bildirimlerini aktif etmek için (Türkiye SMS servisleri):
 ```bash
 # SMS API ayarları (Netgsm, İletimerkezi, vb.)
 SMS_API_KEY=your-sms-api-key
-SMS_SENDER=MaviPetshop
+SMS_SENDER=Pethome
 ```
 
 ## 🚀 Aktif Özellikler
@@ -72,7 +72,7 @@ SMTP_SERVER=smtp.gmail.com
 SMTP_PORT=587
 EMAIL_USER=your-email@gmail.com
 EMAIL_PASSWORD=your-app-password
-ADMIN_EMAIL=admin@mavipetshop.com
+ADMIN_EMAIL=admin@pethome.com
 ```
 
 ### Heroku için:

@@ -277,6 +277,33 @@
                 });
             });
         }
+
+        // Tema sistemi için fallback ve kalıcılık
+        (function(){
+          // Sayfa yüklenir yüklenmez temayı uygula
+          const isDark = localStorage.getItem('theme') === 'dark';
+          if (isDark) {
+            document.body.classList.add('dark-mode');
+          }
+
+          // Buton işlevselliği
+          const btn = document.getElementById('themeToggle');
+          if (btn) {
+            const icon = document.getElementById('themeIcon');
+            if (icon) icon.className = isDark ? 'fa fa-sun' : 'fa fa-moon';
+            
+            btn.addEventListener('click', function(e) {
+              e.preventDefault();
+              const currentDark = document.body.classList.contains('dark-mode');
+              const newDark = !currentDark;
+              
+              document.body.classList.toggle('dark-mode', newDark);
+              if (icon) icon.className = newDark ? 'fa fa-sun' : 'fa fa-moon';
+              localStorage.setItem('theme', newDark ? 'dark' : 'light');
+            });
+          }
+        })();
     </script>
+    <script src="{{ url_for('static', filename='theme.js') }}?v=1.0.0"></script>
 </body>
 </html>

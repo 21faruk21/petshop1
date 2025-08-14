@@ -62,7 +62,7 @@ error_handler.setLevel(logging.ERROR)
 app.logger.addHandler(error_handler)
 
 app.logger.setLevel(logging.INFO)
-app.logger.info('Mavi Petshop startup')
+app.logger.info('Pethome startup')
 
 # Cache invalidation helper functions
 def invalidate_product_cache(category=None):
@@ -450,7 +450,7 @@ def init_database():
 
 
 # Uygulama başlatıldığında veritabanını oluştur
-print(f"🚀 Mavi Petshop startup")
+print(f"🚀 Pethome startup")
 print(f"🗄️ Database path: {db_path}")
 print(f"📁 Database exists before init: {os.path.exists(db_path)}")
 
@@ -738,11 +738,11 @@ class NotificationService:
         self.smtp_port = int(os.environ.get('SMTP_PORT', '587'))
         self.email_user = os.environ.get('EMAIL_USER', '')
         self.email_password = os.environ.get('EMAIL_PASSWORD', '')
-        self.email_from = os.environ.get('EMAIL_FROM', 'noreply@mavipetshop.com')
+        self.email_from = os.environ.get('EMAIL_FROM', 'noreply@pethome.com')
         
         # SMS configuration (placeholder for external service)
         self.sms_api_key = os.environ.get('SMS_API_KEY', '')
-        self.sms_sender = os.environ.get('SMS_SENDER', 'MaviPetshop')
+        self.sms_sender = os.environ.get('SMS_SENDER', 'Pethome')
     
     def send_email(self, to_email, subject, body, html_body=None):
         """Send email notification"""
@@ -794,8 +794,8 @@ class NotificationService:
         customer_phone = order_data.get('customer_phone')
         order_code = order_data.get('order_code')
         customer_name = order_data.get('customer_name', 'Değerli Müşteri')
-        
-        # Email notification
+            
+            # Email notification
         if customer_email:
             subject = f"Sipariş Durumu Güncellendi - {order_code}"
             body = f"""
@@ -804,17 +804,17 @@ Merhaba {customer_name},
 Sipariş kodunuz: {order_code}
 Yeni durum: {new_status}
 
-Siparişinizi takip etmek için: https://mavipetshop.com/order-track
+Siparişinizi takip etmek için: https://pethome.com/order-track
 
 Teşekkürler,
-Mavi Petshop Ekibi
+Pethome Ekibi
             """
             
             html_body = f"""
 <html>
 <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
     <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; text-align: center;">
-        <h1 style="color: white; margin: 0;">🐾 Mavi Petshop</h1>
+        <h1 style="color: white; margin: 0;">🐾 Pethome</h1>
     </div>
     <div style="padding: 20px; background: #f8f9fa;">
         <h2 style="color: #333;">Merhaba {customer_name},</h2>
@@ -824,7 +824,7 @@ Mavi Petshop Ekibi
             <p><strong>Yeni Durum:</strong> <span style="color: #28a745; font-weight: bold;">{new_status}</span></p>
         </div>
         <div style="text-align: center; margin: 30px 0;">
-            <a href="https://mavipetshop.com/order-track" 
+            <a href="https://pethome.com/order-track" 
                style="background: #667eea; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
                 Siparişimi Takip Et
             </a>
@@ -841,12 +841,12 @@ Mavi Petshop Ekibi
         
         # SMS notification
         if customer_phone:
-            sms_message = f"🐾 Mavi Petshop: Sipariş {order_code} durumu '{new_status}' olarak güncellendi. Takip: mavipetshop.com/order-track"
+            sms_message = f"🐾 Pethome: Sipariş {order_code} durumu '{new_status}' olarak güncellendi. Takip: pethome.com/order-track"
             self.send_sms(customer_phone, sms_message)
     
     def notify_low_stock(self, product_name, current_stock, threshold):
         """Notify admin about low stock"""
-        admin_email = os.environ.get('ADMIN_EMAIL', 'admin@mavipetshop.com')
+        admin_email = os.environ.get('ADMIN_EMAIL', 'admin@pethome.com')
         
         subject = f"🚨 Düşük Stok Uyarısı - {product_name}"
         body = f"""
@@ -856,9 +856,9 @@ DÜŞÜK STOK UYARISI
 Mevcut Stok: {current_stock}
 Eşik: {threshold}
 
-Lütfen stok ekleyin: https://mavipetshop.com/admin/stock
+Lütfen stok ekleyin: https://pethome.com/admin/stock
 
-Mavi Petshop Sistem
+Pethome Sistem
         """
         
         self.send_email(admin_email, subject, body)
@@ -970,7 +970,7 @@ class UserManager:
             with get_db_connection() as conn:
                 cursor = conn.cursor()
                 cursor.execute("""
-                    SELECT id, email, first_name, last_name, phone, address, created_at, last_login
+                    SELECT id, email, first_name, last_name, phone, address, created_at, last_login, balance
                     FROM users WHERE id = ? AND is_active = 1
                 """, (user_id,))
                 
@@ -1366,56 +1366,66 @@ def order():
                 return redirect(url_for("cart"))
 
         # Veritabanına kaydet ve stokları güncelle
-        conn = sqlite3.connect(db_path)
-        cursor = conn.cursor()
-        
-        # First, check all items are still in stock
-        all_available = True
-        stock_issues = []
-        
-        for item in cart_items:
-            cursor.execute("SELECT stock_quantity, name FROM products WHERE id = ?", (item['id'],))
-            product = cursor.fetchone()
-            if product:
-                available_stock = product[0] or 0
-                required_quantity = item.get('quantity', 1)
-                if available_stock < required_quantity:
-                    all_available = False
-                    stock_issues.append(f"{product[1]}: {required_quantity} istendi, {available_stock} mevcut")
-        
-        if not all_available:
-            conn.close()
-            return f"Stok yetersiz: {', '.join(stock_issues)}", 400
-        
-        # Create order with appropriate status
-        order_status = "Ödendi" if balance_paid else "Hazırlanıyor"
-        cursor.execute("""
-            INSERT INTO orders (order_code, items, total_price, customer_name, customer_phone, customer_email, customer_address, address, note, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (order_code, json.dumps(cart_items), total, customer_name, phone, email, address, address, note, order_status))
-        
-        # Update stock for each item and check for low stock
-        for item in cart_items:
-            quantity_sold = item.get('quantity', 1)
-            update_product_stock(item['id'], -quantity_sold, f"Satış - Sipariş: {order_code}")
-            
-            # Check if stock is now low and send notification
-            cursor.execute("SELECT name, stock_quantity, low_stock_threshold FROM products WHERE id = ?", (item['id'],))
-            product = cursor.fetchone()
-            if product:
-                current_stock = product[1] or 0
-                threshold = product[2] or 5
-                if current_stock <= threshold:
-                    notification_service.notify_low_stock(product[0], current_stock, threshold)
-        
-        # Deduct balance if paid with balance
-        if balance_paid:
-            cursor.execute("UPDATE users SET balance = balance - ? WHERE id = ?", 
-                         (total, session["user_id"]))
-            print(f"💰 Balance payment: User {session['user_id']} paid {total} TL - Order: {order_code}")
-        
-        conn.commit()
-        conn.close()
+        try:
+            with get_db_connection() as conn:
+                cursor = conn.cursor()
+                
+                # First, check all items are still in stock
+                all_available = True
+                stock_issues = []
+                
+                for item in cart_items:
+                    cursor.execute("SELECT stock_quantity, name FROM products WHERE id = ?", (item['id'],))
+                    product = cursor.fetchone()
+                    if product:
+                        available_stock = int(product[0] or 0)
+                        required_quantity = int(item.get('quantity', 1))
+                        if available_stock < required_quantity:
+                            all_available = False
+                            stock_issues.append(f"{product[1]}: {required_quantity} istendi, {available_stock} mevcut")
+                
+                if not all_available:
+                    session['cart_message'] = f"Stok yetersiz: {', '.join(stock_issues)}"
+                    return redirect(url_for("cart"))
+                
+                # Create order with appropriate status
+                order_status = "Ödendi" if balance_paid else "Hazırlanıyor"
+                cursor.execute("""
+                    INSERT INTO orders (order_code, items, total_price, customer_name, customer_phone, customer_email, customer_address, address, note, status)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (order_code, json.dumps(cart_items), total, customer_name, phone, email, address, address, note, order_status))
+                
+                # Update stock for each item
+                for item in cart_items:
+                    quantity_sold = item.get('quantity', 1)
+                    cursor.execute("UPDATE products SET stock_quantity = stock_quantity - ? WHERE id = ?", 
+                                 (quantity_sold, item['id']))
+                    
+                    # Check if stock is now low and send notification
+                    cursor.execute("SELECT name, stock_quantity, low_stock_threshold FROM products WHERE id = ?", (item['id'],))
+                    product = cursor.fetchone()
+                    if product:
+                        product_name = product[0]
+                        current_stock = int(product[1] or 0)
+                        threshold = int(product[2] or 5)
+                        if current_stock <= threshold:
+                            try:
+                                notification_service.notify_low_stock(product_name, current_stock, threshold)
+                            except:
+                                pass  # Don't fail order if notification fails
+                
+                # Deduct balance if paid with balance
+                if balance_paid:
+                    cursor.execute("UPDATE users SET balance = balance - ? WHERE id = ?", 
+                                 (total, session["user_id"]))
+                    print(f"💰 Balance payment: User {session['user_id']} paid {total} TL - Order: {order_code}")
+                
+                conn.commit()
+                
+        except Exception as db_error:
+            print(f"DATABASE ERROR: {db_error}")
+            session['cart_message'] = "Sipariş işlenirken bir hata oluştu. Lütfen tekrar deneyin."
+            return redirect(url_for("cart"))
         
         # Send order confirmation email
         order_data = {
@@ -1446,10 +1456,10 @@ Toplam Tutar: {total} TL
             body += f"""
 Adres: {address}
 
-Siparişinizi takip etmek için: https://mavipetshop.com/order-track
+Siparişinizi takip etmek için: https://pethome.com/order-track
 
 Teşekkürler,
-Mavi Petshop Ekibi
+Pethome Ekibi
             """
             
             notification_service.send_email(email, subject, body)
@@ -1459,9 +1469,10 @@ Mavi Petshop Ekibi
         
         # Set success message
         if balance_paid:
-            session['order_message'] = f"✅ Siparişiniz bakiyenizden ödenerek başarıyla alındı! Sipariş Kodu: {order_code}"
+            session['order_message'] = f"✅ Siparişiniz bakiyenizden ödenerek başarıyla alındı!\n\nSipariş Kodu: {order_code}\nToplam Tutar: {total} TL\n\n🎉 Siparişiniz hazırlanmaya başlandı!"
             return redirect(url_for("thank_you"))
         else:
+            session['order_message'] = f"✅ Siparişiniz başarıyla alındı!\n\nSipariş Kodu: {order_code}\nToplam Tutar: {total} TL\n\n📞 WhatsApp ile ödeme yapmak için yönlendiriliyorsunuz..."
             # WhatsApp yönlendirmesi
             whatsapp_number = "905422192125"
             message = f"""🐾 Merhaba! Siparişimi tamamlamak istiyorum.\n\nSipariş Kodu: {order_code}\nAd Soyad: {customer_name}\nToplam Tutar: {total} TL\n\nIBAN bilgilerinizi paylaşabilir misiniz?\n"""
@@ -1724,11 +1735,11 @@ def user_register():
             
             # Send welcome email
             if notification_service.email_enabled:
-                welcome_subject = "🐾 Mavi Petshop'a Hoş Geldiniz!"
+                welcome_subject = "🐾 Pethome'a Hoş Geldiniz!"
                 welcome_body = f"""
 Merhaba {first_name},
 
-Mavi Petshop ailesine hoş geldiniz! 🎉
+Pethome ailesine hoş geldiniz! 🎉
 
 Hesabınız başarıyla oluşturuldu. Artık:
 ✅ Sipariş verebilir ve takip edebilirsiniz
@@ -1738,7 +1749,7 @@ Hesabınız başarıyla oluşturuldu. Artık:
 
 Keyifli alışverişler dileriz!
 
-Mavi Petshop Ekibi
+Pethome Ekibi
                 """
                 notification_service.send_email(email, welcome_subject, welcome_body)
             
@@ -1807,12 +1818,20 @@ def user_profile():
             
             orders = []
             for order_row in cursor.fetchall():
-                order = dict(order_row)
+                # Convert sqlite3.Row to proper dictionary
+                order = {key: order_row[key] for key in order_row.keys()}
                 try:
-                    order["items"] = json.loads(order["items"])
+                    # Ensure items is properly parsed as JSON
+                    if isinstance(order["items"], str):
+                        order["items"] = json.loads(order["items"])
+                    elif order["items"] is None:
+                        order["items"] = []
+                    
+                    # Parse date
                     if order["created_at"]:
                         order["created_at"] = datetime.strptime(order["created_at"], "%Y-%m-%d %H:%M:%S")
-                except:
+                except Exception as e:
+                    print(f"Order processing error: {e}")
                     order["items"] = []
                     order["created_at"] = datetime.now()
                 orders.append(order)
@@ -2346,17 +2365,17 @@ def sitemap():
         sitemap_xml = '''<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-        <loc>https://mavipetshop.com/</loc>
+        <loc>https://pethome.com/</loc>
         <changefreq>daily</changefreq>
         <priority>1.0</priority>
     </url>
     <url>
-        <loc>https://mavipetshop.com/contact</loc>
+        <loc>https://pethome.com/contact</loc>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
     <url>
-        <loc>https://mavipetshop.com/order-track</loc>
+        <loc>https://pethome.com/order-track</loc>
         <changefreq>monthly</changefreq>
         <priority>0.6</priority>
     </url>'''
@@ -2365,7 +2384,7 @@ def sitemap():
         for product in products:
             sitemap_xml += f'''
     <url>
-        <loc>https://mavipetshop.com/product/{product['id']}</loc>
+        <loc>https://pethome.com/product/{product['id']}</loc>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>'''
@@ -2374,7 +2393,7 @@ def sitemap():
         for category in categories:
             sitemap_xml += f'''
     <url>
-        <loc>https://mavipetshop.com/category/{category['category']}</loc>
+        <loc>https://pethome.com/category/{category['category']}</loc>
         <changefreq>weekly</changefreq>
         <priority>0.7</priority>
     </url>'''
@@ -2405,7 +2424,7 @@ Disallow: /profile
 Disallow: /login
 Disallow: /register
 
-Sitemap: https://mavipetshop.com/sitemap.xml'''
+Sitemap: https://pethome.com/sitemap.xml'''
     
     response = app.response_class(
         response=robots_txt,
@@ -2457,11 +2476,11 @@ def newsletter_subscribe():
                 
                 # Send welcome email
                 if notification_service.email_enabled:
-                    welcome_subject = "🐾 Mavi Petshop Newsletter'a Hoş Geldiniz!"
+                    welcome_subject = "🐾 Pethome Newsletter'a Hoş Geldiniz!"
                     welcome_body = f"""
 Merhaba,
 
-Mavi Petshop newsletter'ına abone olduğunuz için teşekkürler! 🎉
+Pethome newsletter'ına abone olduğunuz için teşekkürler! 🎉
 
 Artık:
 ✅ Özel kampanyalarımızdan ilk siz haberdar olacaksınız
@@ -2469,9 +2488,9 @@ Artık:
 ✅ İndirim kuponlarına erişebileceksiniz
 ✅ Evcil hayvan bakım ipuçlarını öğreneceksiniz
 
-Newsletter'dan çıkmak için: https://mavipetshop.com/newsletter/unsubscribe?email={email}
+Newsletter'dan çıkmak için: https://pethome.com/newsletter/unsubscribe?email={email}
 
-Mavi Petshop Ekibi
+Pethome Ekibi
                     """
                     notification_service.send_email(email, welcome_subject, welcome_body)
                 
@@ -2579,9 +2598,9 @@ def admin_send_newsletter():
 {message}
 
 ---
-Bu newsletter'dan çıkmak için: https://mavipetshop.com/newsletter/unsubscribe?email={email}
+Bu newsletter'dan çıkmak için: https://pethome.com/newsletter/unsubscribe?email={email}
 
-Mavi Petshop Ekibi
+Pethome Ekibi
                     """
                     
                     if notification_service.send_email(email, f"🐾 {subject}", full_message):

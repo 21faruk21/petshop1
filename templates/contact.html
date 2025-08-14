@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bize Ulaşın | Mavi Petshop</title>
+    <title>Bize Ulaşın | Pethome</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
   <style>
@@ -89,7 +89,7 @@
     </form>
     </div>
   <script>
-    // Tema toggle scripti
+    // Tema toggle scripti (standart: localStorage 'theme')
     const themeToggle = document.getElementById('themeToggle');
     const themeIcon = document.getElementById('themeIcon');
     function setDarkMode(on) {
@@ -113,14 +113,15 @@
         e.style.color = '#fff';
       });
       themeIcon.className = on ? 'fa fa-sun' : 'fa fa-moon';
+      localStorage.setItem('theme', on ? 'dark' : 'light');
     }
-    // Local storage ile tema kalıcı olsun
-    if(localStorage.getItem('darkMode')==='true') setDarkMode(true);
+    // İlk yüklemede uygula
+    if(localStorage.getItem('theme')==='dark') setDarkMode(true);
     themeToggle.addEventListener('click',()=>{
-      const isDark = themeIcon.classList.contains('fa-moon');
+      const isDark = !(localStorage.getItem('theme')==='dark');
       setDarkMode(isDark);
-      localStorage.setItem('darkMode', isDark);
     });
   </script>
+  <script src="{{ url_for('static', filename='theme.js') }}?v=1.0.0"></script>
 </body>
 </html>

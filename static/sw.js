@@ -1,9 +1,10 @@
-// Service Worker for Mavi Petshop PWA
-const CACHE_NAME = 'mavipetshop-v1.2.0';
+// Service Worker for Pethome PWA
+const CACHE_NAME = 'pethome-v1.5.0';
 const urlsToCache = [
   '/',
   '/static/modern.css',
   '/static/app.js',
+  '/static/theme.js',
   '/contact',
   '/order-track',
   '/cart',
@@ -82,7 +83,7 @@ self.addEventListener('fetch', (event) => {
               return cache.match('/offline') || new Response(
                 `<!DOCTYPE html>
                 <html>
-                <head><title>Çevrimdışı - Mavi Petshop</title></head>
+              <head><title>Çevrimdışı - Pethome</title></head>
                 <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
                   <h1>🐾 Bağlantı Yok</h1>
                   <p>İnternet bağlantınızı kontrol edin ve tekrar deneyin.</p>
@@ -142,7 +143,7 @@ self.addEventListener('push', (event) => {
   };
 
   event.waitUntil(
-    self.registration.showNotification('🐾 Mavi Petshop', options)
+    self.registration.showNotification('🐾 Pethome', options)
   );
 });
 
